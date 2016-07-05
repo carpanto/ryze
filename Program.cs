@@ -57,11 +57,14 @@ namespace KoreanMalzahar
             //Harass Menu
             var harass = new Menu("Harass", "Harass");
             Menu.AddSubMenu(harass);
-            harass.AddItem(new MenuItem("autoharass", "Auto Harrass with E").SetValue(false));
+            harass.AddItem(new MenuItem("autoharass", "Auto Harrass with E").SetValue(true));
+            harass.AddItem(new MenuItem("autoharassuseQ", "Auto Harrass with Q").SetValue(false));
+            harass.AddItem(new MenuItem("autoharassminimumMana", "Minimum Mana%").SetValue(new Slider(30)));
             //LaneClear Menu
             var lc = new Menu("Laneclear", "Laneclear");
             Menu.AddSubMenu(lc);
             lc.AddItem(new MenuItem("laneclearE", "Use E to LaneClear").SetValue(true));
+            lc.AddItem(new MenuItem("laneclearEMinimumMana", "Minimum Mana%").SetValue(new Slider(30)));
 
             // Drawing Menu
             var DrawingMenu = new Menu("Drawings", "Drawings");
@@ -183,6 +186,7 @@ namespace KoreanMalzahar
 
         private static void AntiGapcloserOnOnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
+            // Improve AntiGap Closer
             var sender = gapcloser.Sender;
             if (!gapcloser.Sender.IsValidTarget())
             {
@@ -229,11 +233,15 @@ namespace KoreanMalzahar
         }
         private static void AutoHarass()
         {
+            if (Player.ManaPercentage() < Menu.Item("autoharassminimumMana").GetValue<Slider>().Value)
+                return;
             if (HasRBuff())
                 return;
             var m = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
             if (Menu.Item("autoharass").GetValue<bool>())
                     E.CastOnUnit(m);
+            if (Menu.Item("autoharassuseQ").GetValue<bool>())
+                    Q.Cast(m);
         }
         private static bool HasRBuff()
         {
@@ -278,6 +286,10 @@ namespace KoreanMalzahar
         //Burst
         public static void Oneshot()
         {
+            // If player doesn't have mana don't execute the OneShot Combo
+            if (Player.Mana < Q.ManaCost + W.ManaCost + E.ManaCost + R.ManaCost)
+                return;
+
             if (HasRBuff() || R.IsChanneling)
             {
                 Orbwalker.SetAttack(false);
@@ -295,6 +307,9 @@ namespace KoreanMalzahar
         //Lane
         private static void Lane()
         {
+            if (Player.ManaPercentage() < Menu.Item("laneclearEMinimumMana").GetValue<Slider>().Value)
+                return;
+
             var allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range);
             if (Menu.Item("laneclearE").GetValue<bool>() && E.IsReady())
             {
