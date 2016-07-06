@@ -61,14 +61,15 @@ namespace KoreanMalzahar
             Menu.AddSubMenu(harass);
             harass.AddItem(new MenuItem("autoharass", "Auto Harrass with E").SetValue(true));
             harass.AddItem(new MenuItem("autoharassuseQ", "Auto Harrass with Q").SetValue(false));
-            harass.AddItem(new MenuItem("autoharassminimumMana", "Minimum Mana%").SetValue(new Slider(30)));
+            harass.AddItem(new MenuItem("autoharassminimumMana", "Minimum Mana%").SetValue(new Slider(30)).SetTooltip("Minimum Mana that you need to have to AutoHarass with Q/E."));
             //LaneClear Menu
             var lc = new Menu("Laneclear", "Laneclear");
             Menu.AddSubMenu(lc);
             lc.AddItem(new MenuItem("laneclearE", "Use E to LaneClear").SetValue(true));
             lc.AddItem(new MenuItem("laneclearQ", "Use Q to LaneClear").SetValue(true));
             lc.AddItem(new MenuItem("LaneClearMinions", "LaneClear Minimum Minions for Q").SetValue(new Slider(2, 0, 10)));
-            lc.AddItem(new MenuItem("laneclearEMinimumMana", "Minimum Mana%").SetValue(new Slider(30)));
+            lc.AddItem(new MenuItem("laneclearEMinimumMana", "Minimum E Mana%").SetValue(new Slider(30)).SetTooltip("Minimum Mana that you need to have to cast E on LaneClear."));
+            lc.AddItem(new MenuItem("laneclearQMinimumMana", "Minimum Q Mana%").SetValue(new Slider(30)).SetTooltip("Minimum Mana that you need to have to cast Q on LaneClear."));
 
             // Drawing Menu
             var DrawingMenu = new Menu("Drawings", "Drawings");
@@ -314,12 +315,12 @@ namespace KoreanMalzahar
                 if (useQ && Q.IsReady() && Player.Mana > Q.ManaCost && Q.IsInRange(m)) Q.Cast(m);
                 if (useW && W.IsReady()) W.Cast(m);
                 if (useR && R.IsReady() && m != null && R.IsInRange(m)) R.CastOnUnit(m);
-                if (Menu.Item("useIgniteInCombo").GetValue<bool>())
+            }
+            if (Menu.Item("useIgniteInCombo").GetValue<bool>())
+            {
+                if (m.Health < Player.GetSummonerSpellDamage(m, Damage.SummonerSpell.Ignite))
                 {
-                    if (m.Health < Player.GetSummonerSpellDamage(m, Damage.SummonerSpell.Ignite))
-                    {
-                        Player.Spellbook.CastSpell(igniteSlot, m);
-                    }
+                    Player.Spellbook.CastSpell(igniteSlot, m);
                 }
             }
         }
@@ -341,7 +342,7 @@ namespace KoreanMalzahar
         //Lane
         private static void Lane()
         {
-            if (Player.ManaPercentage() < Menu.Item("laneclearEMinimumMana").GetValue<Slider>().Value)
+            if (Player.ManaPercentage() < Menu.Item("laneclearEMinimumMana").GetValue<Slider>().Value || Player.ManaPercentage() < Menu.Item("laneclearQMinimumMana").GetValue<Slider>().Value)
                 return;
 
             var allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range);
@@ -349,13 +350,13 @@ namespace KoreanMalzahar
             {
                 foreach (var minion in allMinions)
                 {
-                    if (minion.IsValidTarget() && minion.MaxHealth < (minion.MaxHealth * 50 / 100))
+                    if (minion.IsValidTarget() && minion.MaxHealth < minion.MaxHealth * 50 / 100)
                     {
                         E.CastOnUnit(minion);
                     }
                 }
             }
-            if (Menu.Item("laneclearQ").GetValue<bool>() && E.IsReady())
+            if (Menu.Item("laneclearQ").GetValue<bool>() && Q.IsReady())
             {
                 var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
                 var farmPos = Q.GetCircularFarmLocation(allMinions, 150);
