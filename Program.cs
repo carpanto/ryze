@@ -22,6 +22,7 @@ namespace KoreanMalzahar
         public static Menu Menu;
         //Spells
         public static List<Spell> SpellList = new List<Spell>();
+        private static float Rtime = 0;
         public static Spell Q, W, E, R;
         private const float SpellQWidth = 400f;
         public static SpellSlot igniteSlot;
@@ -45,6 +46,7 @@ namespace KoreanMalzahar
             Menu = new Menu("KoreanMalzahar", "KoreanMalzahar", true);
             var orbwalkerMenu = Menu.AddSubMenu(new Menu("Orbwalker", "Orbwalker"));
             Orbwalker = new Orbwalking.Orbwalker(orbwalkerMenu);
+            #region Combo/Harass/LaneClear/OneShot
             //Combo Menu
             var combo = new Menu("Combo", "Combo");
             Menu.AddSubMenu(combo);
@@ -64,6 +66,8 @@ namespace KoreanMalzahar
             var lc = new Menu("Laneclear", "Laneclear");
             Menu.AddSubMenu(lc);
             lc.AddItem(new MenuItem("laneclearE", "Use E to LaneClear").SetValue(true));
+            lc.AddItem(new MenuItem("laneclearQ", "Use Q to LaneClear").SetValue(true));
+            lc.AddItem(new MenuItem("LaneClearMinions", "LaneClear Minimum Minions for Q").SetValue(new Slider(2, 0, 10)));
             lc.AddItem(new MenuItem("laneclearEMinimumMana", "Minimum Mana%").SetValue(new Slider(30)));
 
             // Drawing Menu
@@ -76,10 +80,13 @@ namespace KoreanMalzahar
             // Misc Menu
             var miscMenu = new Menu("Misc", "Misc");
             Menu.AddSubMenu(miscMenu);
-            // Todo: Add KillSteal!
+            // Todo: Add more KillSteal Variants/Spells
+            miscMenu.AddItem(new MenuItem("ksE", "Use E to KillSteal").SetValue(true));
+            miscMenu.AddItem(new MenuItem("interruptQ", "Interrupt Spells Q", true).SetValue(true));
             miscMenu.AddItem(new MenuItem("useQAntiGapCloser", "Use Q on GapClosers").SetValue(true));
             miscMenu.AddItem(new MenuItem("oneshot", "Burst Combo").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)).SetTooltip("It will cast Q+E+W+R on enemy when enemy is in E range."));
             Menu.AddToMainMenu();
+            #endregion
             // Draw Damage
             #region DrawHPDamage
             var dmgAfterShave = new MenuItem("KoreanMalzahar.DrawComboDamage", "Draw Combo Damage").SetValue(true);
@@ -106,9 +113,9 @@ namespace KoreanMalzahar
             #endregion
 
             #region Subscriptions
-            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             Game.OnUpdate += OnUpdate;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloserOnOnEnemyGapcloser;
+            Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             Drawing.OnDraw += OnDraw;
             Game.PrintChat("<font color='#800040'>KoreanMalzahar</font> <font color='#ff6600'>Loaded.</font>");
             #endregion
@@ -139,12 +146,24 @@ namespace KoreanMalzahar
                 return;
             }
 
-            if (HasRBuff() || R.IsChanneling)
+            if (Player.IsChannelingImportantSpell() || Game.Time - Rtime < 2.5 || Player.HasBuff("malzaharrsound"))
             {
                 Orbwalker.SetAttack(false);
                 Orbwalker.SetMovement(false);
                 return;
             }
+            else
+            {
+                Orbwalker.SetAttack(true);
+                Orbwalker.SetMovement(true);
+            }
+            /*if (E.IsReady() && Menu.Item("ksE").GetValue<bool>())
+            {
+                foreach (var t in HeroManager.Enemies.Where(h => h.IsValidTarget(E.Range) && h.Health < Player.GetSpellDamage(h, SpellSlot.E)))
+                {
+                    E.Cast(t);
+                }
+            }*/
             //Combo
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
@@ -162,6 +181,27 @@ namespace KoreanMalzahar
             }
             //AutoHarass
             AutoHarass();
+        }
+        private static void Interrupter2_OnInterruptableTarget(Obj_AI_Hero t, Interrupter2.InterruptableTargetEventArgs args)
+        {
+            if (Player.IsChannelingImportantSpell() || Game.Time - Rtime < 2.5 || Player.HasBuff("malzaharrsound"))
+            {
+                Orbwalker.SetAttack(false);
+                Orbwalker.SetMovement(false);
+                return;
+            }
+            else
+            {
+                Orbwalker.SetAttack(true);
+                Orbwalker.SetMovement(true);
+            }
+            if (!Menu.Item("interruptQ", true).GetValue<bool>() || !Q.IsReady())
+                return;
+
+            if (t.IsValidTarget(Q.Range))
+            {
+                Q.Cast(t);
+            }
         }
 
         #region Q Range/Placement Calculations (BETA)
@@ -186,6 +226,17 @@ namespace KoreanMalzahar
 
         private static void AntiGapcloserOnOnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
+            if (Player.IsChannelingImportantSpell() || Game.Time - Rtime < 2.5 || Player.HasBuff("malzaharrsound"))
+            {
+                Orbwalker.SetAttack(false);
+                Orbwalker.SetMovement(false);
+                return;
+            }
+            else
+            {
+                Orbwalker.SetAttack(true);
+                Orbwalker.SetMovement(true);
+            }
             // Improve AntiGap Closer
             var sender = gapcloser.Sender;
             if (!gapcloser.Sender.IsValidTarget())
@@ -193,7 +244,7 @@ namespace KoreanMalzahar
                 return;
             }
 
-            if (Menu.Item("useQAntiGapCloser").GetValue<bool>() && !HasRBuff())
+            if (Menu.Item("useQAntiGapCloser").GetValue<bool>())
             {
                 Q.Cast(gapcloser.Sender);
             }
@@ -235,8 +286,6 @@ namespace KoreanMalzahar
         {
             if (Player.ManaPercentage() < Menu.Item("autoharassminimumMana").GetValue<Slider>().Value)
                 return;
-            if (HasRBuff())
-                return;
             var m = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
             if (Menu.Item("autoharass").GetValue<bool>())
                     E.CastOnUnit(m);
@@ -250,28 +299,28 @@ namespace KoreanMalzahar
         //Combo
         private static void Combo()
         {
-            if (HasRBuff() || R.IsChanneling)
-            {
-                Orbwalker.SetAttack(false);
-                Orbwalker.SetMovement(false);
-                return;
-            }
             var useQ = (Menu.Item("useQ").GetValue<bool>());
             var useW = (Menu.Item("useW").GetValue<bool>());
             var useE = (Menu.Item("useE").GetValue<bool>());
             var useR = (Menu.Item("useR").GetValue<bool>());
-            var m = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            var m = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (!m.IsValidTarget())
             {
                 return;
             }
-            if (useQ && Q.IsReady()) Q.Cast(m);
+            if (Player.Mana > E.ManaCost + W.ManaCost + R.ManaCost && R.IsInRange(m))
+            {
+                if (useE && E.IsReady()) E.CastOnUnit(m);
+                if (useW && W.IsReady()) W.Cast(m);
+                if (useR && R.IsReady() && m != null) R.CastOnUnit(m);
+            }
             if (useE && E.IsReady()) E.CastOnUnit(m);
+            if (useQ && Q.IsReady()) Q.Cast(m);
             if (useW && W.IsReady()) W.Cast(m);
             if (Menu.Item("useIgniteInCombo").GetValue<bool>()) Player.Spellbook.CastSpell(igniteSlot, m);
             if (useR && R.IsReady() && m != null) R.CastOnUnit(m);
         }
-        private static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        /*private static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             if (!sender.IsMe || args.SData.Name != "MalzaharR" || !Player.HasBuff("MalzaharRSound"))
             {
@@ -282,7 +331,7 @@ namespace KoreanMalzahar
             Orbwalker.SetMovement(false);
             Orbwalker.SetAttack(false);
             Utility.DelayAction.Add(1, () => IsChanneling = false);
-        }
+        }*/
         //Burst
         public static void Oneshot()
         {
@@ -290,14 +339,8 @@ namespace KoreanMalzahar
             if (Player.Mana < Q.ManaCost + W.ManaCost + E.ManaCost + R.ManaCost)
                 return;
 
-            if (HasRBuff() || R.IsChanneling)
-            {
-                Orbwalker.SetAttack(false);
-                Orbwalker.SetMovement(false);
-                return;
-            }
             Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
-            var m = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Physical);
+            var m = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
                 if (Q.IsReady()) Q.CastOnUnit(m);
                 if (E.IsReady()) E.CastOnUnit(m);
                 if (W.IsReady()) W.CastOnUnit(m);
@@ -320,6 +363,13 @@ namespace KoreanMalzahar
                         E.CastOnUnit(minion);
                     }
                 }
+            }
+            if (Menu.Item("laneclearQ").GetValue<bool>() && E.IsReady())
+            {
+                var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
+                var farmPos = Q.GetCircularFarmLocation(allMinions, 150);
+                if (farmPos.MinionsHit > Menu.Item("LaneClearMinions").GetValue<Slider>().Value)
+                    Q.Cast(farmPos.Position);
             }
         }
     }
