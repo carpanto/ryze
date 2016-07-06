@@ -40,7 +40,7 @@ namespace KoreanMalzahar
             E = new Spell(SpellSlot.E, 650f);
             R = new Spell(SpellSlot.R, 700f);
 
-            Q.SetSkillshot(0.1f, 400, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            Q.SetSkillshot(0.75f, 80, float.MaxValue, false, SkillshotType.SkillshotCircle);
             W.SetSkillshot(0.5f, 80, 20, false, SkillshotType.SkillshotCircle);
 
             Menu = new Menu("KoreanMalzahar", "KoreanMalzahar", true);
@@ -82,9 +82,11 @@ namespace KoreanMalzahar
             var miscMenu = new Menu("Misc", "Misc");
             Menu.AddSubMenu(miscMenu);
             // Todo: Add more KillSteal Variants/Spells
-            miscMenu.AddItem(new MenuItem("ksE", "Use E to KillSteal").SetValue(true));
+            miscMenu.AddItem(new MenuItem("ksE", "Use E to KillSteal (Currently being coded)").SetValue(true));
             miscMenu.AddItem(new MenuItem("interruptQ", "Interrupt Spells Q", true).SetValue(true));
             miscMenu.AddItem(new MenuItem("useQAntiGapCloser", "Use Q on GapClosers").SetValue(true));
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
+                miscMenu.AddItem(new MenuItem("gapcloserR" + enemy.ChampionName, enemy.ChampionName).SetValue(false).SetTooltip("Use R on GapClosing Champions"));
             miscMenu.AddItem(new MenuItem("OneShotInfo", "OneShot Combo [Info]").SetTooltip("If you don't have mana to cast Q/W/E/R spells all together it won't cast the spells. Use Combo Instead."));
             miscMenu.AddItem(new MenuItem("oneshot", "Burst Combo").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)).SetTooltip("It will cast Q+E+W+R on enemy when enemy is in E range."));
             Menu.AddToMainMenu();
@@ -119,7 +121,7 @@ namespace KoreanMalzahar
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloserOnOnEnemyGapcloser;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             Drawing.OnDraw += OnDraw;
-            Game.PrintChat("<font color='#800040'>KoreanMalzahar</font> <font color='#ff6600'>Loaded.</font>");
+            Game.PrintChat("<font color='#800040'>[Korean]Malzahar</font> <font color='#ff6600'>Loaded.</font>");
             #endregion
         }
         private static void OnDraw(EventArgs args)
@@ -239,16 +241,20 @@ namespace KoreanMalzahar
                 Orbwalker.SetAttack(true);
                 Orbwalker.SetMovement(true);
             }
-            // Improve AntiGap Closer
+            // Improved AntiGap Closer
             var sender = gapcloser.Sender;
             if (!gapcloser.Sender.IsValidTarget())
             {
                 return;
             }
 
-            if (Menu.Item("useQAntiGapCloser").GetValue<bool>())
+            if (Menu.Item("useQAntiGapCloser").GetValue<bool>() && sender.IsValidTarget(Q.Range))
             {
-                Q.Cast(gapcloser.Sender);
+                Q.Cast(gapcloser.End);
+            }
+            else if (R.IsReady() && Menu.Item("gapcloserR" + gapcloser.Sender.ChampionName).GetValue<bool>() && sender.IsValidTarget(R.Range))
+            {
+                R.CastOnUnit(sender);
             }
         }
         private static float CalculateDamage(Obj_AI_Base enemy)
