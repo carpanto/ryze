@@ -86,7 +86,7 @@ namespace KoreanMalzahar
             miscMenu.AddItem(new MenuItem("interruptQ", "Interrupt Spells Q", true).SetValue(true));
             miscMenu.AddItem(new MenuItem("useQAntiGapCloser", "Use Q on GapClosers").SetValue(true));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
-                miscMenu.AddItem(new MenuItem("gapcloserR" + enemy.ChampionName, enemy.ChampionName).SetValue(false).SetTooltip("Use R on GapClosing Champions"));
+                miscMenu.SubMenu("GapCloser R").AddItem(new MenuItem("gapcloserR" + enemy.ChampionName, enemy.ChampionName).SetValue(false).SetTooltip("Use R on GapClosing Champions"));
             miscMenu.AddItem(new MenuItem("OneShotInfo", "OneShot Combo [Info]").SetTooltip("If you don't have mana to cast Q/W/E/R spells all together it won't cast the spells. Use Combo Instead."));
             miscMenu.AddItem(new MenuItem("oneshot", "Burst Combo").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)).SetTooltip("It will cast Q+E+W+R on enemy when enemy is in E range."));
             Menu.AddToMainMenu();
@@ -252,7 +252,7 @@ namespace KoreanMalzahar
             {
                 Q.Cast(gapcloser.End);
             }
-            else if (R.IsReady() && Menu.Item("gapcloserR" + gapcloser.Sender.ChampionName).GetValue<bool>() && sender.IsValidTarget(R.Range))
+            if (R.IsReady() && Menu.Item("gapcloserR" + gapcloser.Sender.ChampionName).GetValue<bool>() && sender.IsValidTarget(R.Range) && gapcloser.End == Player.ServerPosition)
             {
                 R.CastOnUnit(sender);
             }
@@ -295,7 +295,7 @@ namespace KoreanMalzahar
             if (Player.ManaPercentage() < Menu.Item("autoharassminimumMana").GetValue<Slider>().Value)
                 return;
             var m = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
-            if (Menu.Item("autoharass").GetValue<bool>())
+            if (m != null && Menu.Item("autoharass").GetValue<bool>())
                     E.CastOnUnit(m);
             if (Menu.Item("autoharassuseQ").GetValue<bool>())
                     Q.Cast(m);
@@ -344,7 +344,7 @@ namespace KoreanMalzahar
             if (Player.Mana < Q.ManaCost + W.ManaCost + E.ManaCost + R.ManaCost)
                 return;
 
-            Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+            Orbwalking.MoveTo(Game.CursorPos);
             var m = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
                 if (Q.IsReady()) Q.CastOnUnit(m);
                 if (E.IsReady()) E.CastOnUnit(m);
@@ -363,7 +363,7 @@ namespace KoreanMalzahar
             {
                 foreach (var minion in allMinions)
                 {
-                    if (minion.IsValidTarget())
+                    if (minion.IsValidTarget() && !minion.HasBuff("malzahare") && minion.Health < E.GetDamage(minion))
                     {
                         E.CastOnUnit(minion);
                     }
