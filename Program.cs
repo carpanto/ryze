@@ -36,7 +36,7 @@ namespace KoreanMalzahar
 
             igniteSlot = Player.GetSpellSlot("summonerdot");
             Q = new Spell(SpellSlot.Q, 900f);
-            W = new Spell(SpellSlot.W, 450f);
+            W = new Spell(SpellSlot.W, 750f);
             E = new Spell(SpellSlot.E, 650f);
             R = new Spell(SpellSlot.R, 700f);
 
@@ -85,6 +85,7 @@ namespace KoreanMalzahar
             miscMenu.AddItem(new MenuItem("ksE", "Use E to KillSteal").SetValue(true));
             miscMenu.AddItem(new MenuItem("interruptQ", "Interrupt Spells Q", true).SetValue(true));
             miscMenu.AddItem(new MenuItem("useQAntiGapCloser", "Use Q on GapClosers").SetValue(true));
+            miscMenu.AddItem(new MenuItem("OneShotInfo", "OneShot Combo [Info]").SetTooltip("If you don't have mana to cast Q/W/E/R spells all together it won't cast the spells. Use Combo Instead."));
             miscMenu.AddItem(new MenuItem("oneshot", "Burst Combo").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)).SetTooltip("It will cast Q+E+W+R on enemy when enemy is in E range."));
             Menu.AddToMainMenu();
             #endregion
@@ -129,7 +130,7 @@ namespace KoreanMalzahar
             }
             if (Menu.Item("drawW").GetValue<bool>())
             {
-                Render.Circle.DrawCircle(Player.Position, W.Range, System.Drawing.Color.LightBlue, 3);
+                Render.Circle.DrawCircle(Player.Position, 450f, System.Drawing.Color.LightBlue, 3);
             }
             if (Menu.Item("drawR").GetValue<bool>())
             {
@@ -316,6 +317,12 @@ namespace KoreanMalzahar
                 if (useW && W.IsReady()) W.Cast(m);
                 if (useR && R.IsReady() && m != null && R.IsInRange(m)) R.CastOnUnit(m);
             }
+            else
+            {
+                if (useE && E.IsReady() && E.IsInRange(m)) E.CastOnUnit(m);
+                if (useQ && Q.IsReady() && Player.Mana > Q.ManaCost && Q.IsInRange(m)) Q.Cast(m);
+                if (useW && W.IsReady() && Player.Mana > W.ManaCost) W.Cast(m);
+            }
             if (Menu.Item("useIgniteInCombo").GetValue<bool>())
             {
                 if (m.Health < Player.GetSummonerSpellDamage(m, Damage.SummonerSpell.Ignite))
@@ -345,12 +352,12 @@ namespace KoreanMalzahar
             if (Player.ManaPercentage() < Menu.Item("laneclearEMinimumMana").GetValue<Slider>().Value || Player.ManaPercentage() < Menu.Item("laneclearQMinimumMana").GetValue<Slider>().Value)
                 return;
 
-            var allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Q.Range);
+            var allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range);
             if (Menu.Item("laneclearE").GetValue<bool>() && E.IsReady())
             {
                 foreach (var minion in allMinions)
                 {
-                    if (minion.IsValidTarget() && minion.MaxHealth < minion.MaxHealth * 50 / 100)
+                    if (minion.IsValidTarget())
                     {
                         E.CastOnUnit(minion);
                     }
