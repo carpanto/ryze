@@ -55,7 +55,7 @@ namespace KoreanMalzahar
             combo.AddItem(new MenuItem("useW", "Use W").SetValue(true));
             combo.AddItem(new MenuItem("useE", "Use E").SetValue(true));
             combo.AddItem(new MenuItem("useR", "Use R").SetValue(true));
-            combo.AddItem(new MenuItem("useIgniteInCombo", "Use Ignite if Spells won't kill the target (Smart)").SetValue(true));
+            combo.AddItem(new MenuItem("useIgniteInCombo", "Use Ignite if Killable").SetValue(true));
             //Harass Menu
             var harass = new Menu("Harass", "Harass");
             Menu.AddSubMenu(harass);
@@ -252,7 +252,7 @@ namespace KoreanMalzahar
         private static float CalculateDamage(Obj_AI_Base enemy)
         {
             float damage = 0;
-            if (igniteSlot == SpellSlot.Unknown || Player.Spellbook.CanUseSpell(igniteSlot) != SpellState.Ready)
+            if (igniteSlot != SpellSlot.Unknown || Player.Spellbook.CanUseSpell(igniteSlot) == SpellState.Ready)
             {
                 if (Menu.Item("useIgniteInCombo").GetValue<bool>())
                 {
@@ -308,30 +308,21 @@ namespace KoreanMalzahar
             {
                 return;
             }
-            if (Player.Mana > E.ManaCost + W.ManaCost + R.ManaCost && R.IsInRange(m))
+            if (Player.Mana > E.ManaCost + W.ManaCost + R.ManaCost)
             {
-                if (useE && E.IsReady()) E.CastOnUnit(m);
+                if (useE && E.IsReady() && E.IsInRange(m)) E.CastOnUnit(m);
+                if (useQ && Q.IsReady() && Player.Mana > Q.ManaCost && Q.IsInRange(m)) Q.Cast(m);
                 if (useW && W.IsReady()) W.Cast(m);
-                if (useR && R.IsReady() && m != null) R.CastOnUnit(m);
+                if (useR && R.IsReady() && m != null && R.IsInRange(m)) R.CastOnUnit(m);
+                if (Menu.Item("useIgniteInCombo").GetValue<bool>())
+                {
+                    if (m.Health < Player.GetSummonerSpellDamage(m, Damage.SummonerSpell.Ignite))
+                    {
+                        Player.Spellbook.CastSpell(igniteSlot, m);
+                    }
+                }
             }
-            if (useE && E.IsReady()) E.CastOnUnit(m);
-            if (useQ && Q.IsReady()) Q.Cast(m);
-            if (useW && W.IsReady()) W.Cast(m);
-            if (Menu.Item("useIgniteInCombo").GetValue<bool>()) Player.Spellbook.CastSpell(igniteSlot, m);
-            if (useR && R.IsReady() && m != null) R.CastOnUnit(m);
         }
-        /*private static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
-        {
-            if (!sender.IsMe || args.SData.Name != "MalzaharR" || !Player.HasBuff("MalzaharRSound"))
-            {
-                return;
-            }
-
-            IsChanneling = true;
-            Orbwalker.SetMovement(false);
-            Orbwalker.SetAttack(false);
-            Utility.DelayAction.Add(1, () => IsChanneling = false);
-        }*/
         //Burst
         public static void Oneshot()
         {
@@ -358,7 +349,7 @@ namespace KoreanMalzahar
             {
                 foreach (var minion in allMinions)
                 {
-                    if (minion.IsValidTarget() && minion.MaxHealth < (minion.MaxHealth - 50 * 100))
+                    if (minion.IsValidTarget() && minion.MaxHealth < (minion.MaxHealth * 50 / 100))
                     {
                         E.CastOnUnit(minion);
                     }
