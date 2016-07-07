@@ -7,6 +7,7 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using LeagueSharp.Data;
 using SharpDX;
+using SPrediction;
 using Color = System.Drawing.Color;
 
 namespace KoreanMalzahar
@@ -68,6 +69,7 @@ namespace KoreanMalzahar
             lc.AddItem(new MenuItem("laneclearE", "Use E to LaneClear").SetValue(true));
             lc.AddItem(new MenuItem("laneclearQ", "Use Q to LaneClear").SetValue(true));
             lc.AddItem(new MenuItem("LaneClearMinions", "LaneClear Minimum Minions for Q").SetValue(new Slider(2, 0, 10)));
+            lc.AddItem(new MenuItem("LaneClearEMinMinions", "LaneClear Minimum Minions for E").SetValue(new Slider(2, 0, 10)));
             lc.AddItem(new MenuItem("laneclearEMinimumMana", "Minimum E Mana%").SetValue(new Slider(30)).SetTooltip("Minimum Mana that you need to have to cast E on LaneClear."));
             lc.AddItem(new MenuItem("laneclearQMinimumMana", "Minimum Q Mana%").SetValue(new Slider(30)).SetTooltip("Minimum Mana that you need to have to cast Q on LaneClear."));
 
@@ -82,7 +84,8 @@ namespace KoreanMalzahar
             var miscMenu = new Menu("Misc", "Misc");
             Menu.AddSubMenu(miscMenu);
             // Todo: Add more KillSteal Variants/Spells
-            miscMenu.AddItem(new MenuItem("ksE", "Use E to KillSteal (Currently being coded)").SetValue(true));
+            miscMenu.AddItem(new MenuItem("ksE", "Use E to KillSteal").SetValue(true));
+            miscMenu.AddItem(new MenuItem("ksQ", "Use Q to KillSteal").SetValue(true));
             miscMenu.AddItem(new MenuItem("interruptQ", "Interrupt Spells Q", true).SetValue(true));
             miscMenu.AddItem(new MenuItem("useQAntiGapCloser", "Use Q on GapClosers").SetValue(true));
             foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(enemy => enemy.IsEnemy))
@@ -115,7 +118,7 @@ namespace KoreanMalzahar
                 DrawDamage.FillColor = eventArgs.GetNewValue<Circle>().Color;
             };
             #endregion
-
+            SPrediction.Prediction.Initialize();
             #region Subscriptions
             Game.OnUpdate += OnUpdate;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloserOnOnEnemyGapcloser;
@@ -161,13 +164,24 @@ namespace KoreanMalzahar
                 Orbwalker.SetAttack(true);
                 Orbwalker.SetMovement(true);
             }
-            /*if (E.IsReady() && Menu.Item("ksE").GetValue<bool>())
+            if (E.IsReady() && Menu.Item("ksE").GetValue<bool>())
             {
-                foreach (var t in HeroManager.Enemies.Where(h => h.IsValidTarget(E.Range) && h.Health < Player.GetSpellDamage(h, SpellSlot.E)))
+                foreach (var h in HeroManager.Enemies.Where(h => h.IsValidTarget(E.Range) && h.Health < Player.GetSpellDamage(h, SpellSlot.E)))
                 {
-                    E.Cast(t);
+                    E.Cast(h);
                 }
-            }*/
+            }
+            if (Q.IsReady() && Menu.Item("ksQ").GetValue<bool>())
+            {
+                foreach (var h in HeroManager.Enemies.Where(h => h.IsValidTarget(Q.Range) && h.Health < Player.GetSpellDamage(h, SpellSlot.Q)))
+                {
+                    var pred = Q.GetSPrediction(h);
+                    if (pred.HitChance >= HitChance.High)
+                    {
+                        Q.Cast(pred.CastPosition);
+                    }
+                }
+            }
             //Combo
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
@@ -295,10 +309,14 @@ namespace KoreanMalzahar
             if (Player.ManaPercentage() < Menu.Item("autoharassminimumMana").GetValue<Slider>().Value)
                 return;
             var m = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
+            var pred = Q.GetSPrediction(m);
             if (m != null && Menu.Item("autoharass").GetValue<bool>())
                     E.CastOnUnit(m);
-            if (Menu.Item("autoharassuseQ").GetValue<bool>())
-                    Q.Cast(m);
+            if (m != null && Menu.Item("autoharassuseQ").GetValue<bool>())
+                if (pred.HitChance >= HitChance.High)
+                {
+                    Q.Cast(pred.CastPosition);
+                }
         }
         private static bool HasRBuff()
         {
@@ -312,6 +330,7 @@ namespace KoreanMalzahar
             var useE = (Menu.Item("useE").GetValue<bool>());
             var useR = (Menu.Item("useR").GetValue<bool>());
             var m = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            var pred = Q.GetSPrediction(m);
             if (!m.IsValidTarget())
             {
                 return;
@@ -319,14 +338,26 @@ namespace KoreanMalzahar
             if (Player.Mana > E.ManaCost + W.ManaCost + R.ManaCost)
             {
                 if (useE && E.IsReady() && E.IsInRange(m)) E.CastOnUnit(m);
-                if (useQ && Q.IsReady() && Player.Mana > Q.ManaCost && Q.IsInRange(m)) Q.Cast(m);
+                if (useQ && Q.IsReady() && Player.Mana > Q.ManaCost && Q.IsInRange(m))
+                {
+                    if (pred.HitChance >= HitChance.High)
+                    {
+                        Q.Cast(pred.CastPosition);
+                    }
+                }
                 if (useW && W.IsReady()) W.Cast(m);
-                if (useR && R.IsReady() && m != null && R.IsInRange(m)) R.CastOnUnit(m);
+                if (useR && R.IsReady() && m != null && E.IsInRange(m)) R.CastOnUnit(m);
             }
             else
             {
                 if (useE && E.IsReady() && E.IsInRange(m)) E.CastOnUnit(m);
-                if (useQ && Q.IsReady() && Player.Mana > Q.ManaCost && Q.IsInRange(m)) Q.Cast(m);
+                if (useQ && Q.IsReady() && Player.Mana > Q.ManaCost && Q.IsInRange(m))
+                {
+                    if (pred.HitChance >= HitChance.High)
+                    {
+                        Q.Cast(pred.CastPosition);
+                    }
+                }
                 if (useW && W.IsReady() && Player.Mana > W.ManaCost) W.Cast(m);
             }
             if (Menu.Item("useIgniteInCombo").GetValue<bool>())
@@ -344,9 +375,33 @@ namespace KoreanMalzahar
             if (Player.Mana < Q.ManaCost + W.ManaCost + E.ManaCost + R.ManaCost)
                 return;
 
+
+            if (Player.IsChannelingImportantSpell() || Game.Time - Rtime < 2.5 || Player.HasBuff("malzaharrsound"))
+            {
+                Orbwalker.SetAttack(false);
+                Orbwalker.SetMovement(false);
+                return;
+            }
+            else
+            {
+                Orbwalker.SetAttack(true);
+                Orbwalker.SetMovement(true);
+            }
+
             Orbwalking.MoveTo(Game.CursorPos);
             var m = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-                if (Q.IsReady()) Q.CastOnUnit(m);
+            if (!m.IsValidTarget())
+            {
+                return;
+            }
+            var pred = Q.GetSPrediction(m);
+                if (Q.IsReady())
+                {
+                    if (pred.HitChance >= HitChance.High)
+                    {
+                        Q.Cast(pred.CastPosition);
+                    }
+                }
                 if (E.IsReady()) E.CastOnUnit(m);
                 if (W.IsReady()) W.CastOnUnit(m);
                 Player.Spellbook.CastSpell(igniteSlot, m);
@@ -359,13 +414,16 @@ namespace KoreanMalzahar
                 return;
 
             var allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range);
-            if (Menu.Item("laneclearE").GetValue<bool>() && E.IsReady())
+            if (allMinions.Count > Menu.Item("LaneClearEMinMinions").GetValue<Slider>().Value)
             {
-                foreach (var minion in allMinions)
+                if (Menu.Item("laneclearE").GetValue<bool>() && E.IsReady())
                 {
-                    if (minion.IsValidTarget() && !minion.HasBuff("malzahare") && minion.Health < E.GetDamage(minion))
+                    foreach (var minion in allMinions)
                     {
-                        E.CastOnUnit(minion);
+                        if (minion.IsValidTarget() && !minion.HasBuff("malzahare") && minion.Health < E.GetDamage(minion))
+                        {
+                            E.CastOnUnit(minion);
+                        }
                     }
                 }
             }
