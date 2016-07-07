@@ -7,8 +7,8 @@
     <ProjectGuid>{BEC15079-4F20-4D84-B2D9-5F8E34C9934D}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>KoreanMalzahar</RootNamespace>
-    <AssemblyName>KoreanMalzahar</AssemblyName>
+    <RootNamespace>SurvivorMalzahar</RootNamespace>
+    <AssemblyName>SurvivorMalzahar</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />

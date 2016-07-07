@@ -10,7 +10,7 @@ using SharpDX;
 using SPrediction;
 using Color = System.Drawing.Color;
 
-namespace KoreanMalzahar
+namespace SurvivorMalzahar
 {
     class Program
     {
@@ -44,7 +44,7 @@ namespace KoreanMalzahar
             Q.SetSkillshot(0.75f, 80, float.MaxValue, false, SkillshotType.SkillshotCircle);
             W.SetSkillshot(0.5f, 80, 20, false, SkillshotType.SkillshotCircle);
 
-            Menu = new Menu("KoreanMalzahar", "KoreanMalzahar", true);
+            Menu = new Menu("SurvivorMalzahar", "SurvivorMalzahar", true);
             var orbwalkerMenu = Menu.AddSubMenu(new Menu("Orbwalker", "Orbwalker"));
             Orbwalker = new Orbwalking.Orbwalker(orbwalkerMenu);
             #region Combo/Harass/LaneClear/OneShot
@@ -98,9 +98,9 @@ namespace KoreanMalzahar
             #endregion
             // Draw Damage
             #region DrawHPDamage
-            var dmgAfterShave = new MenuItem("KoreanMalzahar.DrawComboDamage", "Draw Combo Damage").SetValue(true);
+            var dmgAfterShave = new MenuItem("SurvivorMalzahar.DrawComboDamage", "Draw Combo Damage").SetValue(true);
             var drawFill =
-                new MenuItem("KoreanMalzahar.DrawColour", "Fill Color", true).SetValue(
+                new MenuItem("SurvivorMalzahar.DrawColour", "Fill Color", true).SetValue(
                     new Circle(true, Color.FromArgb(204, 255, 0, 1)));
             Menu.SubMenu("HPBarDrawings").AddItem(drawFill);
             Menu.SubMenu("HPBarDrawings").AddItem(dmgAfterShave);
@@ -126,7 +126,7 @@ namespace KoreanMalzahar
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloserOnOnEnemyGapcloser;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             Drawing.OnDraw += OnDraw;
-            Game.PrintChat("<font color='#800040'>[Korean]Malzahar</font> <font color='#ff6600'>Loaded.</font>");
+            Game.PrintChat("<font color='#800040'>[SurvivorSeries] Malzahar</font> <font color='#ff6600'>Loaded.</font>");
             #endregion
         }
         private static void OnDraw(EventArgs args)
