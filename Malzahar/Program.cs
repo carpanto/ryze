@@ -37,7 +37,7 @@ namespace KoreanMalzahar
 
             igniteSlot = Player.GetSpellSlot("summonerdot");
             Q = new Spell(SpellSlot.Q, 900f);
-            W = new Spell(SpellSlot.W, 750f);
+            W = new Spell(SpellSlot.W, 650f);
             E = new Spell(SpellSlot.E, 650f);
             R = new Spell(SpellSlot.R, 700f);
 
@@ -360,7 +360,7 @@ namespace KoreanMalzahar
                         Q.Cast(pred.CastPosition);
                     }
                 }
-                if (useW && W.IsReady() && Player.Mana > W.ManaCost) W.Cast(m);
+                if (useW && W.IsReady() && Player.Mana > W.ManaCost && W.IsInRange(m)) W.Cast(m);
             }
             if (Menu.Item("useIgniteInCombo").GetValue<bool>())
             {
@@ -397,17 +397,17 @@ namespace KoreanMalzahar
                 return;
             }
             var pred = Q.GetSPrediction(m);
-                if (Q.IsReady())
+                if (Q.IsReady() && Q.IsInRange(m))
                 {
                     if (pred.HitChance >= HitChance.High)
                     {
                         Q.Cast(pred.CastPosition);
                     }
                 }
-                if (E.IsReady()) E.CastOnUnit(m);
+                if (E.IsReady() && E.IsInRange(m)) E.CastOnUnit(m);
                 if (W.IsReady()) W.Cast(m);
                 Player.Spellbook.CastSpell(igniteSlot, m);
-                if (R.IsReady() && !E.IsReady() && !W.IsReady()) R.CastOnUnit(m);
+                if (R.IsReady() && !E.IsReady() && !W.IsReady() && R.IsInRange(m)) R.CastOnUnit(m);
         }
         //Lane
         private static void Lane()
