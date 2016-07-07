@@ -68,10 +68,12 @@ namespace KoreanMalzahar
             Menu.AddSubMenu(lc);
             lc.AddItem(new MenuItem("laneclearE", "Use E to LaneClear").SetValue(true));
             lc.AddItem(new MenuItem("laneclearQ", "Use Q to LaneClear").SetValue(true));
+            lc.AddItem(new MenuItem("laneclearW", "Use W to LaneClear").SetValue(true));
             lc.AddItem(new MenuItem("LaneClearMinions", "LaneClear Minimum Minions for Q").SetValue(new Slider(2, 0, 10)));
             lc.AddItem(new MenuItem("LaneClearEMinMinions", "LaneClear Minimum Minions for E").SetValue(new Slider(2, 0, 10)));
             lc.AddItem(new MenuItem("laneclearEMinimumMana", "Minimum E Mana%").SetValue(new Slider(30)).SetTooltip("Minimum Mana that you need to have to cast E on LaneClear."));
             lc.AddItem(new MenuItem("laneclearQMinimumMana", "Minimum Q Mana%").SetValue(new Slider(30)).SetTooltip("Minimum Mana that you need to have to cast Q on LaneClear."));
+            lc.AddItem(new MenuItem("laneclearWMinimumMana", "Minimum W Mana%").SetValue(new Slider(30)).SetTooltip("Minimum Mana that you need to have to cast W on LaneClear."));
 
             // Drawing Menu
             var DrawingMenu = new Menu("Drawings", "Drawings");
@@ -403,17 +405,18 @@ namespace KoreanMalzahar
                     }
                 }
                 if (E.IsReady()) E.CastOnUnit(m);
-                if (W.IsReady()) W.CastOnUnit(m);
+                if (W.IsReady()) W.Cast(m);
                 Player.Spellbook.CastSpell(igniteSlot, m);
                 if (R.IsReady() && !E.IsReady() && !W.IsReady()) R.CastOnUnit(m);
         }
         //Lane
         private static void Lane()
         {
-            if (Player.ManaPercentage() < Menu.Item("laneclearEMinimumMana").GetValue<Slider>().Value || Player.ManaPercentage() < Menu.Item("laneclearQMinimumMana").GetValue<Slider>().Value)
+            if (Player.ManaPercentage() < Menu.Item("laneclearEMinimumMana").GetValue<Slider>().Value || Player.ManaPercentage() < Menu.Item("laneclearQMinimumMana").GetValue<Slider>().Value || Player.ManaPercentage() < Menu.Item("laneclearWMinimumMana").GetValue<Slider>().Value)
                 return;
 
             var allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range);
+            var allMinionsW = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, 450f);
             if (allMinions.Count > Menu.Item("LaneClearEMinMinions").GetValue<Slider>().Value)
             {
                 if (Menu.Item("laneclearE").GetValue<bool>() && E.IsReady())
@@ -424,6 +427,16 @@ namespace KoreanMalzahar
                         {
                             E.CastOnUnit(minion);
                         }
+                    }
+                }
+            }
+            if (Menu.Item("laneclearW").GetValue<bool>() && W.IsReady())
+            {
+                foreach (var minion in allMinionsW)
+                {
+                    if (minion.IsValidTarget())
+                    {
+                        W.Cast(minion);
                     }
                 }
             }
