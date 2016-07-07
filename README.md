@@ -1,4 +1,5 @@
 # LeagueSharp Assemblies by SupportExTraGoZ
 
-* KoreanMalzahar - Improvements Incoming!
-* KoreanMasterYi - Updated for the latest version to be done!
+* SurvivorSeries | Malzahar - Improvements Incoming!
+* SurvivorSeries | Brand - Finishing it up!
+* SurvivorSeries | AIO - Incoming!
