@@ -78,6 +78,7 @@ namespace SurvivorBrand
             Menu LaneClearMenu = Menu.AddSubMenu(new Menu("Lane Clear", "LaneClear"));
             LaneClearMenu.AddItem(new MenuItem("laneclearW", "Use W").SetValue(true));
             LaneClearMenu.AddItem(new MenuItem("laneclearE", "Use E").SetValue(true));
+            LaneClearMenu.AddItem(new MenuItem("LaneClearWMinions", "Minimum Enemies inside W").SetValue(new Slider(2, 1, 10)));
             LaneClearMenu.AddItem(new MenuItem("LaneClearManaManager", "Mana Manager (%)").SetValue(new Slider(30, 1, 100)));
 
             Menu KillStealMenu = Menu.AddSubMenu(new Menu("Kill Steal", "KillSteal"));
@@ -154,7 +155,9 @@ namespace SurvivorBrand
         private static void OnUpdate(EventArgs args)
         {
             if (Player.IsDead || Player.IsRecalling())
+            {
                 return;
+            }
 
             // Checks
             RManaCost();
@@ -167,11 +170,11 @@ namespace SurvivorBrand
             if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.LaneClear) // LaneClear mode broken? kappa
             {
                 LaneClear();
-                Game.PrintChat("LaneClear Works!");
             }
             if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.Mixed)
             {
                 Harass();
+                //Game.PrintChat("Test");
             }
         }
 
@@ -226,13 +229,6 @@ namespace SurvivorBrand
             {
                 return;
             }
-            if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.Mixed && Player.ManaPercentage() > Menu.Item("HarassManaManager").GetValue<Slider>().Value)
-            {
-                if (Menu.Item("harrasQ").GetValue<bool>() && Q.IsInRange(m))
-                {
-                    Q.CastIfHitchanceEquals(m, HitChance.High);
-                }
-            }
             // Q Improvement + KS Below
             if (OktwCommon.GetKsDamage(m, Q) + BonusDmg(m) + OktwCommon.GetEchoLudenDamage(m) > m.Health)
                 Q.CastIfHitchanceEquals(m, HitChance.High);
@@ -276,27 +272,6 @@ namespace SurvivorBrand
             var t = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
             if (t.IsValidTarget())
             {
-                if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.Mixed && Player.ManaPercentage() > Menu.Item("HarassManaManager").GetValue<Slider>().Value)
-                {
-                    if (Menu.Item("harrasW").GetValue<bool>() && W.IsInRange(t))
-                    {
-                        W.CastIfHitchanceEquals(t, HitChance.VeryHigh);
-                    }
-                }
-                else if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.LaneClear && Player.ManaPercentage() > Menu.Item("LaneClearManaManager").GetValue<Slider>().Value)
-                {
-                    var allMinions = Cache.GetMinions(Player.ServerPosition, 500, MinionTeam.Enemy);
-                    if (Menu.Item("laneclearW").GetValue<bool>() && W.IsReady())
-                    {
-                        foreach (var minion in allMinions)
-                        {
-                            if (minion.IsValidTarget())
-                            {
-                                W.CastIfHitchanceEquals(minion, HitChance.High);
-                            }
-                        }
-                    }
-                }
                 var Qdamage = Q.GetDamage(t);
                 var Wdamage = OktwCommon.GetKsDamage(t, W) + BonusDmg(t) + OktwCommon.GetEchoLudenDamage(t);
                 if (Wdamage > t.Health)
@@ -324,28 +299,6 @@ namespace SurvivorBrand
                 if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.Combo && Player.Mana > RManaC + E.ManaCost)
                 {
                     E.CastOnUnit(t);
-                }
-                // If In Harass/Mixed Mode
-                else if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.Mixed && Player.ManaPercentage() > Menu.Item("HarassManaManager").GetValue<Slider>().Value)
-                {
-                    if (Menu.Item("harrasE").GetValue<bool>() && E.IsInRange(t))
-                    {
-                        E.CastOnUnit(t);
-                    }
-                }
-                else if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.LaneClear && Player.ManaPercentage() > Menu.Item("LaneClearManaManager").GetValue<Slider>().Value)
-                {
-                    var allMinions = Cache.GetMinions(Player.ServerPosition, 500, MinionTeam.Enemy);
-                    if (Menu.Item("laneclearE").GetValue<bool>() && E.IsReady())
-                    {
-                        foreach (var minion in allMinions)
-                        {
-                            if (minion.IsValidTarget())
-                            {
-                                E.CastOnUnit(minion);
-                            }
-                        }
-                    }
                 }
                 else
                 {
@@ -497,16 +450,61 @@ namespace SurvivorBrand
         private static void Harass()
         {
             // Harass
-            WUsage();
-            QUsage();
-            EUsage();
+            var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+            if (!t.IsValidTarget())
+            {
+                return;
+            }
+            if (Player.ManaPercentage() > Menu.Item("HarassManaManager").GetValue<Slider>().Value)
+            {
+                if (Menu.Item("harrasW").GetValue<bool>() && W.IsInRange(t))
+                {
+                    W.CastIfHitchanceEquals(t, HitChance.VeryHigh);
+                }
+            }
+            if (Player.ManaPercentage() > Menu.Item("HarassManaManager").GetValue<Slider>().Value)
+            {
+                if (Menu.Item("harrasQ").GetValue<bool>() && Q.IsInRange(t))
+                {
+                    Q.CastIfHitchanceEquals(t, HitChance.High);
+                }
+            }
+            if (Player.ManaPercentage() > Menu.Item("HarassManaManager").GetValue<Slider>().Value)
+            {
+                if (Menu.Item("harrasE").GetValue<bool>() && E.IsInRange(t))
+                {
+                    E.CastOnUnit(t);
+                }
+            }
         }
 
         private static void LaneClear()
         {
             // LaneClear
-            WUsage();
-            EUsage();
+            if (Player.ManaPercentage() > Menu.Item("LaneClearManaManager").GetValue<Slider>().Value)
+                {
+                    if (Menu.Item("laneclearW").GetValue<bool>() && W.IsReady())
+                    {
+                        var allMinionsW = Cache.GetMinions(Player.ServerPosition, W.Range, MinionTeam.Enemy);
+                        var farmPos = Q.GetCircularFarmLocation(allMinionsW, 250);
+                        if (farmPos.MinionsHit > Menu.Item("LaneClearWMinions").GetValue<Slider>().Value)
+                            W.Cast(farmPos.Position);
+                    }
+                }
+            if (Player.ManaPercentage() > Menu.Item("LaneClearManaManager").GetValue<Slider>().Value)
+            {
+                var allMinions = Cache.GetMinions(Player.ServerPosition, E.Range, MinionTeam.Enemy);
+                if (Menu.Item("laneclearE").GetValue<bool>() && E.IsReady() && !W.IsReady())
+                {
+                    foreach (var minion in allMinions)
+                    {
+                        if (minion.IsValidTarget())
+                        {
+                            E.CastOnUnit(minion);
+                        }
+                    }
+                }
+            }
         }
 
         private static float CalculateDamage(Obj_AI_Base enemy)
