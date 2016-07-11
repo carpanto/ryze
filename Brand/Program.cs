@@ -233,7 +233,7 @@ namespace SurvivorBrand
                     Q.CastIfHitchanceEquals(m, HitChance.High);
                 }
             }
-            // Q Improvement
+            // Q Improvement + KS Below
             if (OktwCommon.GetKsDamage(m, Q) + BonusDmg(m) + OktwCommon.GetEchoLudenDamage(m) > m.Health)
                 Q.CastIfHitchanceEquals(m, HitChance.High);
 
@@ -298,7 +298,7 @@ namespace SurvivorBrand
                     }
                 }
                 var Qdamage = Q.GetDamage(t);
-                var Wdamage = OktwCommon.GetKsDamage(t, W) + BonusDmg(t);
+                var Wdamage = OktwCommon.GetKsDamage(t, W) + BonusDmg(t) + OktwCommon.GetEchoLudenDamage(t);
                 if (Wdamage > t.Health)
                 {
                     W.CastIfHitchanceEquals(t, HitChance.VeryHigh);
@@ -363,6 +363,12 @@ namespace SurvivorBrand
                     }
                 }
             }
+        }
+
+        private static void KSHPPrediction(Obj_AI_Base enemy)
+        {
+            // Thanks Sebby for making such a wonderful Lib :feelsniceman:
+            //var TargetHP = SebbyLib.HealthPrediction.GetHealthPrediction(enemy, 500) + SebbyLib.OktwCommon.GetIncomingDamage(enemy);
         }
 
         private static void RUsage()
