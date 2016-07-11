@@ -443,7 +443,7 @@ namespace SurvivorMalzahar
             if (Menu.Item("laneclearQ").GetValue<bool>() && Q.IsReady())
             {
                 var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
-                var farmPos = Q.GetCircularFarmLocation(allMinions, 150);
+                var farmPos = Q.GetCircularFarmLocation(allMinionsQ, 150);
                 if (farmPos.MinionsHit > Menu.Item("LaneClearMinions").GetValue<Slider>().Value)
                     Q.Cast(farmPos.Position);
             }
