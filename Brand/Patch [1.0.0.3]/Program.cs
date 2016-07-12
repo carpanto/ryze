@@ -174,6 +174,7 @@ namespace SurvivorBrand
             if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.Mixed)
             {
                 Harass();
+                //Game.PrintChat("Test");
             }
         }
 
@@ -230,16 +231,7 @@ namespace SurvivorBrand
             }
             // Q Improvement + KS Below
             if (OktwCommon.GetKsDamage(m, Q) + BonusDmg(m) + OktwCommon.GetEchoLudenDamage(m) > m.Health)
-            {
-                if (!m.CanMove)
-                {
-                    Q.CastIfHitchanceEquals(m, HitChance.Immobile);
-                }
-                else
-                {
-                    Q.CastIfHitchanceEquals(m, HitChance.High);
-                }
-            }
+                Q.CastIfHitchanceEquals(m, HitChance.High);
 
             if (m.HasBuff("brandablaze") && Menu.Item("QAblazedEnemy").GetValue<bool>())
             {
@@ -253,29 +245,12 @@ namespace SurvivorBrand
             }
 
             if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.Combo && !W.IsReady() && Player.ManaPercentage() > RManaC + Q.ManaCost)
-            {
-                foreach (var enemy in HeroManager.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range)))
-                    if (enemy.HasBuff("stun") || enemy.IsStunned)
-                    {
-                        Q.CastIfHitchanceEquals(enemy, HitChance.Immobile);
-                    }
-                    else
-                    {
-                        Q.CastIfHitchanceEquals(enemy, HitChance.High);
-                    }
-            }
+                Q.CastIfHitchanceEquals(m, HitChance.High);
 
             if (Player.Mana > RManaC + Q.ManaCost)
             {
                 foreach (var enemy in HeroManager.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range)))
-                    if (enemy.HasBuff("stun") || enemy.IsStunned)
-                    {
-                        Q.CastIfHitchanceEquals(enemy, HitChance.Immobile);
-                    }
-                    else
-                    {
-                        Q.CastIfHitchanceEquals(enemy, HitChance.High);
-                    }
+                    Q.CastIfHitchanceEquals(m, HitChance.High);
             }
         }
 
@@ -301,38 +276,15 @@ namespace SurvivorBrand
                 var Wdamage = OktwCommon.GetKsDamage(t, W) + BonusDmg(t) + OktwCommon.GetEchoLudenDamage(t);
                 if (Wdamage > t.Health)
                 {
-                    if (!t.CanMove)
-                    {
-                        W.CastIfHitchanceEquals(t, HitChance.Immobile);
-                    }
-                    else
-                    {
-                        W.CastIfHitchanceEquals(t, HitChance.VeryHigh);
-                    }
+                    W.CastIfHitchanceEquals(t, HitChance.VeryHigh);
                 }
                 else if (Wdamage + Qdamage > t.Health && Player.ManaPercentage() > Q.ManaCost + E.ManaCost)
-                {
-                    if (!t.CanMove)
-                    {
-                        W.CastIfHitchanceEquals(t, HitChance.Immobile);
-                    }
-                    else
-                    {
-                        W.CastIfHitchanceEquals(t, HitChance.VeryHigh);
-                    }
-                }
+                    W.CastIfHitchanceEquals(t, HitChance.VeryHigh);
 
                 if (Player.Mana > RManaC + W.ManaCost)
                 {
                     foreach (var enemy in HeroManager.Enemies.Where(enemy => enemy.IsValidTarget(W.Range)))
-                        if (enemy.HasBuff("stun") || enemy.IsStunned)
-                        {
-                            W.CastIfHitchanceEquals(enemy, HitChance.Immobile);
-                        }
-                        else
-                        {
-                            W.CastIfHitchanceEquals(enemy, HitChance.High);
-                        }
+                        W.CastIfHitchanceEquals(t, HitChance.VeryHigh);
                 }
             }
         }
@@ -346,15 +298,7 @@ namespace SurvivorBrand
                 // If in Combo Mode
                 if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.Combo && Player.Mana > RManaC + E.ManaCost)
                 {
-                    foreach (var enemy in HeroManager.Enemies.Where(enemy => enemy.IsValidTarget(E.Range)))
-                        if (enemy.HasBuff("stun") || enemy.IsStunned)
-                        {
-                            E.CastOnUnit(enemy);
-                        }
-                        else
-                        {
-                            E.CastOnUnit(enemy);
-                        }
+                    E.CastOnUnit(t);
                 }
                 else
                 {
@@ -368,14 +312,7 @@ namespace SurvivorBrand
                     else if (wDmg + eDmg > t.Health && Player.Mana > W.ManaCost + E.ManaCost)
                     {
                         E.CastOnUnit(t);
-                        if (!t.CanMove)
-                        {
-                            W.CastIfHitchanceEquals(t, HitChance.Immobile);
-                        }
-                        else
-                        {
-                            W.CastIfHitchanceEquals(t, HitChance.VeryHigh);
-                        }
+                        W.CastIfHitchanceEquals(t, HitChance.VeryHigh);
                     }
                 }
             }
@@ -522,28 +459,14 @@ namespace SurvivorBrand
             {
                 if (Menu.Item("harrasW").GetValue<bool>() && W.IsInRange(t))
                 {
-                    if (!t.CanMove)
-                    {
-                        W.CastIfHitchanceEquals(t, HitChance.Immobile);
-                    }
-                    else
-                    {
-                        W.CastIfHitchanceEquals(t, HitChance.VeryHigh);
-                    }
+                    W.CastIfHitchanceEquals(t, HitChance.VeryHigh);
                 }
             }
             if (Player.ManaPercentage() > Menu.Item("HarassManaManager").GetValue<Slider>().Value)
             {
                 if (Menu.Item("harrasQ").GetValue<bool>() && Q.IsInRange(t))
                 {
-                    if (!t.CanMove)
-                    {
-                        Q.CastIfHitchanceEquals(t, HitChance.Immobile);
-                    }
-                    else
-                    {
-                        Q.CastIfHitchanceEquals(t, HitChance.VeryHigh);
-                    }
+                    Q.CastIfHitchanceEquals(t, HitChance.High);
                 }
             }
             if (Player.ManaPercentage() > Menu.Item("HarassManaManager").GetValue<Slider>().Value)
@@ -557,7 +480,7 @@ namespace SurvivorBrand
 
         private static void LaneClear()
         {
-            // LaneClear W
+            // LaneClear
             if (Player.ManaPercentage() > Menu.Item("LaneClearManaManager").GetValue<Slider>().Value)
                 {
                     if (Menu.Item("laneclearW").GetValue<bool>() && W.IsReady())
@@ -568,7 +491,6 @@ namespace SurvivorBrand
                             W.Cast(farmPos.Position);
                     }
                 }
-            // LaneClear E
             if (Player.ManaPercentage() > Menu.Item("LaneClearManaManager").GetValue<Slider>().Value)
             {
                 var allMinions = Cache.GetMinions(Player.ServerPosition, E.Range, MinionTeam.Enemy);
@@ -576,11 +498,7 @@ namespace SurvivorBrand
                 {
                     foreach (var minion in allMinions)
                     {
-                        if (minion.IsValidTarget() && minion.HasBuff("brandablaze"))
-                        {
-                            E.CastOnUnit(minion);
-                        }
-                        else
+                        if (minion.IsValidTarget())
                         {
                             E.CastOnUnit(minion);
                         }
