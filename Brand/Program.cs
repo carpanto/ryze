@@ -85,6 +85,7 @@ namespace SurvivorBrand
             KillStealMenu.AddItem(new MenuItem("KillStealWithAvSpells", "KS with available spells (Q/W/E)").SetValue(true));
 
             Menu MiscMenu = Menu.AddSubMenu(new Menu("Misc", "Misc"));
+            MiscMenu.AddItem(new MenuItem("PrioritizeStunned", "Prioritize Stunned Targets?").SetValue(true));
             MiscMenu.AddItem(new MenuItem("QAblazedEnemy", "Auto Q if Target's [ABlazed]").SetValue(true));
             MiscMenu.AddItem(new MenuItem("QGapC", "Auto Stun GapClosers").SetValue(true));
             MiscMenu.AddItem(new MenuItem("InterruptEQ", "Auto E-Q to Interrupt").SetValue(false));
@@ -255,7 +256,7 @@ namespace SurvivorBrand
             if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.Combo && !W.IsReady() && Player.ManaPercentage() > RManaC + Q.ManaCost)
             {
                 foreach (var enemy in HeroManager.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range)))
-                    if (enemy.HasBuff("stun") || enemy.IsStunned)
+                    if (enemy.HasBuff("stun") || enemy.IsStunned && Menu.Item("PrioritizeStunned").GetValue<bool>())
                     {
                         Q.CastIfHitchanceEquals(enemy, HitChance.Immobile);
                     }
@@ -268,7 +269,7 @@ namespace SurvivorBrand
             if (Player.Mana > RManaC + Q.ManaCost)
             {
                 foreach (var enemy in HeroManager.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range)))
-                    if (enemy.HasBuff("stun") || enemy.IsStunned)
+                    if (enemy.HasBuff("stun") || enemy.IsStunned && Menu.Item("PrioritizeStunned").GetValue<bool>())
                     {
                         Q.CastIfHitchanceEquals(enemy, HitChance.Immobile);
                     }
@@ -325,7 +326,7 @@ namespace SurvivorBrand
                 if (Player.Mana > RManaC + W.ManaCost)
                 {
                     foreach (var enemy in HeroManager.Enemies.Where(enemy => enemy.IsValidTarget(W.Range)))
-                        if (enemy.HasBuff("stun") || enemy.IsStunned)
+                        if (enemy.HasBuff("stun") || enemy.IsStunned && Menu.Item("PrioritizeStunned").GetValue<bool>())
                         {
                             W.CastIfHitchanceEquals(enemy, HitChance.Immobile);
                         }
@@ -347,7 +348,7 @@ namespace SurvivorBrand
                 if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.Combo && Player.Mana > RManaC + E.ManaCost)
                 {
                     foreach (var enemy in HeroManager.Enemies.Where(enemy => enemy.IsValidTarget(E.Range)))
-                        if (enemy.HasBuff("stun") || enemy.IsStunned)
+                        if (enemy.HasBuff("stun") || enemy.IsStunned && Menu.Item("PrioritizeStunned").GetValue<bool>())
                         {
                             E.CastOnUnit(enemy);
                         }
