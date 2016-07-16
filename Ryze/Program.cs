@@ -23,6 +23,8 @@ namespace SurvivorRyze
         #region Declaration
         private static Spell Q, W, E, R;
         private static SpellSlot IgniteSlot;
+        private static Items.Item HealthPot;
+        private static Items.Item BiscuitOfRej;
         private static Orbwalking.Orbwalker Orbwalker;
         private static Menu Menu;
         private static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
@@ -41,7 +43,7 @@ namespace SurvivorRyze
 
             #region Spells
             Q = new Spell(SpellSlot.Q, 1000f);
-            Q.SetSkillshot(0.4f, 50f, float.MaxValue, true, SkillshotType.SkillshotLine);
+            Q.SetSkillshot(0.7f, 55f, float.MaxValue, true, SkillshotType.SkillshotLine);
             W = new Spell(SpellSlot.W, 610f);
             W.SetTargetted(0.103f, 550f);
             E = new Spell(SpellSlot.E, 610f);
@@ -50,8 +52,11 @@ namespace SurvivorRyze
             R.SetTargetted(2f, 1500f);
             #endregion
 
-            #region Ignite
+            #region Items/SummonerSpells
             IgniteSlot = Player.GetSpellSlot("summonerdot");
+            HealthPot = new Items.Item(2003, 0);
+            BiscuitOfRej = new Items.Item(2010, 0);
+            //var muramanai = Items.HasItem(ItemManager.Muramana) ? 3042 : 3043;
             #endregion
 
             #region Menu
@@ -68,7 +73,7 @@ namespace SurvivorRyze
             ComboMenu.AddItem(new MenuItem("CUseW", "Cast W").SetValue(true));
             ComboMenu.AddItem(new MenuItem("CUseE", "Cast E").SetValue(true));
             ComboMenu.AddItem(new MenuItem("CBlockAA", "Block AA in Combo Mode").SetValue(true));
-            ComboMenu.AddItem(new MenuItem("Combo2TimesMana", "Champion needs to have mana for atleast 2 times (Q/W/E)?").SetValue(true));
+            ComboMenu.AddItem(new MenuItem("Combo2TimesMana", "Champion needs to have mana for atleast 2 times (Q/W/E)?").SetValue(true).SetTooltip("If it's set to 'false' it'll need atleast mana for Q/W/E [1x] Post in thread if needs a change"));
             ComboMenu.AddItem(new MenuItem("CUseR", "Ultimate (R) in Misc Menu"));
             ComboMenu.AddItem(new MenuItem("CUseIgnite", "Use Ignite (Soon)").SetValue(true));
 
@@ -153,11 +158,11 @@ namespace SurvivorRyze
             if (Player.IsDead || Player.IsRecalling())
                 return;
 
+            Orbwalker.SetAttack(true);
             KSCheck();
             switch (Orbwalker.ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
-                        AABlock();
                         Combo();
                     break;
                 case Orbwalking.OrbwalkingMode.Mixed:
@@ -243,6 +248,25 @@ namespace SurvivorRyze
             {
                 if (Player.Mana >= 2 * (Q.Instance.ManaCost + W.Instance.ManaCost + E.Instance.ManaCost))
                 {
+                    if (CUseQ && CUseW && CUseE && target.IsValidTarget(Q.Range))
+                    {
+                        if (target.CanMove && predpos.Hitchance >= HitChance.High)
+                        {
+                            Q.Cast(predpos.CastPosition);
+                        }
+                        else if (!target.CanMove)
+                        {
+                            Q.Cast(target);
+                        }
+                        if (target.IsValidTarget(W.Range) && W.IsReady())
+                        {
+                            W.CastOnUnit(target);
+                        }
+                        if (target.IsValidTarget(E.Range) && E.IsReady())
+                        {
+                            E.CastOnUnit(target);
+                        }
+                    }
                     if (CUseW && target.IsValidTarget(W.Range) && W.IsReady())
                     {
                         W.CastOnUnit(target);
@@ -267,6 +291,28 @@ namespace SurvivorRyze
             else
             {
                 if (Player.Mana >= Q.Instance.ManaCost + W.Instance.ManaCost + E.Instance.ManaCost)
+                {
+                    if (CUseW && target.IsValidTarget(W.Range) && W.IsReady())
+                    {
+                        W.CastOnUnit(target);
+                    }
+                    if (CUseQ && target.IsValidTarget(Q.Range))
+                    {
+                        if (target.CanMove && predpos.Hitchance >= HitChance.High)
+                        {
+                            Q.Cast(predpos.CastPosition);
+                        }
+                        else if (!target.CanMove)
+                        {
+                            Q.Cast(target);
+                        }
+                    }
+                    if (CUseE && target.IsValidTarget(E.Range) && E.IsReady())
+                    {
+                        E.CastOnUnit(target);
+                    }
+                }
+                else
                 {
                     if (CUseW && target.IsValidTarget(W.Range) && W.IsReady())
                     {
@@ -376,14 +422,20 @@ namespace SurvivorRyze
         private static float CalculateDamage(Obj_AI_Base enemy)
         {
             float damage = 0;
-            if (Q.IsReady() || Player.Mana <= Q.Instance.ManaCost)
+            if (Q.IsReady() || Player.Mana <= Q.Instance.ManaCost + Q.Instance.ManaCost)
+                damage += Q.GetDamage(enemy) + Q.GetDamage(enemy);
+            else if (Q.IsReady() || Player.Mana <= Q.Instance.ManaCost)
                 damage += Q.GetDamage(enemy);
 
-            if (E.IsReady() || Player.Mana <= E.Instance.ManaCost)
-                damage += E.GetDamage(enemy);
-
-            if (W.IsReady() || Player.Mana <= W.Instance.ManaCost)
+            if (W.IsReady() || Player.Mana <= W.Instance.ManaCost + W.Instance.ManaCost)
+                damage += W.GetDamage(enemy) + W.GetDamage(enemy);
+            else if (W.IsReady() || Player.Mana <= W.Instance.ManaCost)
                 damage += W.GetDamage(enemy);
+
+            if (E.IsReady() || Player.Mana <= E.Instance.ManaCost + E.Instance.ManaCost)
+                damage += E.GetDamage(enemy) + E.GetDamage(enemy);
+            else if (E.IsReady() || Player.Mana <= E.Instance.ManaCost)
+                damage += E.GetDamage(enemy);
 
             return damage;
         }
