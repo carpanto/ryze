@@ -25,6 +25,11 @@ namespace SurvivorRyze
         private static SpellSlot IgniteSlot;
         private static Items.Item HealthPot;
         private static Items.Item BiscuitOfRej;
+        private static Items.Item TearOfGod;
+        private static Items.Item Seraph;
+        private static Items.Item Manamune;
+        private static Items.Item Archangel;
+        private static Items.Item Flask;
         private static Orbwalking.Orbwalker Orbwalker;
         private static Menu Menu;
         private static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
@@ -56,7 +61,11 @@ namespace SurvivorRyze
             IgniteSlot = Player.GetSpellSlot("summonerdot");
             HealthPot = new Items.Item(2003, 0);
             BiscuitOfRej = new Items.Item(2010, 0);
-            //var muramanai = Items.HasItem(ItemManager.Muramana) ? 3042 : 3043;
+            TearOfGod = new Items.Item(3070, 0);
+            Manamune = new Items.Item(3004, 0);
+            Seraph = new Items.Item(3040, 0);
+            Archangel = new Items.Item(3003, 0);
+            Flask = new Items.Item(2041, 0);
             #endregion
 
             #region Menu
@@ -75,7 +84,7 @@ namespace SurvivorRyze
             ComboMenu.AddItem(new MenuItem("CBlockAA", "Block AA in Combo Mode").SetValue(true));
             ComboMenu.AddItem(new MenuItem("Combo2TimesMana", "Champion needs to have mana for atleast 2 times (Q/W/E)?").SetValue(true).SetTooltip("If it's set to 'false' it'll need atleast mana for Q/W/E [1x] Post in thread if needs a change"));
             ComboMenu.AddItem(new MenuItem("CUseR", "Ultimate (R) in Misc Menu"));
-            ComboMenu.AddItem(new MenuItem("CUseIgnite", "Use Ignite (Soon)").SetValue(true));
+            ComboMenu.AddItem(new MenuItem("CUseIgnite", "Use Ignite (Smart)").SetValue(true));
 
             Menu HarassMenu = Menu.AddSubMenu(new Menu("Harass", "Harass"));
             HarassMenu.AddItem(new MenuItem("HarassQ", "Use Q").SetValue(true));
@@ -88,6 +97,16 @@ namespace SurvivorRyze
             LaneClearMenu.AddItem(new MenuItem("UseELC", "Use E to LaneClear").SetValue(true));
             LaneClearMenu.AddItem(new MenuItem("LaneClearManaManager", "Mana Manager (%)").SetValue(new Slider(30, 1, 100)));
 
+            Menu ItemsMenu = Menu.AddSubMenu(new Menu("Items Menu", "ItemsMenu"));
+            ItemsMenu.AddItem(new MenuItem("UseHPPotion", "Use HP Potion/Biscuit/Flask at % Health").SetValue(new Slider(15, 0, 100)));
+            ItemsMenu.AddItem(new MenuItem("UseItemFlask", "Use Flasks If You don't have Potions?").SetValue(true));
+            ItemsMenu.AddItem(new MenuItem("UsePotionOnlyIfEnemiesAreInRange", "Use Potions/Flasks only if Enemies are nearby?").SetValue(true).SetTooltip("It'll use the potions/flask if enemies are within the e.g (~R Range)"));
+            ItemsMenu.AddItem(new MenuItem("UseSeraph", "Use [Seraph's Embrace]?").SetValue(true));
+            ItemsMenu.AddItem(new MenuItem("UseSeraphIfEnemiesAreNearby", "Use [Seraph's Embrace] only if Enemies are nearby?").SetValue(true));
+            ItemsMenu.AddItem(new MenuItem("UseSeraphAtHP", "Activate [Seraph's Embrace] at HP %?").SetValue(new Slider(15, 0, 100)));
+            ItemsMenu.AddItem(new MenuItem("StackTear", "Stack Tear/Manamune/Archangel in Fountain?").SetValue(true).SetTooltip("Stack it in Fountain?"));
+            ItemsMenu.AddItem(new MenuItem("StackTearNF", "Stack Tear/Manamune/Archangel if You've Blue Buff?").SetValue(true));
+
             Menu MiscMenu = Menu.AddSubMenu(new Menu("Misc Menu", "MiscMenu"));
             MiscMenu.AddItem(new MenuItem("KSQ", "Use Q to KS").SetValue(true));
             MiscMenu.AddItem(new MenuItem("KSW", "Use W to KS").SetValue(true));
@@ -95,7 +114,7 @@ namespace SurvivorRyze
             MiscMenu.AddItem(new MenuItem("InterruptWithW", "Use W to Interrupt Channeling Spells").SetValue(true));
             MiscMenu.AddItem(new MenuItem("WGapCloser", "Use W on Enemy GapCloser (Irelia's Q)").SetValue(true));
             MiscMenu.AddItem(new MenuItem("ChaseWithR", "Use R to Chase (Being Added)"));
-            MiscMenu.AddItem(new MenuItem("EscapeWithR", "Use R to Chase (Being Added)"));
+            MiscMenu.AddItem(new MenuItem("EscapeWithR", "Use R to Escape (Being Added)"));
             
             Menu DrawingMenu = Menu.AddSubMenu(new Menu("Drawing", "Drawing"));
             DrawingMenu.AddItem(new MenuItem("DrawQ", "Draw Q Range").SetValue(true));
@@ -110,8 +129,8 @@ namespace SurvivorRyze
             var drawFill =
                 new MenuItem("SurvivorRyze.DrawColour", "Fill Color", true).SetValue(
                     new Circle(true, Color.SeaGreen));
-            Menu.SubMenu("HPBarDrawings").AddItem(drawFill);
-            Menu.SubMenu("HPBarDrawings").AddItem(dmgAfterShave);
+            DrawingMenu.AddItem(drawFill);
+            DrawingMenu.AddItem(dmgAfterShave);
             DrawDamage.DamageToUnit = CalculateDamage;
             DrawDamage.Enabled = dmgAfterShave.GetValue<bool>();
             DrawDamage.Fill = drawFill.GetValue<Circle>().Active;
@@ -143,7 +162,7 @@ namespace SurvivorRyze
             if (Menu.Item("DrawQ").GetValue<bool>())
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.Aqua);
             if (Menu.Item("DrawWE").GetValue<bool>())
-                Render.Circle.DrawCircle(Player.Position, W.Range, Color.OrangeRed);
+                Render.Circle.DrawCircle(Player.Position, W.Range, Color.AliceBlue);
             if (Menu.Item("DrawR").GetValue<bool>())
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.Orchid);
         }
@@ -153,12 +172,61 @@ namespace SurvivorRyze
             Orbwalker.SetAttack(!Menu.Item("CBlockAA").GetValue<bool>());
         }
 
+        private static void ItemsChecks()
+        {
+            // Check when you can use items (potions, ex) && Cast them (Probelt Usage please)
+            if (Player.HealthPercentage() < Menu.Item("UseHPPotion").GetValue<Slider>().Value && !Player.InFountain() || !Player.IsRecalling())
+            {
+                if (Player.CountEnemiesInRange(1250) > 0 && Menu.Item("UsePotionOnlyIfEnemiesAreInRange").GetValue<bool>())
+                {
+                    if (!Player.HasBuff("RegenerationPotion") || !Player.HasBuff("FlaskOfCrystalWater") || !Player.HasBuff("ItemCrystalFlask"))
+                    {
+                        HealthPot.Cast();
+                    }
+                    if (!Player.HasBuff("FlaskOfCrystalWater") || !Player.HasBuff("ItemCrystalFlask") || !Player.HasBuff("ItemMiniRegenPotion") && Items.HasItem(2010))
+                    {
+                        BiscuitOfRej.Cast();
+                    }
+                    if (Menu.Item("UseItemFlask").GetValue<bool>() && !Player.HasBuff("FlaskOfCrystalWater") || !Player.HasBuff("ItemCrystalFlask") || !Player.HasBuff("RegenerationPotion") || !Player.HasBuff("ItemMiniRegenPotion") && Items.HasItem(2041))
+                    {
+                        Flask.Cast();
+                    }
+                }
+            }
+            if (Player.HealthPercentage() < Menu.Item("UseSeraphAtHP").GetValue<Slider>().Value && Menu.Item("UseSeraph").GetValue<bool>() && !Player.InFountain() || !Player.IsRecalling())
+            {
+                if (Player.CountEnemiesInRange(1000) > 0 && Menu.Item("UseSeraphIfEnemiesAreNearby").GetValue<bool>())
+                {
+                    if (Seraph.IsReady() && Seraph.IsOwned(Player))
+                    {
+                        Seraph.Cast();
+                    }
+                }
+            }
+        }
+
+        private static void StackItems()
+        {
+            if (Player.InFountain() || Player.HasBuff("CrestoftheAncientGolem") && Menu.Item("StackTearNF").GetValue<bool>()) // Add if Player has Blue Buff
+            {
+                if (Items.HasItem(3004, Player) || Items.HasItem(3003, Player) || Items.HasItem(3070, Player) || Items.HasItem(3072, Player) || Items.HasItem(3073, Player) || Items.HasItem(3008, Player))
+                {
+                    Q.Cast(Player.ServerPosition);
+                }
+            }
+        }
+
         private static void Game_OnUpdate(EventArgs args)
         {
             if (Player.IsDead || Player.IsRecalling())
                 return;
 
             Orbwalker.SetAttack(true);
+            if (Menu.Item("StackTear").GetValue<bool>())
+            {
+                StackItems();
+            }
+            ItemsChecks();
             KSCheck();
             switch (Orbwalker.ActiveMode)
             {
@@ -244,6 +312,10 @@ namespace SurvivorRyze
             if (target == null || !target.IsValidTarget(Q.Range) || target.IsInvulnerable)
                 return;
             // Execute the Lad
+            if (Menu.Item("CUseIgnite").GetValue<bool>() && target.Health < Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite))
+            {
+                Player.Spellbook.CastSpell(IgniteSlot, target);
+            }
             if (Menu.Item("Combo2TimesMana").GetValue<bool>())
             {
                 if (Player.Mana >= 2 * (Q.Instance.ManaCost + W.Instance.ManaCost + E.Instance.ManaCost))
@@ -436,6 +508,11 @@ namespace SurvivorRyze
                 damage += E.GetDamage(enemy) + E.GetDamage(enemy);
             else if (E.IsReady() || Player.Mana <= E.Instance.ManaCost)
                 damage += E.GetDamage(enemy);
+
+            if (Menu.Item("CUseIgnite").GetValue<bool>())
+            {
+                damage += (float)Player.GetSummonerSpellDamage(enemy, Damage.SummonerSpell.Ignite);
+            }
 
             return damage;
         }
