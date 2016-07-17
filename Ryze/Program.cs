@@ -13,6 +13,7 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using LeagueSharp.Data;
 using SharpDX;
+using SebbyLib;
 using Color = System.Drawing.Color;
 
 namespace SurvivorRyze
@@ -30,7 +31,10 @@ namespace SurvivorRyze
         private static Items.Item Manamune;
         private static Items.Item Archangel;
         private static Items.Item Flask;
-        private static Orbwalking.Orbwalker Orbwalker;
+        private static Items.Item HexProtobelt;
+        private static Items.Item HexGunBlade;
+        private static Items.Item HexGLP;
+        private static SebbyLib.Orbwalking.Orbwalker Orbwalker;
         private static Menu Menu;
         private static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
         private const string ChampionName = "Ryze";
@@ -66,13 +70,16 @@ namespace SurvivorRyze
             Seraph = new Items.Item(3040, 0);
             Archangel = new Items.Item(3003, 0);
             Flask = new Items.Item(2041, 0);
+            HexGunBlade = new Items.Item(3146, 600f);
+            HexProtobelt = new Items.Item(3152, 300f);
+            HexGLP = new Items.Item(3030, 300f);
             #endregion
 
             #region Menu
             Menu = new Menu("SurvivorRyze", "SurvivorRyze", true);
 
             Menu OrbwalkerMenu = Menu.AddSubMenu(new Menu("Orbwalker", "Orbwalker"));
-            Orbwalker = new Orbwalking.Orbwalker(OrbwalkerMenu);
+            Orbwalker = new SebbyLib.Orbwalking.Orbwalker(OrbwalkerMenu);
 
             Menu TargetSelectorMenu = Menu.AddSubMenu(new Menu("Target Selector", "TargetSelector"));
             TargetSelector.AddToMenu(TargetSelectorMenu);
@@ -104,6 +111,12 @@ namespace SurvivorRyze
             ItemsMenu.AddItem(new MenuItem("UseSeraph", "Use [Seraph's Embrace]?").SetValue(true));
             ItemsMenu.AddItem(new MenuItem("UseSeraphIfEnemiesAreNearby", "Use [Seraph's Embrace] only if Enemies are nearby?").SetValue(true));
             ItemsMenu.AddItem(new MenuItem("UseSeraphAtHP", "Activate [Seraph's Embrace] at HP %?").SetValue(new Slider(15, 0, 100)));
+            ItemsMenu.AddItem(new MenuItem("UseHexGunBlade", "Use [Hextech Gunblade]?").SetValue(true));
+            ItemsMenu.AddItem(new MenuItem("UseHexProtobelt", "Use [Hextech Protobelt-01]?").SetValue(true));
+            ItemsMenu.AddItem(new MenuItem("UseHexGLP", "Use [Hextech GLP-800]?").SetValue(true));
+            ItemsMenu.AddItem(new MenuItem("HexGunBladeAtHP", "Use [Hextech Gunblade] at HP %?").SetValue(new Slider(25, 0, 100)));
+            ItemsMenu.AddItem(new MenuItem("HexProtobeltAtHP", "Use [Hextech Protobelt-01] at HP %?").SetValue(new Slider(25, 0, 100)));
+            ItemsMenu.AddItem(new MenuItem("HexGLPAtHP", "Use [Hextech GLP-800] at HP %?").SetValue(new Slider(25, 0, 100)));
             ItemsMenu.AddItem(new MenuItem("StackTear", "Stack Tear/Manamune/Archangel in Fountain?").SetValue(true).SetTooltip("Stack it in Fountain?"));
             ItemsMenu.AddItem(new MenuItem("StackTearNF", "Stack Tear/Manamune/Archangel if You've Blue Buff?").SetValue(true));
 
@@ -203,6 +216,24 @@ namespace SurvivorRyze
                     }
                 }
             }
+            var target = TargetSelector.GetTarget(HexGunBlade.Range, TargetSelector.DamageType.Magical);
+
+            // If Target's not in Q Range or there's no target or target's invulnerable don't fuck with him
+            if (target == null || !target.IsValidTarget(HexGunBlade.Range) || target.IsInvulnerable)
+                return;
+
+            if (Menu.Item("UseHexGunBlade").GetValue<bool>() && target.Health < Menu.Item("HexGunBladeAtHP").GetValue<Slider>().Value && HexGunBlade.IsOwned(Player) && HexGunBlade.IsReady())
+            {
+                Items.UseItem(HexGunBlade.Id, target);
+            }
+            if (Menu.Item("UseHexProtobelt").GetValue<bool>() && target.Health < Menu.Item("HexProtobeltAtHP").GetValue<Slider>().Value && HexProtobelt.IsInRange(target) && HexProtobelt.IsOwned(Player) && HexProtobelt.IsReady())
+            {
+                Items.UseItem(HexProtobelt.Id, target.ServerPosition);
+            }
+            if (Menu.Item("UseHexGLP").GetValue<bool>() && target.Health < Menu.Item("HexGLPAtHP").GetValue<Slider>().Value && HexGLP.IsInRange(target) && HexGLP.IsOwned(Player) && HexGLP.IsReady())
+            {
+                Items.UseItem(HexGLP.Id, target.ServerPosition);
+            }
         }
 
         private static void StackItems()
@@ -230,13 +261,13 @@ namespace SurvivorRyze
             KSCheck();
             switch (Orbwalker.ActiveMode)
             {
-                case Orbwalking.OrbwalkingMode.Combo:
+                case SebbyLib.Orbwalking.OrbwalkingMode.Combo:
                         Combo();
                     break;
-                case Orbwalking.OrbwalkingMode.Mixed:
+                case SebbyLib.Orbwalking.OrbwalkingMode.Mixed:
                         Harass();
                     break;
-                case Orbwalking.OrbwalkingMode.LaneClear:
+                case SebbyLib.Orbwalking.OrbwalkingMode.LaneClear:
                         LaneClear();
                     break;
             }
@@ -454,7 +485,7 @@ namespace SurvivorRyze
             {
                 if (Player.ManaPercentage() > Menu.Item("LaneClearManaManager").GetValue<Slider>().Value)
                 {
-                    var allMinions = MinionManager.GetMinions(E.Range, MinionTypes.All, MinionTeam.Enemy);
+                    var allMinions = Cache.GetMinions(Player.ServerPosition, E.Range, MinionTeam.Enemy);
                     if (!Q.IsReady() && E.IsReady())
                     {
                         foreach (var minion in allMinions)
