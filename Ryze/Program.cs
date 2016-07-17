@@ -192,7 +192,7 @@ namespace SurvivorRyze
             {
                 if (Player.CountEnemiesInRange(1250) > 0 && Menu.Item("UsePotionOnlyIfEnemiesAreInRange").GetValue<bool>())
                 {
-                    if (!Player.HasBuff("RegenerationPotion") || !Player.HasBuff("FlaskOfCrystalWater") || !Player.HasBuff("ItemCrystalFlask"))
+                    if (!Player.HasBuff("RegenerationPotion") || !Player.HasBuff("FlaskOfCrystalWater") || !Player.HasBuff("ItemCrystalFlask") && Items.HasItem(2003))
                     {
                         HealthPot.Cast();
                     }
@@ -216,23 +216,23 @@ namespace SurvivorRyze
                     }
                 }
             }
-            var target = TargetSelector.GetTarget(HexGunBlade.Range, TargetSelector.DamageType.Magical);
+            var target = TargetSelector.GetTarget(600f, TargetSelector.DamageType.Magical);
 
             // If Target's not in Q Range or there's no target or target's invulnerable don't fuck with him
-            if (target == null || !target.IsValidTarget(HexGunBlade.Range) || target.IsInvulnerable)
+            if (target == null || !target.IsValidTarget(600f) || target.IsInvulnerable)
                 return;
 
-            if (Menu.Item("UseHexGunBlade").GetValue<bool>() && target.Health < Menu.Item("HexGunBladeAtHP").GetValue<Slider>().Value && HexGunBlade.IsOwned(Player) && HexGunBlade.IsReady())
+            if (Menu.Item("UseHexGunBlade").GetValue<bool>() && target.IsValidTarget(600) && target.HealthPercentage() < Menu.Item("HexGunBladeAtHP").GetValue<Slider>().Value)
             {
-                Items.UseItem(HexGunBlade.Id, target);
+                Items.UseItem(3146, target);
             }
-            if (Menu.Item("UseHexProtobelt").GetValue<bool>() && target.Health < Menu.Item("HexProtobeltAtHP").GetValue<Slider>().Value && HexProtobelt.IsInRange(target) && HexProtobelt.IsOwned(Player) && HexProtobelt.IsReady())
+            if (Menu.Item("UseHexProtobelt").GetValue<bool>() && target.IsValidTarget(300) && target.HealthPercentage() < Menu.Item("HexProtobeltAtHP").GetValue<Slider>().Value)
             {
-                Items.UseItem(HexProtobelt.Id, target.ServerPosition);
+                Items.UseItem(3152, target.Position);
             }
-            if (Menu.Item("UseHexGLP").GetValue<bool>() && target.Health < Menu.Item("HexGLPAtHP").GetValue<Slider>().Value && HexGLP.IsInRange(target) && HexGLP.IsOwned(Player) && HexGLP.IsReady())
+            if (Menu.Item("UseHexGLP").GetValue<bool>() && target.IsValidTarget(300) && target.HealthPercentage() < Menu.Item("HexGLPAtHP").GetValue<Slider>().Value)
             {
-                Items.UseItem(HexGLP.Id, target.ServerPosition);
+                Items.UseItem(3030, target.Position);
             }
         }
 
