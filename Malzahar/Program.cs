@@ -8,6 +8,7 @@ using LeagueSharp.Common;
 using LeagueSharp.Data;
 using SharpDX;
 using SPrediction;
+using SebbyLib;
 using Color = System.Drawing.Color;
 
 namespace SurvivorMalzahar
@@ -18,7 +19,7 @@ namespace SurvivorMalzahar
         private static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
 
         private static bool IsChanneling;
-        private static Orbwalking.Orbwalker Orbwalker;
+        private static SebbyLib.Orbwalking.Orbwalker Orbwalker;
         //Menu
         public static Menu Menu;
         //Spells
@@ -46,7 +47,7 @@ namespace SurvivorMalzahar
 
             Menu = new Menu("SurvivorMalzahar", "SurvivorMalzahar", true);
             var orbwalkerMenu = Menu.AddSubMenu(new Menu("Orbwalker", "Orbwalker"));
-            Orbwalker = new Orbwalking.Orbwalker(orbwalkerMenu);
+            Orbwalker = new SebbyLib.Orbwalking.Orbwalker(orbwalkerMenu);
             #region Combo/Harass/LaneClear/OneShot
             //Combo Menu
             var combo = new Menu("Combo", "Combo");
@@ -56,6 +57,7 @@ namespace SurvivorMalzahar
             combo.AddItem(new MenuItem("useW", "Use W").SetValue(true));
             combo.AddItem(new MenuItem("useE", "Use E").SetValue(true));
             combo.AddItem(new MenuItem("useR", "Use R").SetValue(true));
+            combo.AddItem(new MenuItem("DontAAInCombo", "Don't AA while doing Combo").SetValue(true));
             combo.AddItem(new MenuItem("useIgniteInCombo", "Use Ignite if Killable").SetValue(true));
             //Harass Menu
             var harass = new Menu("Harass", "Harass");
@@ -185,8 +187,16 @@ namespace SurvivorMalzahar
                 }
             }
             //Combo
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+            if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.Combo)
             {
+                if (Menu.Item("DontAAInCombo").GetValue<bool>())
+                {
+                    Orbwalker.SetAttack(false);
+                }
+                else
+                {
+                    Orbwalker.SetAttack(true);
+                }
                 Combo();
             }
             //Burst
@@ -195,7 +205,7 @@ namespace SurvivorMalzahar
                 Oneshot();
             }
             //Lane
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
+            if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.LaneClear)
             {
                 Lane();
             }
@@ -390,7 +400,7 @@ namespace SurvivorMalzahar
                 Orbwalker.SetMovement(true);
             }
 
-            Orbwalking.MoveTo(Game.CursorPos);
+            SebbyLib.Orbwalking.MoveTo(Game.CursorPos);
             var m = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (!m.IsValidTarget())
             {
@@ -415,8 +425,18 @@ namespace SurvivorMalzahar
             if (Player.ManaPercentage() < Menu.Item("laneclearEMinimumMana").GetValue<Slider>().Value || Player.ManaPercentage() < Menu.Item("laneclearQMinimumMana").GetValue<Slider>().Value || Player.ManaPercentage() < Menu.Item("laneclearWMinimumMana").GetValue<Slider>().Value)
                 return;
 
-            var allMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, E.Range);
-            var allMinionsW = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, 450f);
+            var allMinions = Cache.GetMinions(ObjectManager.Player.ServerPosition, E.Range, MinionTeam.Enemy);
+            var allMinionsW = Cache.GetMinions(ObjectManager.Player.ServerPosition, 450f, MinionTeam.Enemy);
+            if (allMinionsW.Count > 1)
+            {
+                foreach (var minion in allMinionsW)
+                {
+                    if (Orbwalker.InAutoAttackRange(minion) && minion.HasBuff("malzahare") && minion.Health < Player.GetAutoAttackDamage(minion))
+                    {
+                        Player.IssueOrder(GameObjectOrder.AttackUnit, minion);
+                    }
+                }
+            }
             if (allMinions.Count > Menu.Item("LaneClearEMinMinions").GetValue<Slider>().Value)
             {
                 if (Menu.Item("laneclearE").GetValue<bool>() && E.IsReady())

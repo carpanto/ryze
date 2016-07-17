@@ -65,6 +65,9 @@
     <Reference Include="LeagueSharp.Data">
       <HintPath>C:\Program Files (x86)\LeagueSharp\System\LeagueSharp.Data.dll</HintPath>
     </Reference>
+    <Reference Include="SebbyLib">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\LeagueSharp\System\SebbyLib.dll</HintPath>
+    </Reference>
     <Reference Include="SharpDX">
       <HintPath>C:\Program Files (x86)\LeagueSharp\System\SharpDX.dll</HintPath>
     </Reference>
