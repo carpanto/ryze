@@ -234,7 +234,7 @@ namespace SurvivorBrand
             {
                 if (!m.CanMove)
                 {
-                    Q.CastIfHitchanceEquals(m, HitChance.Immobile);
+                    Q.CastIfHitchanceEquals(m, HitChance.High);
                 }
                 else
                 {
@@ -255,28 +255,48 @@ namespace SurvivorBrand
 
             if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.Combo && !W.IsReady() && Player.ManaPercentage() > RManaC + Q.ManaCost)
             {
-                foreach (var enemy in HeroManager.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range)))
-                    if (enemy.HasBuff("stun") || enemy.IsStunned && Menu.Item("PrioritizeStunned").GetValue<bool>())
+                var enemystunned = HeroManager.Enemies.Find(enemy => enemy.IsValidTarget(Q.Range) && enemy.HasBuff("stun") || enemy.IsStunned && Menu.Item("PrioritizeStunned").GetValue<bool>());
+                    if (enemystunned != null)
                     {
-                        Q.CastIfHitchanceEquals(enemy, HitChance.Immobile);
+                        Orbwalker.ForceTarget(enemystunned);
+                        var prediction = Q.GetPrediction(enemystunned);
+                        if (prediction.Hitchance >= HitChance.High)
+                        {
+                            Q.Cast(prediction.CastPosition);
+                        }
                     }
                     else
                     {
-                        Q.CastIfHitchanceEquals(enemy, HitChance.High);
+                        Orbwalker.ForceTarget(null);
+                        var prediction = Q.GetPrediction(m);
+                        if (prediction.Hitchance >= HitChance.High)
+                        {
+                            Q.Cast(prediction.CastPosition);
+                        }
                     }
             }
 
             if (Player.Mana > RManaC + Q.ManaCost)
             {
-                foreach (var enemy in HeroManager.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range)))
-                    if (enemy.HasBuff("stun") || enemy.IsStunned && Menu.Item("PrioritizeStunned").GetValue<bool>())
+                var enemystunned = HeroManager.Enemies.Find(enemy => enemy.IsValidTarget(Q.Range) && enemy.HasBuff("stun") || enemy.IsStunned && Menu.Item("PrioritizeStunned").GetValue<bool>());
+                if (enemystunned != null)
+                {
+                    Orbwalker.ForceTarget(enemystunned);
+                    var prediction = Q.GetPrediction(enemystunned);
+                    if (prediction.Hitchance >= HitChance.High)
                     {
-                        Q.CastIfHitchanceEquals(enemy, HitChance.Immobile);
+                        Q.Cast(prediction.CastPosition);
                     }
-                    else
+                }
+                else
+                {
+                    Orbwalker.ForceTarget(null);
+                    var prediction = Q.GetPrediction(m);
+                    if (prediction.Hitchance >= HitChance.High)
                     {
-                        Q.CastIfHitchanceEquals(enemy, HitChance.High);
+                        Q.Cast(prediction.CastPosition);
                     }
+                }
             }
         }
 
@@ -300,40 +320,63 @@ namespace SurvivorBrand
             {
                 var Qdamage = Q.GetDamage(t);
                 var Wdamage = OktwCommon.GetKsDamage(t, W) + BonusDmg(t) + OktwCommon.GetEchoLudenDamage(t);
+                var prediction = W.GetPrediction(t);
                 if (Wdamage > t.Health)
                 {
                     if (!t.CanMove)
                     {
-                        W.CastIfHitchanceEquals(t, HitChance.Immobile);
+                        if (prediction.Hitchance >= HitChance.High)
+                        {
+                            W.Cast(prediction.CastPosition);
+                        }
                     }
                     else
                     {
-                        W.CastIfHitchanceEquals(t, HitChance.VeryHigh);
+                        if (prediction.Hitchance >= HitChance.High)
+                        {
+                            W.Cast(prediction.CastPosition);
+                        }
                     }
                 }
                 else if (Wdamage + Qdamage > t.Health && Player.ManaPercentage() > Q.ManaCost + E.ManaCost)
                 {
                     if (!t.CanMove)
                     {
-                        W.CastIfHitchanceEquals(t, HitChance.Immobile);
+                        if (prediction.Hitchance >= HitChance.High)
+                        {
+                            W.Cast(prediction.CastPosition);
+                        }
                     }
                     else
                     {
-                        W.CastIfHitchanceEquals(t, HitChance.VeryHigh);
+                        if (prediction.Hitchance >= HitChance.High)
+                        {
+                            W.Cast(prediction.CastPosition);
+                        }
                     }
                 }
 
                 if (Player.Mana > RManaC + W.ManaCost)
                 {
-                    foreach (var enemy in HeroManager.Enemies.Where(enemy => enemy.IsValidTarget(W.Range)))
-                        if (enemy.HasBuff("stun") || enemy.IsStunned && Menu.Item("PrioritizeStunned").GetValue<bool>())
+                    var enemystunned = HeroManager.Enemies.Find(enemy => enemy.IsValidTarget(W.Range) && enemy.HasBuff("stun") || enemy.IsStunned && Menu.Item("PrioritizeStunned").GetValue<bool>());
+                    if (enemystunned != null)
+                    {
+                        Orbwalker.ForceTarget(enemystunned);
+                        var predictionw = W.GetPrediction(enemystunned);
+                        if (predictionw.Hitchance >= HitChance.High)
                         {
-                            W.CastIfHitchanceEquals(enemy, HitChance.Immobile);
+                            W.Cast(predictionw.CastPosition);
                         }
-                        else
+                    }
+                    else
+                    {
+                        Orbwalker.ForceTarget(null);
+                        var predictionw = W.GetPrediction(t);
+                        if (predictionw.Hitchance >= HitChance.High)
                         {
-                            W.CastIfHitchanceEquals(enemy, HitChance.High);
+                            W.Cast(predictionw.CastPosition);
                         }
+                    }
                 }
             }
         }
@@ -347,15 +390,17 @@ namespace SurvivorBrand
                 // If in Combo Mode
                 if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.Combo && Player.Mana > RManaC + E.ManaCost)
                 {
-                    foreach (var enemy in HeroManager.Enemies.Where(enemy => enemy.IsValidTarget(E.Range)))
-                        if (enemy.HasBuff("stun") || enemy.IsStunned && Menu.Item("PrioritizeStunned").GetValue<bool>())
-                        {
-                            E.CastOnUnit(enemy);
-                        }
-                        else
-                        {
-                            E.CastOnUnit(enemy);
-                        }
+                    var enemystunned = HeroManager.Enemies.Find(enemy => enemy.IsValidTarget(E.Range) && enemy.HasBuff("stun") || enemy.IsStunned && Menu.Item("PrioritizeStunned").GetValue<bool>());
+                    if (enemystunned != null)
+                    {
+                        Orbwalker.ForceTarget(enemystunned);
+                        E.CastOnUnit(enemystunned);
+                    }
+                    else
+                    {
+                        Orbwalker.ForceTarget(null);
+                        E.CastOnUnit(t);
+                    }
                 }
                 else
                 {
@@ -371,11 +416,19 @@ namespace SurvivorBrand
                         E.CastOnUnit(t);
                         if (!t.CanMove)
                         {
-                            W.CastIfHitchanceEquals(t, HitChance.Immobile);
+                            var predictionw = W.GetPrediction(t);
+                            if (predictionw.Hitchance >= HitChance.High)
+                            {
+                                W.Cast(predictionw.CastPosition);
+                            }
                         }
                         else
                         {
-                            W.CastIfHitchanceEquals(t, HitChance.VeryHigh);
+                            var predictionw = W.GetPrediction(t);
+                            if (predictionw.Hitchance >= HitChance.High)
+                            {
+                                W.Cast(predictionw.CastPosition);
+                            }
                         }
                     }
                 }
@@ -525,11 +578,19 @@ namespace SurvivorBrand
                 {
                     if (!t.CanMove)
                     {
-                        W.CastIfHitchanceEquals(t, HitChance.Immobile);
+                        var predictionw = W.GetPrediction(t);
+                        if (predictionw.Hitchance >= HitChance.High)
+                        {
+                            W.Cast(predictionw.CastPosition);
+                        }
                     }
                     else
                     {
-                        W.CastIfHitchanceEquals(t, HitChance.VeryHigh);
+                        var predictionw = W.GetPrediction(t);
+                        if (predictionw.Hitchance >= HitChance.High)
+                        {
+                            W.Cast(predictionw.CastPosition);
+                        }
                     }
                 }
             }
@@ -539,11 +600,19 @@ namespace SurvivorBrand
                 {
                     if (!t.CanMove)
                     {
-                        Q.CastIfHitchanceEquals(t, HitChance.Immobile);
+                        var prediction = Q.GetPrediction(t);
+                        if (prediction.Hitchance >= HitChance.High)
+                        {
+                            W.Cast(prediction.CastPosition);
+                        }
                     }
                     else
                     {
-                        Q.CastIfHitchanceEquals(t, HitChance.VeryHigh);
+                        var prediction = Q.GetPrediction(t);
+                        if (prediction.Hitchance >= HitChance.High)
+                        {
+                            W.Cast(prediction.CastPosition);
+                        }
                     }
                 }
             }
