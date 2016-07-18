@@ -425,16 +425,18 @@ namespace SurvivorMalzahar
             if (Player.ManaPercentage() < Menu.Item("laneclearEMinimumMana").GetValue<Slider>().Value || Player.ManaPercentage() < Menu.Item("laneclearQMinimumMana").GetValue<Slider>().Value || Player.ManaPercentage() < Menu.Item("laneclearWMinimumMana").GetValue<Slider>().Value)
                 return;
 
+            var infectedminion = MinionManager.GetMinions(Player.Position, E.Range).Find(x => x.HasBuff("malzahare") && x.IsValidTarget(E.Range));
             var allMinions = Cache.GetMinions(ObjectManager.Player.ServerPosition, E.Range, MinionTeam.Enemy);
             var allMinionsW = Cache.GetMinions(ObjectManager.Player.ServerPosition, 450f, MinionTeam.Enemy);
             if (allMinionsW.Count > 1)
             {
-                foreach (var minion in allMinionsW)
+                if (infectedminion != null)
                 {
-                    if (Orbwalker.InAutoAttackRange(minion) && minion.HasBuff("malzahare") && minion.Health < Player.GetAutoAttackDamage(minion))
-                    {
-                        Player.IssueOrder(GameObjectOrder.AttackUnit, minion);
-                    }
+                    Orbwalker.ForceTarget(infectedminion);
+                }
+                else
+                {
+                    Orbwalker.ForceTarget(null);
                 }
             }
             if (allMinions.Count > Menu.Item("LaneClearEMinMinions").GetValue<Slider>().Value)
