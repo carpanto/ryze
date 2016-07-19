@@ -174,6 +174,7 @@ namespace SurvivorRyze
             #region Subscriptions
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += Game_OnUpdate;
+            Obj_AI_Base.OnLevelUp += Obj_AI_Base_OnLevelUp;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             #endregion
