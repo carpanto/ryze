@@ -38,7 +38,7 @@ namespace SurvivorMalzahar
 
             igniteSlot = Player.GetSpellSlot("summonerdot");
             Q = new Spell(SpellSlot.Q, 900f);
-            W = new Spell(SpellSlot.W, 650f);
+            W = new Spell(SpellSlot.W, 760f);
             E = new Spell(SpellSlot.E, 650f);
             R = new Spell(SpellSlot.R, 700f);
 
