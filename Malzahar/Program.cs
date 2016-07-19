@@ -104,8 +104,8 @@ namespace SurvivorMalzahar
             var drawFill =
                 new MenuItem("SurvivorMalzahar.DrawColour", "Fill Color", true).SetValue(
                     new Circle(true, Color.FromArgb(204, 255, 0, 1)));
-            Menu.SubMenu("HPBarDrawings").AddItem(drawFill);
-            Menu.SubMenu("HPBarDrawings").AddItem(dmgAfterShave);
+            DrawingMenu.AddItem(drawFill);
+            DrawingMenu.AddItem(dmgAfterShave);
             DrawDamage.DamageToUnit = CalculateDamage;
             DrawDamage.Enabled = dmgAfterShave.GetValue<bool>();
             DrawDamage.Fill = drawFill.GetValue<Circle>().Active;
@@ -349,7 +349,6 @@ namespace SurvivorMalzahar
             }
             if (Player.Mana > E.ManaCost + W.ManaCost + R.ManaCost)
             {
-                if (useE && E.IsReady() && E.IsInRange(m)) E.CastOnUnit(m);
                 if (useQ && Q.IsReady() && Player.Mana > Q.ManaCost && Q.IsInRange(m))
                 {
                     if (pred.HitChance >= HitChance.High)
@@ -358,7 +357,8 @@ namespace SurvivorMalzahar
                     }
                 }
                 if (useW && W.IsReady()) W.Cast(m);
-                if (useR && R.IsReady() && m != null && E.IsInRange(m)) R.CastOnUnit(m);
+                if (useE && E.IsReady() && E.IsInRange(m)) E.CastOnUnit(m);
+                if (useR && R.IsReady() && !W.IsReady() && !E.IsReady() && m != null && E.IsInRange(m)) R.CastOnUnit(m);
             }
             else
             {
