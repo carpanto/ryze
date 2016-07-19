@@ -38,6 +38,7 @@ namespace SurvivorRyze
         private static Menu Menu;
         private static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
         private const string ChampionName = "Ryze";
+        private static int lvl1, lvl2, lvl3, lvl4;
         #endregion
 
         public static void Main(string[] args)
@@ -85,6 +86,7 @@ namespace SurvivorRyze
             TargetSelector.AddToMenu(TargetSelectorMenu);
 
             Menu ComboMenu = Menu.AddSubMenu(new Menu("Combo", "Combo"));
+            ComboMenu.AddItem(new MenuItem("ComboMode", "Combo Mode:").SetValue(new StringList(new[] {"Burst", "Survivor Mode (Shield)"})).SetTooltip("Survivor Mode - Will try to stack Shield 99% of the time."));
             ComboMenu.AddItem(new MenuItem("CUseQ", "Cast Q").SetValue(true));
             ComboMenu.AddItem(new MenuItem("CUseW", "Cast W").SetValue(true));
             ComboMenu.AddItem(new MenuItem("CUseE", "Cast E").SetValue(true));
@@ -128,7 +130,15 @@ namespace SurvivorRyze
             MiscMenu.AddItem(new MenuItem("WGapCloser", "Use W on Enemy GapCloser (Irelia's Q)").SetValue(true));
             MiscMenu.AddItem(new MenuItem("ChaseWithR", "Use R to Chase (Being Added)"));
             MiscMenu.AddItem(new MenuItem("EscapeWithR", "Use R to Escape (Being Added)"));
-            
+
+            Menu AutoLevelerMenu = Menu.AddSubMenu(new Menu("AutoLeveler Menu", "AutoLevelerMenu"));
+            AutoLevelerMenu.AddItem(new MenuItem("AutoLevelUp", "AutoLevel Up Spells?").SetValue(true));
+            AutoLevelerMenu.AddItem(new MenuItem("AutoLevelUp1", "First: ").SetValue(new StringList(new[] { "Q", "W", "E", "R" }, 3)));
+            AutoLevelerMenu.AddItem(new MenuItem("AutoLevelUp2", "Second: ").SetValue(new StringList(new[] { "Q", "W", "E", "R" }, 0)));
+            AutoLevelerMenu.AddItem(new MenuItem("AutoLevelUp3", "Third: ").SetValue(new StringList(new[] { "Q", "W", "E", "R" }, 2)));
+            AutoLevelerMenu.AddItem(new MenuItem("AutoLevelUp4", "Fourth: ").SetValue(new StringList(new[] { "Q", "W", "E", "R" }, 1)));
+            AutoLevelerMenu.AddItem(new MenuItem("AutoLvlStartFrom", "AutoLeveler Start from Level: ").SetValue(new Slider(2, 6, 1)));
+
             Menu DrawingMenu = Menu.AddSubMenu(new Menu("Drawing", "Drawing"));
             DrawingMenu.AddItem(new MenuItem("DrawQ", "Draw Q Range").SetValue(true));
             DrawingMenu.AddItem(new MenuItem("DrawWE", "Draw W/E Range").SetValue(true));
@@ -183,6 +193,43 @@ namespace SurvivorRyze
         private static void AABlock()
         {
             Orbwalker.SetAttack(!Menu.Item("CBlockAA").GetValue<bool>());
+        }
+
+        private static void Obj_AI_Base_OnLevelUp(Obj_AI_Base sender, EventArgs args)
+        {
+            if (!sender.IsMe || !Menu.Item("AutoLevelUp").GetValue<bool>() || ObjectManager.Player.Level < Menu.Item("AutoLvlStartFrom").GetValue<Slider>().Value)
+                return;
+            if (lvl2 == lvl3 || lvl2 == lvl4 || lvl3 == lvl4)
+                return;
+            int delay = 700;
+            Utility.DelayAction.Add(delay, () => LevelUp(lvl1));
+            Utility.DelayAction.Add(delay + 50, () => LevelUp(lvl2));
+            Utility.DelayAction.Add(delay + 100, () => LevelUp(lvl3));
+            Utility.DelayAction.Add(delay + 150, () => LevelUp(lvl4));
+        }
+
+        private static void LevelUp(int indx)
+        {
+            if (ObjectManager.Player.Level < 4)
+            {
+                if (indx == 0 && ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Q).Level == 0)
+                    ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.Q);
+                if (indx == 1 && ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Level == 0)
+                    ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.W);
+                if (indx == 2 && ObjectManager.Player.Spellbook.GetSpell(SpellSlot.E).Level == 0)
+                    ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.E);
+            }
+            else
+            {
+                if (indx == 0)
+                    ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.Q);
+                if (indx == 1)
+                    ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.W);
+                if (indx == 2)
+                    ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.E);
+                if (indx == 3)
+                    ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.R);
+            }
         }
 
         private static void ItemsChecks()
@@ -271,6 +318,15 @@ namespace SurvivorRyze
                         LaneClear();
                     break;
             }
+
+            //AutoLeveler
+            if (Menu.Item("AutoLevelUp").GetValue<bool>())
+            {
+                lvl1 = Menu.Item("AutoLevelUp1").GetValue<StringList>().SelectedIndex;
+                lvl2 = Menu.Item("AutoLevelUp2").GetValue<StringList>().SelectedIndex;
+                lvl3 = Menu.Item("AutoLevelUp3").GetValue<StringList>().SelectedIndex;
+                lvl4 = Menu.Item("AutoLevelUp4").GetValue<StringList>().SelectedIndex;
+            }
         }
 
         private static void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -305,28 +361,63 @@ namespace SurvivorRyze
             var ksW = Menu.Item("KSW").GetValue<bool>();
             var ksE = Menu.Item("KSE").GetValue<bool>();
 
-            var predpos = Q.GetPrediction(target);
+            #region SebbyPrediction
+            //SebbyPrediction
+            SebbyLib.Prediction.SkillshotType PredSkillShotType = SebbyLib.Prediction.SkillshotType.SkillshotLine;
+            bool Aoe10 = false;
+
+            var predictioninput = new SebbyLib.Prediction.PredictionInput
+            {
+                Aoe = Aoe10,
+                Collision = Q.Collision,
+                Speed = Q.Speed,
+                Delay = Q.Delay,
+                Range = Q.Range,
+                From = Player.ServerPosition,
+                Radius = Q.Width,
+                Unit = target,
+                Type = PredSkillShotType
+            };
+            //SebbyPrediction END
+            #endregion
+            // Input = 'var predictioninput'
+            var predpos = SebbyLib.Prediction.Prediction.GetPrediction(predictioninput);
 
             // KS
-            if (ksQ && Q.GetDamage(target) > target.Health && target.IsValidTarget(Q.Range))
+            if (ksQ && SebbyLib.OktwCommon.GetKsDamage(target, Q) > target.Health && target.IsValidTarget(Q.Range))
             {
-                if (target.CanMove && predpos.Hitchance >= HitChance.High)
+                if (target.CanMove && predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
                 {
                     Q.Cast(predpos.CastPosition);
                 }
                 else if (!target.CanMove)
                 {
-                    Q.Cast(target);
+                    Q.Cast(target.Position);
                 }
             }
-            if (ksW && W.GetDamage(target) > target.Health && target.IsValidTarget(W.Range))
+            if (ksW && SebbyLib.OktwCommon.GetKsDamage(target, W) > target.Health && target.IsValidTarget(W.Range))
             {
                 W.CastOnUnit(target);
             }
-            if (ksE && W.GetDamage(target) > target.Health && target.IsValidTarget(E.Range))
+            if (ksE && SebbyLib.OktwCommon.GetKsDamage(target, E) > target.Health && target.IsValidTarget(E.Range))
             {
                 E.CastOnUnit(target);
             }
+        }
+
+        public static bool RyzeCharge0()
+        {
+            return Player.HasBuff("ryzeqiconnocharge");
+        }
+
+        public static bool RyzeCharge1()
+        {
+            return Player.HasBuff("ryzeqiconhalfcharge");
+        }
+
+        public static bool RyzeCharge2()
+        {
+            return Player.HasBuff("ryzeqiconfullcharge");
         }
 
         private static void Combo()
@@ -337,106 +428,229 @@ namespace SurvivorRyze
             var CUseE = Menu.Item("CUseE").GetValue<bool>();
             // Checks
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-            var predpos = Q.GetPrediction(target);
+            #region SebbyPrediction
+            //SebbyPrediction
+            SebbyLib.Prediction.SkillshotType PredSkillShotType = SebbyLib.Prediction.SkillshotType.SkillshotLine;
+            bool Aoe10 = false;
+
+            var predictioninput = new SebbyLib.Prediction.PredictionInput
+            {
+                Aoe = Aoe10,
+                Collision = Q.Collision,
+                Speed = Q.Speed,
+                Delay = Q.Delay,
+                Range = Q.Range,
+                From = Player.ServerPosition,
+                Radius = Q.Width,
+                Unit = target,
+                Type = PredSkillShotType
+            };
+            //SebbyPrediction END
+            #endregion
+            // Input = 'var predictioninput'
+            var predpos = SebbyLib.Prediction.Prediction.GetPrediction(predictioninput);
 
             // If Target's not in Q Range or there's no target or target's invulnerable don't fuck with him
             if (target == null || !target.IsValidTarget(Q.Range) || target.IsInvulnerable)
                 return;
-            // Execute the Lad
-            if (Menu.Item("CUseIgnite").GetValue<bool>() && target.Health < Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite))
+            switch (Menu.Item("ComboMode").GetValue<StringList>().SelectedIndex)
             {
-                Player.Spellbook.CastSpell(IgniteSlot, target);
-            }
-            if (Menu.Item("Combo2TimesMana").GetValue<bool>())
-            {
-                if (Player.Mana >= 2 * (Q.Instance.ManaCost + W.Instance.ManaCost + E.Instance.ManaCost))
-                {
-                    if (CUseQ && CUseW && CUseE && target.IsValidTarget(Q.Range))
+                case 0:
+                    #region Burst Mode
+                    // Execute the Lad
+                    if (Menu.Item("CUseIgnite").GetValue<bool>() && target.Health < SebbyLib.OktwCommon.GetIncomingDamage(target) + Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite))
                     {
-                        if (target.CanMove && predpos.Hitchance >= HitChance.High)
+                        Player.Spellbook.CastSpell(IgniteSlot, target);
+                    }
+                    if (Menu.Item("Combo2TimesMana").GetValue<bool>())
+                    {
+                        if (Player.Mana >= 2 * (Q.Instance.ManaCost + W.Instance.ManaCost + E.Instance.ManaCost))
                         {
-                            Q.Cast(predpos.CastPosition);
+                            if (CUseQ && CUseW && CUseE && target.IsValidTarget(Q.Range))
+                            {
+                                if (target.CanMove && predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                                {
+                                    Q.Cast(predpos.CastPosition);
+                                }
+                                else if (!target.CanMove)
+                                {
+                                    Q.Cast(target);
+                                }
+                                if (target.IsValidTarget(W.Range) && W.IsReady())
+                                {
+                                    W.CastOnUnit(target);
+                                }
+                                if (target.IsValidTarget(E.Range) && E.IsReady())
+                                {
+                                    E.CastOnUnit(target);
+                                }
+                            }
+                            if (CUseW && target.IsValidTarget(W.Range) && W.IsReady())
+                            {
+                                W.CastOnUnit(target);
+                            }
+                            if (CUseQ && target.IsValidTarget(Q.Range))
+                            {
+                                if (target.CanMove && predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                                {
+                                    Q.Cast(predpos.CastPosition);
+                                }
+                                else if (!target.CanMove)
+                                {
+                                    Q.Cast(target);
+                                }
+                            }
+                            if (CUseE && target.IsValidTarget(E.Range) && E.IsReady())
+                            {
+                                E.CastOnUnit(target);
+                            }
                         }
-                        else if (!target.CanMove)
+                    }
+                    else
+                    {
+                        if (Player.Mana >= Q.Instance.ManaCost + W.Instance.ManaCost + E.Instance.ManaCost)
                         {
-                            Q.Cast(target);
+                            if (CUseW && target.IsValidTarget(W.Range) && W.IsReady())
+                            {
+                                W.CastOnUnit(target);
+                            }
+                            if (CUseQ && target.IsValidTarget(Q.Range))
+                            {
+                                if (target.CanMove && predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                                {
+                                    Q.Cast(predpos.CastPosition);
+                                }
+                                else if (!target.CanMove)
+                                {
+                                    Q.Cast(target);
+                                }
+                            }
+                            if (CUseE && target.IsValidTarget(E.Range) && E.IsReady())
+                            {
+                                E.CastOnUnit(target);
+                            }
                         }
+                        else
+                        {
+                            if (CUseW && target.IsValidTarget(W.Range) && W.IsReady())
+                            {
+                                W.CastOnUnit(target);
+                            }
+                            if (CUseQ && target.IsValidTarget(Q.Range))
+                            {
+                                if (target.CanMove && predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                                {
+                                    Q.Cast(predpos.CastPosition);
+                                }
+                                else if (!target.CanMove)
+                                {
+                                    Q.Cast(target);
+                                }
+                            }
+                            if (CUseE && target.IsValidTarget(E.Range) && E.IsReady())
+                            {
+                                E.CastOnUnit(target);
+                            }
+                        }
+                    }
+                    #endregion
+                    break;
+
+                case 1:
+                    #region SurvivorMode
+                    if (Q.Level >= 1 && W.Level >= 1 && E.Level >= 1)
+                    {
+                        if (!target.IsValidTarget(W.Range - 15f) && Q.IsReady())
+                        {
+                            if (target.CanMove && predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                            {
+                                Q.Cast(predpos.CastPosition);
+                            }
+                            else if (!target.CanMove)
+                            {
+                                Q.Cast(target);
+                            }
+                        }
+                        // Try having Full Charge if either W or E spells are ready... :pokemon:
+                        if (RyzeCharge1() && Q.IsReady() && (W.IsReady() || E.IsReady()))
+                        {
+                            if (E.IsReady())
+                            {
+                                E.Cast(target);
+                            }
+                            if (W.IsReady())
+                            {
+                                W.Cast(target);
+                            }
+                        }
+                        // Rest in Piece XDDD
+                        if (RyzeCharge1() && !E.IsReady() && !W.IsReady())
+                        {
+                            if (target.CanMove && predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                            {
+                                Q.Cast(predpos.CastPosition);
+                            }
+                            else if (!target.CanMove)
+                            {
+                                Q.Cast(target);
+                            }
+                        }
+
+                        if (RyzeCharge0() && !E.IsReady() && !W.IsReady())
+                        {
+                            if (target.CanMove && predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                            {
+                                Q.Cast(predpos.CastPosition);
+                            }
+                            else if (!target.CanMove)
+                            {
+                                Q.Cast(target);
+                            }
+                        }
+
+                        if (!RyzeCharge2())
+                        {
+                            E.Cast(target);
+                            W.Cast(target);
+                        }
+                        else
+                        {
+                            if (target.CanMove && predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                            {
+                                Q.Cast(predpos.CastPosition);
+                            }
+                            else if (!target.CanMove)
+                            {
+                                Q.Cast(target);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (target.IsValidTarget(Q.Range) && Q.IsReady())
+                        {
+                            if (target.CanMove && predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                            {
+                                Q.Cast(predpos.CastPosition);
+                            }
+                            else if (!target.CanMove)
+                            {
+                                Q.Cast(target);
+                            }
+                        }
+
                         if (target.IsValidTarget(W.Range) && W.IsReady())
                         {
-                            W.CastOnUnit(target);
+                            W.Cast(target);
                         }
+
                         if (target.IsValidTarget(E.Range) && E.IsReady())
                         {
-                            E.CastOnUnit(target);
+                            E.Cast(target);
                         }
                     }
-                    if (CUseW && target.IsValidTarget(W.Range) && W.IsReady())
-                    {
-                        W.CastOnUnit(target);
-                    }
-                    if (CUseQ && target.IsValidTarget(Q.Range))
-                    {
-                        if (target.CanMove && predpos.Hitchance >= HitChance.High)
-                        {
-                            Q.Cast(predpos.CastPosition);
-                        }
-                        else if (!target.CanMove)
-                        {
-                            Q.Cast(target);
-                        }
-                    }
-                    if (CUseE && target.IsValidTarget(E.Range) && E.IsReady())
-                    {
-                        E.CastOnUnit(target);
-                    }
-                }
-            }
-            else
-            {
-                if (Player.Mana >= Q.Instance.ManaCost + W.Instance.ManaCost + E.Instance.ManaCost)
-                {
-                    if (CUseW && target.IsValidTarget(W.Range) && W.IsReady())
-                    {
-                        W.CastOnUnit(target);
-                    }
-                    if (CUseQ && target.IsValidTarget(Q.Range))
-                    {
-                        if (target.CanMove && predpos.Hitchance >= HitChance.High)
-                        {
-                            Q.Cast(predpos.CastPosition);
-                        }
-                        else if (!target.CanMove)
-                        {
-                            Q.Cast(target);
-                        }
-                    }
-                    if (CUseE && target.IsValidTarget(E.Range) && E.IsReady())
-                    {
-                        E.CastOnUnit(target);
-                    }
-                }
-                else
-                {
-                    if (CUseW && target.IsValidTarget(W.Range) && W.IsReady())
-                    {
-                        W.CastOnUnit(target);
-                    }
-                    if (CUseQ && target.IsValidTarget(Q.Range))
-                    {
-                        if (target.CanMove && predpos.Hitchance >= HitChance.High)
-                        {
-                            Q.Cast(predpos.CastPosition);
-                        }
-                        else if (!target.CanMove)
-                        {
-                            Q.Cast(target);
-                        }
-                    }
-                    if (CUseE && target.IsValidTarget(E.Range) && E.IsReady())
-                    {
-                        E.CastOnUnit(target);
-                    }
-                }
+                    #endregion
+                    break;
             }
         }
 
@@ -448,7 +662,27 @@ namespace SurvivorRyze
             var HarassUseE = Menu.Item("HarassE").GetValue<bool>();
             // Checks
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-            var predpos = Q.GetPrediction(target);
+            #region SebbyPrediction
+            //SebbyPrediction
+            SebbyLib.Prediction.SkillshotType PredSkillShotType = SebbyLib.Prediction.SkillshotType.SkillshotLine;
+            bool Aoe10 = false;
+
+            var predictioninput = new SebbyLib.Prediction.PredictionInput
+            {
+                Aoe = Aoe10,
+                Collision = Q.Collision,
+                Speed = Q.Speed,
+                Delay = Q.Delay,
+                Range = Q.Range,
+                From = Player.ServerPosition,
+                Radius = Q.Width,
+                Unit = target,
+                Type = PredSkillShotType
+            };
+            //SebbyPrediction END
+            #endregion
+            // Input = 'var predictioninput'
+            var predpos = SebbyLib.Prediction.Prediction.GetPrediction(predictioninput);
 
             // If Target's not in Q Range or there's no target or target's invulnerable don't fuck with him
             if (target == null || !target.IsValidTarget(Q.Range) || target.IsInvulnerable)
@@ -462,7 +696,7 @@ namespace SurvivorRyze
                 }
                 if (HarassUseQ && target.IsValidTarget(Q.Range))
                 {
-                    if (target.CanMove && predpos.Hitchance >= HitChance.High)
+                    if (target.CanMove && predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
                     {
                         Q.Cast(predpos.CastPosition);
                     }
