@@ -16,17 +16,7 @@ namespace Simple
         private static Orbwalking.Orbwalker Orbwalker;
         private static void Main(string[] args)
         {
-            CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
-        }
-
-        private static void Game_OnGameLoad(EventArgs args)
-        {
-            Drawing.OnDraw += OnDraw;
-        }
-
-        private static void OnDraw(EventArgs args)
-        {
-                Render.Circle.DrawCircle(Player.Position, Player.AttackRange, System.Drawing.Color.AliceBlue);
+            CustomEvents.Game.OnGameLoad += eventArgs => Drawing.OnDraw += args1 => Render.Circle.DrawCircle(Player.Position, Player.AttackRange, Color.AliceBlue);
         }
     }
 }
