@@ -135,7 +135,7 @@ namespace SurvivorMalzahar
         {
             if (Menu.Item("drawQ").GetValue<bool>())
             {
-                Render.Circle.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.DarkRed, 3);               
+                Render.Circle.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.DarkRed, 3);
             }
             if (Menu.Item("drawW").GetValue<bool>())
             {
@@ -170,19 +170,39 @@ namespace SurvivorMalzahar
             }
             if (E.IsReady() && Menu.Item("ksE").GetValue<bool>())
             {
-                foreach (var h in HeroManager.Enemies.Where(h => h.IsValidTarget(E.Range) && h.Health < Player.GetSpellDamage(h, SpellSlot.E)))
+                foreach (var h in HeroManager.Enemies.Where(h => h.IsValidTarget(E.Range) && h.Health < SebbyLib.OktwCommon.GetKsDamage(h, E) + SebbyLib.OktwCommon.GetEchoLudenDamage(h)))
                 {
                     E.Cast(h);
                 }
             }
             if (Q.IsReady() && Menu.Item("ksQ").GetValue<bool>())
             {
-                foreach (var h in HeroManager.Enemies.Where(h => h.IsValidTarget(Q.Range) && h.Health < Player.GetSpellDamage(h, SpellSlot.Q)))
+                foreach (var h in HeroManager.Enemies.Where(h => h.IsValidTarget(Q.Range) && h.Health < SebbyLib.OktwCommon.GetKsDamage(h, Q) + SebbyLib.OktwCommon.GetEchoLudenDamage(h)))
                 {
-                    var pred = Q.GetSPrediction(h);
-                    if (pred.HitChance >= HitChance.High)
+                    #region SebbyPrediction
+                    //SebbyPrediction
+                    SebbyLib.Prediction.SkillshotType PredSkillShotType = SebbyLib.Prediction.SkillshotType.SkillshotCircle;
+                    bool Aoe10 = true;
+
+                    var predictioninput = new SebbyLib.Prediction.PredictionInput
                     {
-                        Q.Cast(pred.CastPosition);
+                        Aoe = Aoe10,
+                        Collision = Q.Collision,
+                        Speed = Q.Speed,
+                        Delay = Q.Delay,
+                        Range = Q.Range,
+                        From = Player.ServerPosition,
+                        Radius = Q.Width,
+                        Unit = h,
+                        Type = PredSkillShotType
+                    };
+                    //SebbyPrediction END
+                    #endregion
+                    // Input = 'var predictioninput'
+                    var predpos = SebbyLib.Prediction.Prediction.GetPrediction(predictioninput);
+                    if (predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                    {
+                        Q.Cast(predpos.CastPosition);
                     }
                 }
             }
@@ -321,13 +341,35 @@ namespace SurvivorMalzahar
             if (Player.ManaPercentage() < Menu.Item("autoharassminimumMana").GetValue<Slider>().Value)
                 return;
             var m = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
-            var pred = Q.GetSPrediction(m);
+            if (m == null || !m.IsValidTarget())
+                return;
+            #region SebbyPrediction
+            //SebbyPrediction
+            SebbyLib.Prediction.SkillshotType PredSkillShotType = SebbyLib.Prediction.SkillshotType.SkillshotCircle;
+            bool Aoe10 = true;
+
+            var predictioninput = new SebbyLib.Prediction.PredictionInput
+            {
+                Aoe = Aoe10,
+                Collision = Q.Collision,
+                Speed = Q.Speed,
+                Delay = Q.Delay,
+                Range = Q.Range,
+                From = Player.ServerPosition,
+                Radius = Q.Width,
+                Unit = m,
+                Type = PredSkillShotType
+            };
+            //SebbyPrediction END
+            #endregion
+            // Input = 'var predictioninput'
+            var predpos = SebbyLib.Prediction.Prediction.GetPrediction(predictioninput);
             if (m != null && Menu.Item("autoharass").GetValue<bool>())
                     E.CastOnUnit(m);
             if (m != null && Menu.Item("autoharassuseQ").GetValue<bool>())
-                if (pred.HitChance >= HitChance.High)
+                if (predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
                 {
-                    Q.Cast(pred.CastPosition);
+                    Q.Cast(predpos.CastPosition);
                 }
         }
         private static bool HasRBuff()
@@ -342,18 +384,40 @@ namespace SurvivorMalzahar
             var useE = (Menu.Item("useE").GetValue<bool>());
             var useR = (Menu.Item("useR").GetValue<bool>());
             var m = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-            var pred = Q.GetSPrediction(m);
-            if (!m.IsValidTarget())
-            {
+            if (m == null || !m.IsValidTarget())
                 return;
-            }
+            #region SebbyPrediction
+            //SebbyPrediction
+            SebbyLib.Prediction.SkillshotType PredSkillShotType = SebbyLib.Prediction.SkillshotType.SkillshotCircle;
+            bool Aoe10 = true;
+
+            var predictioninput = new SebbyLib.Prediction.PredictionInput
+            {
+                Aoe = Aoe10,
+                Collision = Q.Collision,
+                Speed = Q.Speed,
+                Delay = Q.Delay,
+                Range = Q.Range,
+                From = Player.ServerPosition,
+                Radius = Q.Width,
+                Unit = m,
+                Type = PredSkillShotType
+            };
+            //SebbyPrediction END
+            #endregion
+            // Input = 'var predictioninput'
+            var predpos = SebbyLib.Prediction.Prediction.GetPrediction(predictioninput);
             if (Player.Mana > E.ManaCost + W.ManaCost + R.ManaCost)
             {
                 if (useQ && Q.IsReady() && Player.Mana > Q.ManaCost && Q.IsInRange(m))
                 {
-                    if (pred.HitChance >= HitChance.High)
+                    if (m.CanMove && predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
                     {
-                        Q.Cast(pred.CastPosition);
+                        Q.Cast(predpos.CastPosition);
+                    }
+                    else if (!m.CanMove)
+                    {
+                        Q.Cast(m.Position);
                     }
                 }
                 if (useW && W.IsReady()) W.Cast(m);
@@ -365,9 +429,13 @@ namespace SurvivorMalzahar
                 if (useE && E.IsReady() && E.IsInRange(m)) E.CastOnUnit(m);
                 if (useQ && Q.IsReady() && Player.Mana > Q.ManaCost && Q.IsInRange(m))
                 {
-                    if (pred.HitChance >= HitChance.High)
+                    if (m.CanMove && predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
                     {
-                        Q.Cast(pred.CastPosition);
+                        Q.Cast(predpos.CastPosition);
+                    }
+                    else if (!m.CanMove)
+                    {
+                        Q.Cast(m.Position);
                     }
                 }
                 if (useW && W.IsReady() && Player.Mana > W.ManaCost && W.IsInRange(m)) W.Cast(m);
@@ -406,12 +474,37 @@ namespace SurvivorMalzahar
             {
                 return;
             }
-            var pred = Q.GetSPrediction(m);
+            #region SebbyPrediction
+            //SebbyPrediction
+            SebbyLib.Prediction.SkillshotType PredSkillShotType = SebbyLib.Prediction.SkillshotType.SkillshotCircle;
+            bool Aoe10 = true;
+
+            var predictioninput = new SebbyLib.Prediction.PredictionInput
+            {
+                Aoe = Aoe10,
+                Collision = Q.Collision,
+                Speed = Q.Speed,
+                Delay = Q.Delay,
+                Range = Q.Range,
+                From = Player.ServerPosition,
+                Radius = Q.Width,
+                Unit = m,
+                Type = PredSkillShotType
+            };
+            //SebbyPrediction END
+            #endregion
+            // Input = 'var predictioninput'
+            var predpos = SebbyLib.Prediction.Prediction.GetPrediction(predictioninput);
+            // var pred = Q.GetSPrediction(m);
                 if (Q.IsReady() && Q.IsInRange(m))
                 {
-                    if (pred.HitChance >= HitChance.High)
+                    if (m.CanMove && predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
                     {
-                        Q.Cast(pred.CastPosition);
+                        Q.Cast(predpos.CastPosition);
+                    }
+                    else if (!m.CanMove)
+                    {
+                        Q.Cast(m.Position);
                     }
                 }
                 if (E.IsReady() && E.IsInRange(m)) E.CastOnUnit(m);
@@ -426,11 +519,13 @@ namespace SurvivorMalzahar
                 return;
 
             var infectedminion = MinionManager.GetMinions(Player.Position, E.Range).Find(x => x.HasBuff("malzahare") && x.IsValidTarget(E.Range));
-            var allMinions = Cache.GetMinions(ObjectManager.Player.ServerPosition, E.Range, MinionTeam.Enemy);
-            var allMinionsW = Cache.GetMinions(ObjectManager.Player.ServerPosition, 450f, MinionTeam.Enemy);
+            //var allMinions = Cache.GetMinions(ObjectManager.Player.ServerPosition, E.Range, MinionTeam.Enemy);
+            //var allMinionsW = Cache.GetMinions(ObjectManager.Player.ServerPosition, 450f, MinionTeam.Enemy);
+            var allMinions = MinionManager.GetMinions(E.Range, MinionTypes.All, MinionTeam.Enemy);
+            var allMinionsW = MinionManager.GetMinions(450f, MinionTypes.All, MinionTeam.Enemy);
             if (allMinionsW.Count > 1)
             {
-                if (infectedminion != null)
+                if (infectedminion != null) // Replaced Sebby with Common
                 {
                     Orbwalker.ForceTarget(infectedminion);
                 }
@@ -464,7 +559,7 @@ namespace SurvivorMalzahar
             }
             if (Menu.Item("laneclearQ").GetValue<bool>() && Q.IsReady())
             {
-                var allMinionsQ = Cache.GetMinions(Player.ServerPosition, Q.Range);
+                var allMinionsQ = MinionManager.GetMinions(Player.ServerPosition, Q.Range);
                 var farmPos = Q.GetCircularFarmLocation(allMinionsQ, 150);
                 if (farmPos.MinionsHit > Menu.Item("LaneClearMinions").GetValue<Slider>().Value)
                     Q.Cast(farmPos.Position);
