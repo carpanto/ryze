@@ -1,8 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
@@ -23,10 +19,10 @@ namespace Simple
         {
             Drawing.OnDraw += OnDraw;
         }
-
+        
         private static void OnDraw(EventArgs args)
         {
-                Render.Circle.DrawCircle(Player.Position, Player.AttackRange, System.Drawing.Color.AliceBlue);
+            Render.Circle.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(null) + 65, System.Drawing.Color.Yellow, 2);
         }
     }
 }
