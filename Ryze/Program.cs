@@ -311,7 +311,7 @@ namespace SurvivorRyze
 
         private static void StackItems()
         {
-            if (Player.InFountain() || Player.HasBuff("CrestoftheAncientGolem") && Menu.Item("StackTearNF").GetValue<bool>()) // Add if Player has Blue Buff
+            if (Player.InFountain() || Player.HasBuff("CrestoftheAncientGolem") && (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.None) && Menu.Item("StackTearNF").GetValue<bool>()) // Add if Player has Blue Buff
             {
                 if (Items.HasItem(3004, Player) || Items.HasItem(3003, Player) || Items.HasItem(3070, Player) || Items.HasItem(3072, Player) || Items.HasItem(3073, Player) || Items.HasItem(3008, Player))
                 {
@@ -347,6 +347,9 @@ namespace SurvivorRyze
                     break;
                 case SebbyLib.Orbwalking.OrbwalkingMode.LaneClear:
                         LaneClear();
+                    break;
+                case SebbyLib.Orbwalking.OrbwalkingMode.LastHit:
+                        LastHit();
                     break;
             }
 
@@ -745,6 +748,33 @@ namespace SurvivorRyze
             }
         }
 
+        private static void LastHit()
+        {
+            // To be Done
+            if (Player.ManaPercentage() > Menu.Item("LaneClearManaManager").GetValue<Slider>().Value)
+            {
+                var allMinionsQ = Cache.GetMinions(Player.ServerPosition, Q.Range, MinionTeam.Enemy);
+                if (Q.IsReady())
+                {
+                    if (allMinionsQ.Count > 0)
+                    {
+                        foreach (var minion in allMinionsQ)
+                        {
+                            if (!minion.IsValidTarget() || minion == null)
+                                return;
+                            if (minion.Health < Q.GetDamage(minion))
+                                Q.Cast(minion.Position);
+                            else if (minion.Health < Q.GetDamage(minion) + Player.GetAutoAttackDamage(minion) && minion.IsValidTarget(SebbyLib.Orbwalking.GetRealAutoAttackRange(minion)))
+                            {
+                                Q.Cast(minion.Position);
+                                Orbwalker.ForceTarget(minion);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         private static void LaneClear()
         {
             // LaneClear
@@ -754,7 +784,26 @@ namespace SurvivorRyze
                 {
                     var ryzeebuffed = MinionManager.GetMinions(Player.Position, Q.Range).Find(x => x.HasBuff("RyzeE") && x.IsValidTarget(Q.Range));
                     var ryzenotebuffed = MinionManager.GetMinions(Player.Position, Q.Range).Find(x => !x.HasBuff("RyzeE") && x.IsValidTarget(Q.Range));
+                    var allMinionsQ = Cache.GetMinions(Player.ServerPosition, Q.Range, MinionTeam.Enemy);
                     var allMinions = Cache.GetMinions(Player.ServerPosition, E.Range, MinionTeam.Enemy);
+                    if (Q.IsReady() && !E.IsReady())
+                    {
+                        if (allMinionsQ.Count > 0)
+                        {
+                            foreach (var minion in allMinionsQ)
+                            {
+                                if (!minion.IsValidTarget() || minion == null)
+                                    return;
+                                if (minion.Health < Q.GetDamage(minion))
+                                    Q.Cast(minion.Position);
+                                else if (minion.Health < Q.GetDamage(minion) + Player.GetAutoAttackDamage(minion) && minion.IsValidTarget(SebbyLib.Orbwalking.GetRealAutoAttackRange(minion)))
+                                {
+                                    Q.Cast(minion.Position);
+                                    Orbwalker.ForceTarget(minion);
+                                }
+                            }
+                        }
+                    }
                     if (!Q.IsReady() && E.IsReady())
                     {
                         if (ryzeebuffed != null)
@@ -765,9 +814,15 @@ namespace SurvivorRyze
                                 Orbwalker.ForceTarget(ryzeebuffed);
                             }
                         }
-                        else
+                        else if (ryzeebuffed == null)
                         {
-                            Orbwalker.ForceTarget(null);
+                            foreach (var minion in allMinions)
+                            {
+                                if (minion.IsValidTarget(E.Range) && minion.Health < E.GetDamage(minion))
+                                {
+                                    E.CastOnUnit(minion);
+                                }
+                            }
                         }
                     }
                     if (Q.IsReady() && E.IsReady())
