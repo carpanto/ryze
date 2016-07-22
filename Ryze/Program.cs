@@ -281,12 +281,9 @@ namespace SurvivorRyze
             // Check when you can use items (potions, ex) && Cast them (Probelt Usage please)
             if (Player.HealthPercent < Menu.Item("UseSeraphAtHP").GetValue<Slider>().Value && Menu.Item("UseSeraph").GetValue<bool>() && !Player.InFountain() || !Player.IsRecalling())
             {
-                if (Player.CountEnemiesInRange(1000) > 0 && Menu.Item("UseSeraphIfEnemiesAreNearby").GetValue<bool>())
+                if (Player.HealthPercent < Menu.Item("UseSeraphAtHP").GetValue<Slider>().Value && Menu.Item("UseSeraph").GetValue<bool>() && Player.CountEnemiesInRange(1000) > 0 && Menu.Item("UseSeraphIfEnemiesAreNearby").GetValue<bool>())
                 {
-                    if (Seraph.IsReady() && Seraph.IsOwned(Player))
-                    {
                         Seraph.Cast();
-                    }
                 }
             }
             var target = TargetSelector.GetTarget(600f, TargetSelector.DamageType.Magical);
