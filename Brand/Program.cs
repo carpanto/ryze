@@ -28,6 +28,7 @@ namespace SurvivorBrand
         private static Menu Menu;
         private static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
         public const string ChampionName = "Brand";
+        private static int lvl1, lvl2, lvl3, lvl4;
         #endregion
         private static void Main(string[] args)
         {
@@ -86,11 +87,20 @@ namespace SurvivorBrand
 
             Menu MiscMenu = Menu.AddSubMenu(new Menu("Misc", "Misc"));
             MiscMenu.AddItem(new MenuItem("PrioritizeStunned", "Prioritize Stunned Targets?").SetValue(true));
+            //MiscMenu.AddItem(new MenuItem("StunTargetKey", "Stun the target if possible while holding Key -> 'G'").SetValue(new KeyBind("G".ToCharArray()[0], KeyBindType.Press)));
             MiscMenu.AddItem(new MenuItem("QAblazedEnemy", "Auto Q if Target's [ABlazed]").SetValue(true));
             MiscMenu.AddItem(new MenuItem("QGapC", "Auto Stun GapClosers").SetValue(true));
             MiscMenu.AddItem(new MenuItem("InterruptEQ", "Auto E-Q to Interrupt").SetValue(false));
             MiscMenu.AddItem(new MenuItem("NearbyREnemies", "Use R in Combo if X Enemies are nearby 'X' ->").SetValue(new Slider(1, 0, 5)));
-            
+
+            Menu AutoLevelerMenu = Menu.AddSubMenu(new Menu("AutoLeveler Menu", "AutoLevelerMenu"));
+            AutoLevelerMenu.AddItem(new MenuItem("AutoLevelUp", "AutoLevel Up Spells?").SetValue(true));
+            AutoLevelerMenu.AddItem(new MenuItem("AutoLevelUp1", "First: ").SetValue(new StringList(new[] { "Q", "W", "E", "R" }, 3)));
+            AutoLevelerMenu.AddItem(new MenuItem("AutoLevelUp2", "Second: ").SetValue(new StringList(new[] { "Q", "W", "E", "R" }, 0)));
+            AutoLevelerMenu.AddItem(new MenuItem("AutoLevelUp3", "Third: ").SetValue(new StringList(new[] { "Q", "W", "E", "R" }, 1)));
+            AutoLevelerMenu.AddItem(new MenuItem("AutoLevelUp4", "Fourth: ").SetValue(new StringList(new[] { "Q", "W", "E", "R" }, 2)));
+            AutoLevelerMenu.AddItem(new MenuItem("AutoLvlStartFrom", "AutoLeveler Start from Level: ").SetValue(new Slider(2, 6, 1)));
+
             Menu DrawingMenu = Menu.AddSubMenu(new Menu("Drawing", "Drawing"));
             DrawingMenu.AddItem(new MenuItem("DrawQ", "Draw Q Range").SetValue(true));
             DrawingMenu.AddItem(new MenuItem("DrawPassiveBombOnEnemy", "Draw Passive Bomb on Enemy (Range) (Soon)").SetValue(true));
@@ -101,13 +111,24 @@ namespace SurvivorBrand
             Menu.AddToMainMenu();
             #endregion
 
+            Menu SkinMenu = Menu.AddSubMenu(new Menu("Skins Menu", "SkinMenu"));
+            SkinMenu.AddItem(new MenuItem("SkinID", "Skin ID")).SetValue(new Slider(5, 0, 5));
+            var UseSkin = SkinMenu.AddItem(new MenuItem("UseSkin", "Enabled")).SetValue(true);
+            UseSkin.ValueChanged += (sender, eventArgs) =>
+            {
+                if (!eventArgs.GetNewValue<bool>())
+                {
+                    ObjectManager.Player.SetSkin(ObjectManager.Player.CharData.BaseSkinName, ObjectManager.Player.BaseSkinId);
+                }
+            };
+
             #region DrawHPDamage
             var dmgAfterShave = new MenuItem("SurvivorBrand.DrawComboDamage", "Draw Combo Damage").SetValue(true);
             var drawFill =
                 new MenuItem("SurvivorBrand.DrawColour", "Fill Color", true).SetValue(
                     new Circle(true, Color.FromArgb(204, 255, 0, 1)));
-            Menu.SubMenu("HPBarDrawings").AddItem(drawFill);
-            Menu.SubMenu("HPBarDrawings").AddItem(dmgAfterShave);
+            DrawingMenu.AddItem(drawFill);
+            DrawingMenu.AddItem(dmgAfterShave);
             DrawDamage.DamageToUnit = CalculateDamage;
             DrawDamage.Enabled = dmgAfterShave.GetValue<bool>();
             DrawDamage.Fill = drawFill.GetValue<Circle>().Active;
@@ -125,12 +146,10 @@ namespace SurvivorBrand
             };
             #endregion
 
-            // Prediction
-            SPrediction.Prediction.Initialize();
-
             #region Subscriptions
             Game.OnUpdate += OnUpdate;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
+            Obj_AI_Base.OnLevelUp += Obj_AI_Base_OnLevelUp;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Drawing.OnDraw += OnDraw;
             Game.PrintChat("<font color='#800040'>[SurvivorSeries] Brand</font> <font color='#ff6600'>Loaded.</font>");
@@ -159,7 +178,10 @@ namespace SurvivorBrand
             {
                 return;
             }
-
+            if (Menu.Item("UseSkin").GetValue<bool>())
+            {
+                Player.SetSkin(Player.CharData.BaseSkinName, Menu.Item("SkinID").GetValue<Slider>().Value);
+            }
             // Checks
             RManaCost();
             // Combo
@@ -175,6 +197,15 @@ namespace SurvivorBrand
             if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.Mixed)
             {
                 Harass();
+            }
+
+            //AutoLeveler
+            if (Menu.Item("AutoLevelUp").GetValue<bool>())
+            {
+                lvl1 = Menu.Item("AutoLevelUp1").GetValue<StringList>().SelectedIndex;
+                lvl2 = Menu.Item("AutoLevelUp2").GetValue<StringList>().SelectedIndex;
+                lvl3 = Menu.Item("AutoLevelUp3").GetValue<StringList>().SelectedIndex;
+                lvl4 = Menu.Item("AutoLevelUp4").GetValue<StringList>().SelectedIndex;
             }
         }
 
@@ -204,6 +235,43 @@ namespace SurvivorBrand
                 E.CastOnUnit(t);
                 if (Q.IsReady())
                     Q.Cast(t);
+            }
+        }
+
+        private static void Obj_AI_Base_OnLevelUp(Obj_AI_Base sender, EventArgs args)
+        {
+            if (!sender.IsMe || !Menu.Item("AutoLevelUp").GetValue<bool>() || ObjectManager.Player.Level < Menu.Item("AutoLvlStartFrom").GetValue<Slider>().Value)
+                return;
+            if (lvl2 == lvl3 || lvl2 == lvl4 || lvl3 == lvl4)
+                return;
+            int delay = 700;
+            Utility.DelayAction.Add(delay, () => LevelUp(lvl1));
+            Utility.DelayAction.Add(delay + 50, () => LevelUp(lvl2));
+            Utility.DelayAction.Add(delay + 100, () => LevelUp(lvl3));
+            Utility.DelayAction.Add(delay + 150, () => LevelUp(lvl4));
+        }
+
+        private static void LevelUp(int indx)
+        {
+            if (ObjectManager.Player.Level < 4)
+            {
+                if (indx == 0 && ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Q).Level == 0)
+                    ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.Q);
+                if (indx == 1 && ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Level == 0)
+                    ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.W);
+                if (indx == 2 && ObjectManager.Player.Spellbook.GetSpell(SpellSlot.E).Level == 0)
+                    ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.E);
+            }
+            else
+            {
+                if (indx == 0)
+                    ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.Q);
+                if (indx == 1)
+                    ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.W);
+                if (indx == 2)
+                    ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.E);
+                if (indx == 3)
+                    ObjectManager.Player.Spellbook.LevelSpell(SpellSlot.R);
             }
         }
 
