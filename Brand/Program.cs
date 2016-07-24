@@ -229,44 +229,10 @@ namespace SurvivorBrand
             {
                 return;
             }
-            #region SebbyPrediction
-            //SebbyPrediction
-            SebbyLib.Prediction.SkillshotType PredSkillShotType = SebbyLib.Prediction.SkillshotType.SkillshotLine;
-            bool Aoe10 = false;
-
-            var predictioninput = new SebbyLib.Prediction.PredictionInput
-            {
-                Aoe = Aoe10,
-                Collision = Q.Collision,
-                Speed = Q.Speed,
-                Delay = Q.Delay,
-                Range = Q.Range,
-                From = Player.ServerPosition,
-                Radius = Q.Width,
-                Unit = m,
-                Type = PredSkillShotType
-            };
-            //SebbyPrediction END
-            #endregion
-            // Input = 'var predictioninput'
-            var predpos = SebbyLib.Prediction.Prediction.GetPrediction(predictioninput);
             // Q Improvement + KS Below
             if (OktwCommon.GetKsDamage(m, Q) + BonusDmg(m) + OktwCommon.GetEchoLudenDamage(m) > m.Health)
             {
-                if (!m.CanMove)
-                {
-                    if (predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
-                    {
-                        Q.Cast(predpos.CastPosition);
-                    }
-                }
-                else
-                {
-                    if (predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
-                    {
-                        Q.Cast(predpos.CastPosition);
-                    }
-                }
+                SebbySpell(Q, m);
             }
 
             if (m.HasBuff("brandablaze") && Menu.Item("QAblazedEnemy").GetValue<bool>())
@@ -286,60 +252,12 @@ namespace SurvivorBrand
                 if (enemystunned != null)
                 {
                     Orbwalker.ForceTarget(enemystunned);
-                    #region SebbyPrediction
-                    //SebbyPrediction
-                    SebbyLib.Prediction.SkillshotType PredSkillShotTypeQ = SebbyLib.Prediction.SkillshotType.SkillshotLine;
-                    bool Aoe11 = false;
-
-                    var predictioninputq = new SebbyLib.Prediction.PredictionInput
-                    {
-                        Aoe = Aoe11,
-                        Collision = Q.Collision,
-                        Speed = Q.Speed,
-                        Delay = Q.Delay,
-                        Range = Q.Range,
-                        From = Player.ServerPosition,
-                        Radius = Q.Width,
-                        Unit = enemystunned,
-                        Type = PredSkillShotTypeQ
-                    };
-                    //SebbyPrediction END
-                    #endregion
-                    // Input = 'var predictioninput'
-                    var predposq = SebbyLib.Prediction.Prediction.GetPrediction(predictioninputq);
-                    if (predposq.Hitchance >= SebbyLib.Prediction.HitChance.High)
-                    {
-                        Q.Cast(predposq.CastPosition);
-                    }
+                    SebbySpell(Q, enemystunned);
                 }
                 else
                 {
-                    Orbwalker.ForceTarget(null);
-                    #region SebbyPrediction
-                    //SebbyPrediction
-                    SebbyLib.Prediction.SkillshotType PredSkillShotTypeQ = SebbyLib.Prediction.SkillshotType.SkillshotLine;
-                    bool Aoe11 = false;
-
-                    var predictioninputq = new SebbyLib.Prediction.PredictionInput
-                    {
-                        Aoe = Aoe11,
-                        Collision = Q.Collision,
-                        Speed = Q.Speed,
-                        Delay = Q.Delay,
-                        Range = Q.Range,
-                        From = Player.ServerPosition,
-                        Radius = Q.Width,
-                        Unit = enemystunned,
-                        Type = PredSkillShotTypeQ
-                    };
-                    //SebbyPrediction END
-                    #endregion
-                    // Input = 'var predictioninput'
-                    var predposq = SebbyLib.Prediction.Prediction.GetPrediction(predictioninputq);
-                    if (predposq.Hitchance >= SebbyLib.Prediction.HitChance.High)
-                    {
-                        Q.Cast(predposq.CastPosition);
-                    }
+                    Orbwalker.ForceTarget(m);
+                    SebbySpell(Q, m);
                 }
             }
             if (Player.Mana > RManaC + Q.ManaCost)
@@ -348,62 +266,51 @@ namespace SurvivorBrand
                 if (enemystunned != null)
                 {
                     Orbwalker.ForceTarget(enemystunned);
-                    #region SebbyPrediction
-                    //SebbyPrediction
-                    SebbyLib.Prediction.SkillshotType PredSkillShotTypeQ = SebbyLib.Prediction.SkillshotType.SkillshotLine;
-                    bool Aoe11 = false;
-
-                    var predictioninputq = new SebbyLib.Prediction.PredictionInput
-                    {
-                        Aoe = Aoe11,
-                        Collision = Q.Collision,
-                        Speed = Q.Speed,
-                        Delay = Q.Delay,
-                        Range = Q.Range,
-                        From = Player.ServerPosition,
-                        Radius = Q.Width,
-                        Unit = enemystunned,
-                        Type = PredSkillShotTypeQ
-                    };
-                    //SebbyPrediction END
-                    #endregion
-                    // Input = 'var predictioninput'
-                    var predposq = SebbyLib.Prediction.Prediction.GetPrediction(predictioninputq);
-                    if (predposq.Hitchance >= SebbyLib.Prediction.HitChance.High)
-                    {
-                        Q.Cast(predposq.CastPosition);
-                    }
+                    SebbySpell(Q, enemystunned);
                 }
                 else
                 {
-                    Orbwalker.ForceTarget(null);
-                    #region SebbyPrediction
-                    //SebbyPrediction
-                    SebbyLib.Prediction.SkillshotType PredSkillShotTypeQ = SebbyLib.Prediction.SkillshotType.SkillshotLine;
-                    bool Aoe11 = false;
-
-                    var predictioninputq = new SebbyLib.Prediction.PredictionInput
-                    {
-                        Aoe = Aoe11,
-                        Collision = Q.Collision,
-                        Speed = Q.Speed,
-                        Delay = Q.Delay,
-                        Range = Q.Range,
-                        From = Player.ServerPosition,
-                        Radius = Q.Width,
-                        Unit = enemystunned,
-                        Type = PredSkillShotTypeQ
-                    };
-                    //SebbyPrediction END
-                    #endregion
-                    // Input = 'var predictioninput'
-                    var predposq = SebbyLib.Prediction.Prediction.GetPrediction(predictioninputq);
-                    if (predposq.Hitchance >= SebbyLib.Prediction.HitChance.High)
-                    {
-                        Q.Cast(predposq.CastPosition);
-                    }
+                    Orbwalker.ForceTarget(m);
+                    SebbySpell(Q, m);
                 }
             }
+        }
+
+        private static void SebbySpell(Spell QWER, Obj_AI_Base target)
+        {
+            SebbyLib.Prediction.SkillshotType CoreType2 = SebbyLib.Prediction.SkillshotType.SkillshotLine;
+            bool aoe2 = false;
+
+            if (QWER.Type == SkillshotType.SkillshotCircle)
+            {
+                CoreType2 = SebbyLib.Prediction.SkillshotType.SkillshotCircle;
+                aoe2 = true;
+            }
+
+            if (QWER.Width > 80 && !QWER.Collision)
+                aoe2 = true;
+
+            var predInput2 = new SebbyLib.Prediction.PredictionInput
+            {
+                Aoe = aoe2,
+                Collision = QWER.Collision,
+                Speed = QWER.Speed,
+                Delay = QWER.Delay,
+                Range = QWER.Range,
+                From = Player.ServerPosition,
+                Radius = QWER.Width,
+                Unit = target,
+                Type = CoreType2
+            };
+            var poutput2 = SebbyLib.Prediction.Prediction.GetPrediction(predInput2);
+
+            //var poutput2 = QWER.GetPrediction(target);
+
+            if (QWER.Speed != float.MaxValue && OktwCommon.CollisionYasuo(Player.ServerPosition, poutput2.CastPosition))
+                return;
+
+            if (poutput2.Hitchance >= SebbyLib.Prediction.HitChance.High)
+                QWER.Cast(poutput2.CastPosition);
         }
 
         private static void RManaCost()
@@ -426,60 +333,13 @@ namespace SurvivorBrand
             {
                 var Qdamage = Q.GetDamage(t);
                 var Wdamage = OktwCommon.GetKsDamage(t, W) + BonusDmg(t) + OktwCommon.GetEchoLudenDamage(t);
-                #region SebbyPrediction
-                //SebbyPrediction
-                SebbyLib.Prediction.SkillshotType PredSkillShotType = SebbyLib.Prediction.SkillshotType.SkillshotCircle;
-                bool Aoe10 = true;
-
-                var predictioninput = new SebbyLib.Prediction.PredictionInput
-                {
-                    Aoe = Aoe10,
-                    Collision = W.Collision,
-                    Speed = W.Speed,
-                    Delay = W.Delay,
-                    Range = W.Range,
-                    From = Player.ServerPosition,
-                    Radius = W.Width,
-                    Unit = t,
-                    Type = PredSkillShotType
-                };
-                //SebbyPrediction END
-                #endregion
-                // Input = 'var predictioninput'
-                var predpos = SebbyLib.Prediction.Prediction.GetPrediction(predictioninput);
                 if (Wdamage > t.Health)
                 {
-                    if (!t.CanMove)
-                    {
-                        if (predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
-                        {
-                            W.Cast(predpos.CastPosition);
-                        }
-                    }
-                    else
-                    {
-                        if (predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
-                        {
-                            W.Cast(predpos.CastPosition);
-                        }
-                    }
+                    SebbySpell(W, t);
                 }
                 else if (Wdamage + Qdamage > t.Health && Player.ManaPercentage() > Q.ManaCost + E.ManaCost)
                 {
-                    if (!t.CanMove)
-                    {
-                        if (predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
-                        {
-                            W.Cast(predpos.CastPosition);
-                        }
-                    }
-                    else
-                    {
-                        if (predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
-                        {
-                            W.Cast(predpos.CastPosition);
-                        }
-                    }
+                    SebbySpell(W, t);
                 }
 
                 if (Player.Mana > RManaC + W.ManaCost)
@@ -488,60 +348,12 @@ namespace SurvivorBrand
                     if (enemystunned != null)
                     {
                         Orbwalker.ForceTarget(enemystunned);
-                        #region SebbyPrediction
-                        //SebbyPrediction
-                        SebbyLib.Prediction.SkillshotType PredSkillShotTypeW = SebbyLib.Prediction.SkillshotType.SkillshotCircle;
-                        bool Aoe12 = true;
-
-                        var predictioninputw = new SebbyLib.Prediction.PredictionInput
-                        {
-                            Aoe = Aoe12,
-                            Collision = W.Collision,
-                            Speed = W.Speed,
-                            Delay = W.Delay,
-                            Range = W.Range,
-                            From = Player.ServerPosition,
-                            Radius = W.Width,
-                            Unit = enemystunned,
-                            Type = PredSkillShotTypeW
-                        };
-                        //SebbyPrediction END
-                        #endregion
-                        // Input = 'var predictioninput'
-                        var predposw = SebbyLib.Prediction.Prediction.GetPrediction(predictioninputw);
-                        if (predposw.Hitchance >= SebbyLib.Prediction.HitChance.High)
-                        {
-                            W.Cast(predposw.CastPosition);
-                        }
+                        SebbySpell(W, enemystunned);
                     }
                     else
                     {
-                        Orbwalker.ForceTarget(null);
-                        #region SebbyPrediction
-                        //SebbyPrediction
-                        SebbyLib.Prediction.SkillshotType PredSkillShotTypeW = SebbyLib.Prediction.SkillshotType.SkillshotCircle;
-                        bool Aoe12 = true;
-
-                        var predictioninputw = new SebbyLib.Prediction.PredictionInput
-                        {
-                            Aoe = Aoe12,
-                            Collision = W.Collision,
-                            Speed = W.Speed,
-                            Delay = W.Delay,
-                            Range = W.Range,
-                            From = Player.ServerPosition,
-                            Radius = W.Width,
-                            Unit = enemystunned,
-                            Type = PredSkillShotTypeW
-                        };
-                        //SebbyPrediction END
-                        #endregion
-                        // Input = 'var predictioninput'
-                        var predposw = SebbyLib.Prediction.Prediction.GetPrediction(predictioninputw);
-                        if (predposw.Hitchance >= SebbyLib.Prediction.HitChance.High)
-                        {
-                            W.Cast(predposw.CastPosition);
-                        }
+                        Orbwalker.ForceTarget(enemystunned);
+                        SebbySpell(W, t);
                     }
                 }
             }
@@ -564,7 +376,7 @@ namespace SurvivorBrand
                     }
                     else
                     {
-                        Orbwalker.ForceTarget(null);
+                        Orbwalker.ForceTarget(t);
                         E.CastOnUnit(t);
                     }
                 }
@@ -580,62 +392,7 @@ namespace SurvivorBrand
                     else if (wDmg + eDmg > t.Health && Player.Mana > W.ManaCost + E.ManaCost)
                     {
                         E.CastOnUnit(t);
-                        if (!t.CanMove)
-                        {
-                            #region SebbyPrediction
-                            //SebbyPrediction
-                            SebbyLib.Prediction.SkillshotType PredSkillShotTypeW = SebbyLib.Prediction.SkillshotType.SkillshotCircle;
-                            bool Aoe12 = true;
-
-                            var predictioninputw = new SebbyLib.Prediction.PredictionInput
-                            {
-                                Aoe = Aoe12,
-                                Collision = W.Collision,
-                                Speed = W.Speed,
-                                Delay = W.Delay,
-                                Range = W.Range,
-                                From = Player.ServerPosition,
-                                Radius = W.Width,
-                                Unit = t,
-                                Type = PredSkillShotTypeW
-                            };
-                            //SebbyPrediction END
-                            #endregion
-                            // Input = 'var predictioninput'
-                            var predposw = SebbyLib.Prediction.Prediction.GetPrediction(predictioninputw);
-                            if (predposw.Hitchance >= SebbyLib.Prediction.HitChance.High)
-                            {
-                                W.Cast(predposw.CastPosition);
-                            }
-                        }
-                        else
-                        {
-                            #region SebbyPrediction
-                            //SebbyPrediction
-                            SebbyLib.Prediction.SkillshotType PredSkillShotTypeW = SebbyLib.Prediction.SkillshotType.SkillshotCircle;
-                            bool Aoe12 = true;
-
-                            var predictioninputw = new SebbyLib.Prediction.PredictionInput
-                            {
-                                Aoe = Aoe12,
-                                Collision = W.Collision,
-                                Speed = W.Speed,
-                                Delay = W.Delay,
-                                Range = W.Range,
-                                From = Player.ServerPosition,
-                                Radius = W.Width,
-                                Unit = t,
-                                Type = PredSkillShotTypeW
-                            };
-                            //SebbyPrediction END
-                            #endregion
-                            // Input = 'var predictioninput'
-                            var predposw = SebbyLib.Prediction.Prediction.GetPrediction(predictioninputw);
-                            if (predposw.Hitchance >= SebbyLib.Prediction.HitChance.High)
-                            {
-                                W.Cast(predposw.CastPosition);
-                            }
-                        }
+                        SebbySpell(W, t);
                     }
                 }
             }
@@ -782,124 +539,14 @@ namespace SurvivorBrand
             {
                 if (Menu.Item("harrasW").GetValue<bool>() && W.IsInRange(t))
                 {
-                    if (!t.CanMove)
-                    {
-                        #region SebbyPrediction
-                        //SebbyPrediction
-                        SebbyLib.Prediction.SkillshotType PredSkillShotTypeW = SebbyLib.Prediction.SkillshotType.SkillshotCircle;
-                        bool Aoe12 = true;
-
-                        var predictioninputw = new SebbyLib.Prediction.PredictionInput
-                        {
-                            Aoe = Aoe12,
-                            Collision = W.Collision,
-                            Speed = W.Speed,
-                            Delay = W.Delay,
-                            Range = W.Range,
-                            From = Player.ServerPosition,
-                            Radius = W.Width,
-                            Unit = t,
-                            Type = PredSkillShotTypeW
-                        };
-                        //SebbyPrediction END
-                        #endregion
-                        // Input = 'var predictioninput'
-                        var predposw = SebbyLib.Prediction.Prediction.GetPrediction(predictioninputw);
-                        if (predposw.Hitchance >= SebbyLib.Prediction.HitChance.High)
-                        {
-                            W.Cast(predposw.CastPosition);
-                        }
-                    }
-                    else
-                    {
-                        #region SebbyPrediction
-                        //SebbyPrediction
-                        SebbyLib.Prediction.SkillshotType PredSkillShotTypeW = SebbyLib.Prediction.SkillshotType.SkillshotCircle;
-                        bool Aoe12 = true;
-
-                        var predictioninputw = new SebbyLib.Prediction.PredictionInput
-                        {
-                            Aoe = Aoe12,
-                            Collision = W.Collision,
-                            Speed = W.Speed,
-                            Delay = W.Delay,
-                            Range = W.Range,
-                            From = Player.ServerPosition,
-                            Radius = W.Width,
-                            Unit = t,
-                            Type = PredSkillShotTypeW
-                        };
-                        //SebbyPrediction END
-                        #endregion
-                        // Input = 'var predictioninput'
-                        var predposw = SebbyLib.Prediction.Prediction.GetPrediction(predictioninputw);
-                        if (predposw.Hitchance >= SebbyLib.Prediction.HitChance.High)
-                        {
-                            W.Cast(predposw.CastPosition);
-                        }
-                    }
+                    SebbySpell(W, t);
                 }
             }
             if (Player.ManaPercentage() > Menu.Item("HarassManaManager").GetValue<Slider>().Value)
             {
                 if (Menu.Item("harrasQ").GetValue<bool>() && Q.IsInRange(t))
                 {
-                    if (!t.CanMove)
-                    {
-                        #region SebbyPrediction
-                        //SebbyPrediction
-                        SebbyLib.Prediction.SkillshotType PredSkillShotType = SebbyLib.Prediction.SkillshotType.SkillshotLine;
-                        bool Aoe12 = false;
-
-                        var predictioninput = new SebbyLib.Prediction.PredictionInput
-                        {
-                            Aoe = Aoe12,
-                            Collision = W.Collision,
-                            Speed = W.Speed,
-                            Delay = W.Delay,
-                            Range = W.Range,
-                            From = Player.ServerPosition,
-                            Radius = W.Width,
-                            Unit = t,
-                            Type = PredSkillShotType
-                        };
-                        //SebbyPrediction END
-                        #endregion
-                        // Input = 'var predictioninput'
-                        var predpos = SebbyLib.Prediction.Prediction.GetPrediction(predictioninput);
-                        if (predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
-                        {
-                            Q.Cast(predpos.CastPosition);
-                        }
-                    }
-                    else
-                    {
-                        #region SebbyPrediction
-                        //SebbyPrediction
-                        SebbyLib.Prediction.SkillshotType PredSkillShotType = SebbyLib.Prediction.SkillshotType.SkillshotLine;
-                        bool Aoe12 = false;
-
-                        var predictioninput = new SebbyLib.Prediction.PredictionInput
-                        {
-                            Aoe = Aoe12,
-                            Collision = W.Collision,
-                            Speed = W.Speed,
-                            Delay = W.Delay,
-                            Range = W.Range,
-                            From = Player.ServerPosition,
-                            Radius = W.Width,
-                            Unit = t,
-                            Type = PredSkillShotType
-                        };
-                        //SebbyPrediction END
-                        #endregion
-                        // Input = 'var predictioninput'
-                        var predpos = SebbyLib.Prediction.Prediction.GetPrediction(predictioninput);
-                        if (predpos.Hitchance >= SebbyLib.Prediction.HitChance.High)
-                        {
-                            Q.Cast(predpos.CastPosition);
-                        }
-                    }
+                    SebbySpell(Q, t);
                 }
             }
             if (Player.ManaPercentage() > Menu.Item("HarassManaManager").GetValue<Slider>().Value)
