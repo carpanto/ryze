@@ -87,7 +87,7 @@ namespace SurvivorBrand
 
             Menu MiscMenu = Menu.AddSubMenu(new Menu("Misc", "Misc"));
             MiscMenu.AddItem(new MenuItem("PrioritizeStunned", "Prioritize Stunned Targets?").SetValue(true));
-            //MiscMenu.AddItem(new MenuItem("StunTargetKey", "Stun the target if possible while holding Key -> 'G'").SetValue(new KeyBind("G".ToCharArray()[0], KeyBindType.Press)));
+            MiscMenu.AddItem(new MenuItem("StunTargetKey", "Stun the target if possible while holding Key -> 'G'").SetValue(new KeyBind("G".ToCharArray()[0], KeyBindType.Press)));
             MiscMenu.AddItem(new MenuItem("QAblazedEnemy", "Auto Q if Target's [ABlazed]").SetValue(true));
             MiscMenu.AddItem(new MenuItem("QGapC", "Auto Stun GapClosers").SetValue(true));
             MiscMenu.AddItem(new MenuItem("InterruptEQ", "Auto E-Q to Interrupt").SetValue(false));
@@ -197,6 +197,33 @@ namespace SurvivorBrand
             if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.Mixed)
             {
                 Harass();
+            }
+            if (Menu.Item("StunTargetKey").GetValue<KeyBind>().Active)
+            {
+                SebbyLib.Orbwalking.MoveTo(Game.CursorPos);
+                if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.None)
+                {
+                    var t = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+                    if (!t.IsValidTarget() || t == null)
+                        return;
+                    // Wait till the enemy has BrandABlaze from the W or E casting and then cast Q.
+                    if (t.HasBuff("brandablaze"))
+                    {
+                        if (Q.IsReady())
+                            SebbySpell(Q, t);
+                    }
+                    else
+                    {
+                        if (Q.IsReady() && E.IsReady())
+                        {
+                            E.CastOnUnit(t);
+                        }
+                        else if (Q.IsReady() && W.IsReady())
+                        {
+                            SebbySpell(W, t);
+                        }
+                    }
+                }
             }
 
             //AutoLeveler
