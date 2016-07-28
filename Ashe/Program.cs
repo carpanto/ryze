@@ -406,13 +406,13 @@ namespace SurvivorAshe
 
             if (target != null && target.IsValidTarget())
             {
-                if (Q.IsReady() && Player.Mana > Q.Instance.ManaCost + R.Instance.ManaCost || target.Health < 5 * Player.GetAutoAttackDamage(Player))
+                if (Menu.Item("ComboUseQ").GetValue<bool>() && Q.IsReady() && Player.Mana > Q.Instance.ManaCost + R.Instance.ManaCost || target.Health < 5 * Player.GetAutoAttackDamage(Player))
                     Q.Cast();
-                if (W.IsReady() && Player.Mana > W.Instance.ManaCost + R.Instance.ManaCost && target.IsValidTarget(W.Range))
+                if (Menu.Item("ComboUseW").GetValue<bool>() && W.IsReady() && Player.Mana > W.Instance.ManaCost + R.Instance.ManaCost && target.IsValidTarget(W.Range))
                     SebbySpell(W, target);
                 foreach (var ulttarget in HeroManager.Enemies.Where(ulttarget => target.IsValidTarget(2000) && OktwCommon.ValidUlt(ulttarget)))
                 {
-                    if (target.IsValidTarget(W.Range) && target.Health < W.GetDamage(target) + R.GetDamage(target) + 3 * Player.GetAutoAttackDamage(target) + OktwCommon.GetIncomingDamage(target))
+                    if (Menu.Item("ComboUseR").GetValue<bool>() && target.IsValidTarget(W.Range) && target.Health < W.GetDamage(target) + R.GetDamage(target) + 3 * Player.GetAutoAttackDamage(target) + OktwCommon.GetIncomingDamage(target))
                     {
                         SebbySpell(R, target);
                         if (Q.IsReady())
