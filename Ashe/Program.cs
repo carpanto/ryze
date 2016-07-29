@@ -78,6 +78,7 @@ namespace SurvivorAshe
             UltimateMenu.AddItem(new MenuItem("InstaRSelectedTarget", "Instantly Ult [Selected Target] or Nearby").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)).SetTooltip("It'll Use the Ultimate if there's Enemy selected or enemy nearby.")).Permashow(true, "[Ashe]Insta Ult");
 
             Menu MiscMenu = Menu.AddSubMenu(new Menu("Misc Menu", "MiscMenu"));
+            MiscMenu.AddItem(new MenuItem("KillSteal", "Activate KillSteal?").SetValue(true));
             MiscMenu.AddItem(new MenuItem("BuyBlueTrinket", "Buy Blue Trinket on Lvl 6?").SetValue(true));
             MiscMenu.AddItem(new MenuItem("EOnFlash", "Cast E if Enemy Player Flashes?").SetValue(true));
             MiscMenu.AddItem(new MenuItem("RToInterrupt", "Auto R to Interrupt Enemies").SetValue(true));
@@ -356,7 +357,7 @@ namespace SurvivorAshe
         {
             var target = TargetSelector.GetSelectedTarget();
             if (target == null || !target.IsValidTarget())
-                target = TargetSelector.GetTarget(1700, TargetSelector.DamageType.Physical);
+                target = TargetSelector.GetTarget(1400, TargetSelector.DamageType.Physical);
 
             if (target.IsValidTarget() && target != null)
             {
@@ -369,32 +370,35 @@ namespace SurvivorAshe
 
         private static void KSAshe()
         {
-            var target = Orbwalker.GetTarget() as Obj_AI_Hero;
+            if (Menu.Item("KillSteal").GetValue<bool>())
+            {
+                var target = Orbwalker.GetTarget() as Obj_AI_Hero;
 
-            if (target.IsValidTarget(W.Range) && target.Health < W.GetDamage(target) + R.GetDamage(target) + OktwCommon.GetIncomingDamage(target))
-            {
-                if (!OktwCommon.IsSpellHeroCollision(target, R))
-                    SebbySpell(R, target);
-                if (!target.CanMove || target.IsStunned)
-                    W.Cast(target.Position);
-            }
-            if (target.IsValidTarget(2000) && target.Health < R.GetDamage(target) + OktwCommon.GetIncomingDamage(target))
-            {
-                if (!OktwCommon.IsSpellHeroCollision(target, R))
-                    SebbySpell(R, target);
-            }
-            if (target.IsValidTarget(W.Range) && target.Health < W.GetDamage(target) + OktwCommon.GetIncomingDamage(target))
-            {
-                if (target.CanMove)
+                if (target.IsValidTarget(W.Range) && target.Health < W.GetDamage(target) + R.GetDamage(target) + OktwCommon.GetIncomingDamage(target))
                 {
-                    SebbySpell(W, target);
+                    if (!OktwCommon.IsSpellHeroCollision(target, R))
+                        SebbySpell(R, target);
+                    if (!target.CanMove || target.IsStunned)
+                        W.Cast(target.Position);
                 }
-                else
+                if (target.IsValidTarget(1600) && target.Health < R.GetDamage(target) + OktwCommon.GetIncomingDamage(target))
                 {
-                    W.Cast(target.Position);
+                    if (!OktwCommon.IsSpellHeroCollision(target, R))
+                        SebbySpell(R, target);
                 }
+                if (target.IsValidTarget(W.Range) && target.Health < W.GetDamage(target) + OktwCommon.GetIncomingDamage(target))
+                {
+                    if (target.CanMove)
+                    {
+                        SebbySpell(W, target);
+                    }
+                    else
+                    {
+                        W.Cast(target.Position);
+                    }
+                }
+                // More to be Added
             }
-            // More to be Added
         }
 
         private static void Combo()
