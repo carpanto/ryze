@@ -1,6 +1,7 @@
 ﻿using System;
 using LeagueSharp;
 using LeagueSharp.Common;
+using System.Linq;
 
 namespace LuxBlockimateSharp
 {
@@ -8,12 +9,13 @@ namespace LuxBlockimateSharp
     {
 
         #region Declaration
-        private static Spell NocR, KhaR, ShacoQ;
+        private static Spell NocR, KhaR, ShacoQ, GravesW;
         private static Menu Menu;
         private static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
         private static string Nocturne = "Nocturne";
         private static string KhaZix = "Kha'Zix";
         private static string Shaco = "Shaco";
+        private static string Graves = "Graves";
         #endregion
 
         public static void Main(string[] args)
@@ -29,6 +31,7 @@ namespace LuxBlockimateSharp
             var ChampionNoc = Player.ChampionName == Nocturne;
             var ChampionKha = Player.ChampionName == KhaZix;
             var ChampionShaco = Player.ChampionName == Shaco;
+            var ChampionGraves = Player.ChampionName == Graves;
 
             #region Spells
             if (ChampionNoc)
@@ -43,6 +46,10 @@ namespace LuxBlockimateSharp
             {
                 ShacoQ = new Spell(SpellSlot.Q);
             }
+            if (ChampionGraves)
+            {
+                GravesW = new Spell(SpellSlot.W);
+            }
             #endregion
 
             #region Menu
@@ -56,10 +63,16 @@ namespace LuxBlockimateSharp
             if (ChampionNoc)
             {
                 Spells.AddItem(new MenuItem("BlockNoc", "Exploit with R").SetValue(true).SetTooltip("Will dodge Lux ultimate with R (Exploit)"));
+                Spells.AddItem(new MenuItem("ProtectAllyNoc", "Protect Ally by using Exploit with R").SetValue(true));
             }
             if (ChampionKha)
             {
                 Spells.AddItem(new MenuItem("BlockKha", "Exploit with R").SetValue(true).SetTooltip("Will dodge Lux ultimate with R (Exploit)"));
+            }
+            if (ChampionGraves)
+            {
+                Spells.AddItem(new MenuItem("BlockGraves", "Exploit with W").SetValue(true).SetTooltip("Will dodge Lux ultimate with W (Exploit)"));
+                Spells.AddItem(new MenuItem("ProtectAllyGraves", "Protect Ally by using Exploit with W").SetValue(true));
             }
 
             // Menu DrawingMenu = Menu.AddSubMenu(new Menu("Drawing", "Drawing"));
@@ -72,30 +85,20 @@ namespace LuxBlockimateSharp
             Game.OnUpdate += Game_OnUpdate;
             Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpell;
             #endregion
+            Game.PrintChat("<font color='#800040'>[Exploit] LuxBlockimateSharp</font> <font color='#ff6600'>Loaded.</font>");
         }
 
         public static void Obj_AI_Base_OnProcessSpell(Obj_AI_Base enemy, GameObjectProcessSpellCastEventArgs Spell)
         {
-            var champpos = Player.ServerPosition;
-            //Game.PrintChat("-1");
-            //Console.WriteLine("Test 0");
             if (enemy.IsMe)
                 return;
-            if (enemy.IsChampion())
+            if (enemy.IsChampion() && enemy.IsEnemy)
             {
-                //Game.PrintChat("DEBUG: Before (if Spell.SData) Check");
-                //var luxr = enemy.Spellbook.GetSpell(SpellSlot.R);
                 if (Spell.SData.Name.ToLower() == "luxmalicecannon" || Spell.SData.Name.ToLower() == "lux malice cannon" || Spell.SData.Name.ToLower() == "luxmalicecannonmis" || Spell.SData.Name.ToLower() == "lux malice cannon mis" || Spell.SData.DisplayName.ToLower() == "finalspark")
                 {
-                    //Game.PrintChat("DEBUG: After (if Spell.SData) Check");
-                    //if (champpos.ProjectOn(Spell.Start.To2D(), Spell.End.To2D()).IsOnSegment)
-                    //var startPos = enemy.ServerPosition; //get lux
-                    //var endPos = Player.ServerPosition.Extend(Spell.Start, );
-
                     var rectangle = new Geometry.Polygon.Rectangle(Spell.Start, Spell.End, 50);
                     if (rectangle.IsInside(Player))
                     {
-                        //Game.PrintChat("DEBUG: Inside of ShacoQ Casting");
                         if (Player.ChampionName == Shaco)
                         {
                             ShacoQ.Cast(Player.Position);
@@ -104,9 +107,24 @@ namespace LuxBlockimateSharp
                         {
                             NocR.Cast();
                         }
+                        if (Player.ChampionName == Graves && enemy.IsValidTarget(950f))
+                        {
+                            GravesW.Cast(enemy.Position);
+                        }
                         if (Player.ChampionName == KhaZix)
                         {
                             KhaR.Cast();
+                        }
+                    }
+                    foreach (var ally in HeroManager.Allies.Where(ally => rectangle.IsInside(ally)))
+                    {
+                        if (Player.ChampionName == Graves && Menu.Item("ProtectAllyGraves").GetValue<bool>() && enemy.IsValidTarget(950f))
+                        {
+                            GravesW.Cast(enemy.Position);
+                        }
+                        if (Player.ChampionName == Nocturne && Menu.Item("ProtectAllyNoc").GetValue<bool>())
+                        {
+                            NocR.Cast();
                         }
                     }
                 }
