@@ -74,6 +74,7 @@ namespace SurvivorBrand
             HarassMenu.AddItem(new MenuItem("harassQ", "Use Q").SetValue(true));
             HarassMenu.AddItem(new MenuItem("harassW", "Use W").SetValue(true));
             HarassMenu.AddItem(new MenuItem("harassE", "Use E").SetValue(true));
+            HarassMenu.AddItem(new MenuItem("HarassBlockAA", "Block AA's in Harass Mode").SetValue(true));
             HarassMenu.AddItem(new MenuItem("HarassManaManager", "Mana Manager (%)").SetValue(new Slider(30, 1, 100)));
 
             Menu LaneClearMenu = Menu.AddSubMenu(new Menu("Lane Clear", "LaneClear"));
@@ -172,6 +173,12 @@ namespace SurvivorBrand
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.MediumVioletRed);
         }
 
+        private static void AABlock()
+        {
+            Orbwalker.SetAttack(!Menu.Item("HarassBlockAA").GetValue<bool>());
+            //SebbyLib.OktwCommon.blockAttack = Menu.Item("CBlockAA").GetValue<bool>();
+        }
+
         private static void OnUpdate(EventArgs args)
         {
             if (Player.IsDead || Player.IsRecalling())
@@ -196,7 +203,13 @@ namespace SurvivorBrand
             }
             if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.Mixed)
             {
+                AABlock();
                 Harass();
+            }
+            if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.None)
+            {
+                Orbwalker.SetMovement(true);
+                Orbwalker.SetAttack(true);
             }
             if (Menu.Item("StunTargetKey").GetValue<KeyBind>().Active)
             {
