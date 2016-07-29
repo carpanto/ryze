@@ -92,6 +92,7 @@ namespace SurvivorBrand
             MiscMenu.AddItem(new MenuItem("QAblazedEnemy", "Auto Q if Target's [ABlazed]").SetValue(true));
             MiscMenu.AddItem(new MenuItem("QGapC", "Auto Stun GapClosers").SetValue(true));
             MiscMenu.AddItem(new MenuItem("InterruptEQ", "Auto E-Q to Interrupt").SetValue(false));
+            MiscMenu.AddItem(new MenuItem("QOnlyAblazed", "Use Q Only if Enemy is Ablazed").SetValue(false));
             MiscMenu.AddItem(new MenuItem("NearbyREnemies", "Use R in Combo if X Enemies are nearby 'X' ->").SetValue(new Slider(1, 0, 5)));
 
             Menu AutoLevelerMenu = Menu.AddSubMenu(new Menu("AutoLeveler Menu", "AutoLevelerMenu"));
@@ -342,44 +343,53 @@ namespace SurvivorBrand
             {
                 SebbySpell(Q, m);
             }
-
-            if (m.HasBuff("brandablaze") && Menu.Item("QAblazedEnemy").GetValue<bool>())
+            if (Menu.Item("QOnlyAblazed").GetValue<bool>() && m.HasBuff("brandablaze"))
             {
-                var spreadTarget = m;
-
                 foreach (var enemy in HeroManager.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && enemy.HasBuff("brandablaze")))
-                    m = enemy;
-
-                if (spreadTarget == m && !LogQUse(m))
-                    return;
-            }
-
-            if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.Combo && !W.IsReady() && Player.ManaPercentage() > RManaC + Q.ManaCost)
-            {
-                var enemystunned = HeroManager.Enemies.Find(enemy => enemy.IsValidTarget(Q.Range) && enemy.HasBuff("stun") || enemy.IsStunned && Menu.Item("PrioritizeStunned").GetValue<bool>());
-                if (enemystunned != null)
                 {
-                    Orbwalker.ForceTarget(enemystunned);
-                    SebbySpell(Q, enemystunned);
-                }
-                else
-                {
-                    Orbwalker.ForceTarget(m);
-                    SebbySpell(Q, m);
+                    SebbySpell(Q, enemy);
                 }
             }
-            if (Player.Mana > RManaC + Q.ManaCost)
+            else
             {
-                var enemystunned = HeroManager.Enemies.Find(enemy => enemy.IsValidTarget(Q.Range) && enemy.HasBuff("stun") || enemy.IsStunned && Menu.Item("PrioritizeStunned").GetValue<bool>());
-                if (enemystunned != null)
+                if (m.HasBuff("brandablaze") && Menu.Item("QAblazedEnemy").GetValue<bool>())
                 {
-                    Orbwalker.ForceTarget(enemystunned);
-                    SebbySpell(Q, enemystunned);
+                    var spreadTarget = m;
+
+                    foreach (var enemy in HeroManager.Enemies.Where(enemy => enemy.IsValidTarget(Q.Range) && enemy.HasBuff("brandablaze")))
+                        m = enemy;
+
+                    if (spreadTarget == m && !LogQUse(m))
+                        return;
                 }
-                else
+
+                if (Orbwalker.ActiveMode == SebbyLib.Orbwalking.OrbwalkingMode.Combo && !W.IsReady() && Player.ManaPercentage() > RManaC + Q.ManaCost)
                 {
-                    Orbwalker.ForceTarget(m);
-                    SebbySpell(Q, m);
+                    var enemystunned = HeroManager.Enemies.Find(enemy => enemy.IsValidTarget(Q.Range) && enemy.HasBuff("stun") || enemy.IsStunned && Menu.Item("PrioritizeStunned").GetValue<bool>());
+                    if (enemystunned != null)
+                    {
+                        Orbwalker.ForceTarget(enemystunned);
+                        SebbySpell(Q, enemystunned);
+                    }
+                    else
+                    {
+                        Orbwalker.ForceTarget(m);
+                        SebbySpell(Q, m);
+                    }
+                }
+                if (Player.Mana > RManaC + Q.ManaCost)
+                {
+                    var enemystunned = HeroManager.Enemies.Find(enemy => enemy.IsValidTarget(Q.Range) && enemy.HasBuff("stun") || enemy.IsStunned && Menu.Item("PrioritizeStunned").GetValue<bool>());
+                    if (enemystunned != null)
+                    {
+                        Orbwalker.ForceTarget(enemystunned);
+                        SebbySpell(Q, enemystunned);
+                    }
+                    else
+                    {
+                        Orbwalker.ForceTarget(m);
+                        SebbySpell(Q, m);
+                    }
                 }
             }
         }
