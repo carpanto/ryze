@@ -238,6 +238,9 @@ namespace SurvivorAshe
             };
             var poutput2 = SebbyLib.Prediction.Prediction.GetPrediction(predInput2);
 
+            if (OktwCommon.CollisionYasuo(Player.ServerPosition, poutput2.CastPosition))
+                return;
+
             if (WR.Speed != float.MaxValue && OktwCommon.CollisionYasuo(Player.ServerPosition, poutput2.CastPosition))
                 return;
 
