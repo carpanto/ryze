@@ -362,7 +362,7 @@ namespace SurvivorAshe
             if (target == null || !target.IsValidTarget())
                 target = TargetSelector.GetTarget(1400, TargetSelector.DamageType.Physical);
 
-            if (target.IsValidTarget() && target != null)
+            if (target.IsValidTarget() && target != null && !target.HasBuff("rebirth"))
             {
                 if (Player.Mana > R.Instance.ManaCost)
                 {
@@ -419,7 +419,7 @@ namespace SurvivorAshe
                     SebbySpell(W, target);
                 foreach (var ulttarget in HeroManager.Enemies.Where(ulttarget => target.IsValidTarget(2000) && OktwCommon.ValidUlt(ulttarget)))
                 {
-                    if (Menu.Item("ComboUseR").GetValue<bool>() && target.IsValidTarget(W.Range) && target.Health < W.GetDamage(target) + R.GetDamage(target) + 3 * Player.GetAutoAttackDamage(target) + OktwCommon.GetIncomingDamage(target))
+                    if (Menu.Item("ComboUseR").GetValue<bool>() && target.IsValidTarget(W.Range) && target.Health < W.GetDamage(target) + R.GetDamage(target) + 3 * Player.GetAutoAttackDamage(target) + OktwCommon.GetIncomingDamage(target) && !target.HasBuff("rebirth"))
                     {
                         SebbySpell(R, target);
                         if (Q.IsReady())
