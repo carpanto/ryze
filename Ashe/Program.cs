@@ -413,7 +413,7 @@ namespace SurvivorAshe
 
             if (target != null && target.IsValidTarget())
             {
-                if (Menu.Item("ComboUseQ").GetValue<bool>() && Q.IsReady() && Player.Mana > Q.Instance.ManaCost + R.Instance.ManaCost || target.Health < 5 * Player.GetAutoAttackDamage(Player))
+                if (Menu.Item("ComboUseQ").GetValue<bool>() && target.IsValidTarget(SebbyLib.Orbwalking.GetRealAutoAttackRange(null)) && Q.IsReady() && Player.Mana > Q.Instance.ManaCost + R.Instance.ManaCost || target.Health < 5 * Player.GetAutoAttackDamage(Player))
                     Q.Cast();
                 if (Menu.Item("ComboUseW").GetValue<bool>() && W.IsReady() && Player.Mana > W.Instance.ManaCost + R.Instance.ManaCost && target.IsValidTarget(W.Range))
                     SebbySpell(W, target);
@@ -442,7 +442,7 @@ namespace SurvivorAshe
                 if (target.IsValidTarget(W.Range) && SpellW)
                     SebbySpell(W, target);
 
-                if (Q.IsReady() && SpellQ)
+                if (Q.IsReady() && SpellQ && target.IsValidTarget(SebbyLib.Orbwalking.GetRealAutoAttackRange(null)))
                     Q.Cast();
             }
         }
