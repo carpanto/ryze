@@ -212,7 +212,7 @@ namespace SurvivorRyze
             switch(R.Level)
             {
                 case 1:
-                    RangeR = 1500f;
+                    RangeR = 1750f;
                     break;
                 case 2:
                     RangeR = 3000f;
@@ -757,7 +757,7 @@ namespace SurvivorRyze
                 return;
 
             // Execute the Lad
-            if (Player.ManaPercentage() > Menu.Item("HarassManaManager").GetValue<Slider>().Value)
+            if (Player.ManaPercent > Menu.Item("HarassManaManager").GetValue<Slider>().Value)
             {
                 if (HarassUseW && target.IsValidTarget(W.Range))
                 {
@@ -784,7 +784,7 @@ namespace SurvivorRyze
         private static void LastHit()
         {
             // To be Done
-            if (Player.ManaPercentage() > Menu.Item("LaneClearManaManager").GetValue<Slider>().Value)
+            if (Player.ManaPercent > Menu.Item("LaneClearManaManager").GetValue<Slider>().Value)
             {
                 var allMinionsQ = Cache.GetMinions(Player.ServerPosition, Q.Range, MinionTeam.Enemy);
                 if (Q.IsReady())
@@ -813,7 +813,7 @@ namespace SurvivorRyze
             // LaneClear | Notes: Rework on early levels not using that much abilities since Spell Damage is lower, higher Lvl is fine
             if (Menu.Item("UseQLC").GetValue<bool>() || Menu.Item("UseELC").GetValue<bool>())
             {
-                if (Player.ManaPercentage() > Menu.Item("LaneClearManaManager").GetValue<Slider>().Value)
+                if (Player.ManaPercent > Menu.Item("LaneClearManaManager").GetValue<Slider>().Value)
                 {
                     var ryzeebuffed = MinionManager.GetMinions(Player.Position, Q.Range).Find(x => x.HasBuff("RyzeE") && x.IsValidTarget(Q.Range));
                     var ryzenotebuffed = MinionManager.GetMinions(Player.Position, Q.Range).Find(x => !x.HasBuff("RyzeE") && x.IsValidTarget(Q.Range));
@@ -899,7 +899,7 @@ namespace SurvivorRyze
             switch (R.Level)
             {
                 case 1:
-                    RangeR = 1500f;
+                    RangeR = 1750f;
                     break;
                 case 2:
                     RangeR = 3000f;
