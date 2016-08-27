@@ -107,6 +107,11 @@ namespace SurvivorRyze
             LaneClearMenu.AddItem(new MenuItem("UseELC", "Use E to LaneClear").SetValue(true));
             LaneClearMenu.AddItem(new MenuItem("LaneClearManaManager", "Mana Manager (%)").SetValue(new Slider(30, 1, 100)));
 
+            Menu LastHitMenu = Menu.AddSubMenu(new Menu("Last Hit", "LastHit"));
+            LaneClearMenu.AddItem(new MenuItem("UseQLH", "Use Q to LastHit").SetValue(true));
+            LaneClearMenu.AddItem(new MenuItem("UseELH", "Use E to LastHit").SetValue(true));
+            LaneClearMenu.AddItem(new MenuItem("LaneHitManaManager", "Mana Manager (%)").SetValue(new Slider(30, 1, 100)));
+
             Menu ItemsMenu = Menu.AddSubMenu(new Menu("Items Menu", "ItemsMenu"));
             ItemsMenu.AddItem(new MenuItem("UsePotions", "Use Potions").SetValue(true));
             ItemsMenu.AddItem(new MenuItem("UseSmartPotion", "Use Smart Potion Logic").SetValue(true).SetTooltip("If Enabled, it'll check if enemy's around so it doesn't waste potions."));
@@ -766,11 +771,14 @@ namespace SurvivorRyze
 
         private static void LastHit()
         {
+            var useQ = Menu.Item("UseQLH").GetValue<bool>();
+            var useE = Menu.Item("UseELH").GetValue<bool>();
             // To be Done
-            if (Player.ManaPercent > Menu.Item("LaneClearManaManager").GetValue<Slider>().Value)
+            if (Player.ManaPercent > Menu.Item("LaneHitManaManager").GetValue<Slider>().Value)
             {
                 var allMinionsQ = Cache.GetMinions(Player.ServerPosition, Q.Range, MinionTeam.Enemy);
-                if (Q.IsReady())
+                var allMinionsE = Cache.GetMinions(Player.ServerPosition, E.Range, MinionTeam.Enemy);
+                if (Q.IsReady() && useQ)
                 {
                     if (allMinionsQ.Count > 0)
                     {
@@ -780,11 +788,19 @@ namespace SurvivorRyze
                                 return;
                             if (minion.Health < QGetRealDamage(minion))
                                 Q.Cast(minion.Position);
-                            else if (minion.Health < QGetRealDamage(minion) + Player.GetAutoAttackDamage(minion) && minion.IsValidTarget(SebbyLib.Orbwalking.GetRealAutoAttackRange(minion)))
-                            {
-                                Q.Cast(minion.Position);
-                                Orbwalker.ForceTarget(minion);
-                            }
+                        }
+                    }
+                }
+                else if(E.IsReady() && useE)
+                {
+                    if (allMinionsE.Count > 0)
+                    {
+                        foreach (var minion in allMinionsE)
+                        {
+                            if (!minion.IsValidTarget() || minion == null)
+                                return;
+                            if (minion.Health < E.GetDamage(minion))
+                                E.CastOnUnit(minion);
                         }
                     }
                 }
