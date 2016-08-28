@@ -173,6 +173,7 @@ namespace SurvivorRyze
             DrawingMenu.AddItem(new MenuItem("DrawQ", "Draw Q Range").SetValue(true));
             DrawingMenu.AddItem(new MenuItem("DrawWE", "Draw W/E Range").SetValue(true));
             DrawingMenu.AddItem(new MenuItem("DrawR", "Draw R Range").SetValue(false));
+            DrawingMenu.AddItem(new MenuItem("DrawRMinimap", "Draw R Range | On Minimap").SetValue(true));
 
             Menu.AddToMainMenu();
             #endregion
@@ -203,12 +204,33 @@ namespace SurvivorRyze
 
             #region Subscriptions
             Drawing.OnDraw += Drawing_OnDraw;
+            Drawing.OnEndScene += OnEndScene;
             Game.OnUpdate += Game_OnUpdate;
             Obj_AI_Base.OnLevelUp += Obj_AI_Base_OnLevelUp;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             #endregion
             Game.PrintChat("<font color='#800040'>[SurvivorSeries] Ryze</font> <font color='#ff6600'>Loaded.</font>");
+        }
+
+        private static void OnEndScene(EventArgs args)
+        {
+            switch (R.Level)
+            {
+                case 1:
+                    RangeR = 1750f;
+                    break;
+                case 2:
+                    RangeR = 3000f;
+                    break;
+            }
+
+            if (Menu.Item("DrawRMinimap").GetValue<bool>() && R.Level > 0 && R.IsReady())
+             {
+                #pragma warning disable CS0618 // Type or member is obsolete
+                Utility.DrawCircle(Player.Position, RangeR, Color.DeepPink, 2, 45, true);
+                #pragma warning restore CS0618 // Type or member is obsolete
+            }
         }
 
         private static void Drawing_OnDraw(EventArgs args)
