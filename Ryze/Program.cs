@@ -579,18 +579,18 @@ namespace SurvivorRyze
                 {
                     if (ryzeebuffed.Health < QGetRealDamage(ryzeebuffed))
                     {
-                        Game.PrintChat("<font color='#9400D3'>DEBUG: Spread</font>");
+                        //Game.PrintChat("<font color='#9400D3'>DEBUG: Spread</font>");
                         if (!Q.IsReady() && E.IsReady())
                         {
                             E.CastOnUnit(ryzeebuffed);
                             Q.Cast(ryzeebuffed);
-                            Game.PrintChat("<font color='#9400D3'>DEBUG: Spreading [Reset with E]</font>");
+                            //Game.PrintChat("<font color='#9400D3'>DEBUG: Spreading [Reset with E]</font>");
                         }
                         Q.Cast(ryzeebuffed);
                     }
                     if (target.HasBuff("RyzeE") && target.Distance(ryzeebuffed) < 200 && ryzeebuffed.IsValidTarget(Q.Range))
                     {
-                        Game.PrintChat("<font color='#9400D3'>DEBUG: Got to Part 1</font>");
+                        //Game.PrintChat("<font color='#9400D3'>DEBUG: Got to Part 1</font>");
                         Q.Cast(ryzeebuffed);
                     }
                     else if (!target.HasBuff("RyzeE"))
@@ -598,7 +598,7 @@ namespace SurvivorRyze
                         E.CastOnUnit(target);
                         if (target.Distance(ryzeebuffed) < 200)
                         {
-                            Game.PrintChat("<font color='#9400D3'>DEBUG: Got to Part 2 else</font>");
+                            //Game.PrintChat("<font color='#9400D3'>DEBUG: Got to Part 2 else</font>");
                             Q.Cast(ryzeebuffed);
                         }
                     }
@@ -607,14 +607,14 @@ namespace SurvivorRyze
                 {
                     if (noebuffed != null && noebuffed.IsValidTarget(E.Range) && noebuffed.Health < QGetRealDamage(noebuffed))
                     {
-                        Game.PrintChat("<font color='#9400D3'>DEBUG: Not EBuffed Part 1</font>");
-                        Game.PrintChat("<font color='#9400D3'>DEBUG: Spread Going Deep</font>");
+                        //Game.PrintChat("<font color='#9400D3'>DEBUG: Not EBuffed Part 1</font>");
+                        //Game.PrintChat("<font color='#9400D3'>DEBUG: Spread Going Deep</font>");
                         if (E.IsReady())
                         {
                             E.CastOnUnit(noebuffed);
                             if (Q.IsReady())
                                 Q.Cast(noebuffed);
-                            Game.PrintChat("<font color='#9400D3'>DEBUG: Spreading [Reset with E]</font>");
+                            //Game.PrintChat("<font color='#9400D3'>DEBUG: Spreading [Reset with E]</font>");
                         }
                     }
                 }
@@ -746,7 +746,7 @@ namespace SurvivorRyze
             var HarassUseE = Menu.Item("HarassE").GetValue<bool>();
             // Checks
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-
+            var ryzeebuffed = MinionManager.GetMinions(Player.Position, E.Range).Find(x => x.HasBuff("RyzeE") && x.IsValidTarget(E.Range));
             // If Target's not in Q Range or there's no target or target's invulnerable don't fuck with him
             if (target == null || !target.IsValidTarget(Q.Range) || target.IsInvulnerable)
                 return;
@@ -762,7 +762,11 @@ namespace SurvivorRyze
                 {
                     SebbySpell(Q, target);
                 }
-                if (HarassUseE && target.IsValidTarget(W.Range))
+                if (HarassUseE && ryzeebuffed.IsValidTarget() && target.Distance(ryzeebuffed) < 200)
+                {
+                    E.CastOnUnit(ryzeebuffed);
+                }
+                else if (HarassUseE && (!ryzeebuffed.IsValidTarget() || ryzeebuffed == null) && target.IsValidTarget(W.Range))
                 {
                     E.CastOnUnit(target);
                 }
@@ -831,7 +835,7 @@ namespace SurvivorRyze
                             }
                         }
                     }
-                    if (!Q.IsReady() && E.IsReady())
+                    if ((!Q.IsReady() && Q.Level > 0) && E.IsReady())
                     {
                         if (ryzeebuffed != null)
                         {
