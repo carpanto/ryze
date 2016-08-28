@@ -108,9 +108,9 @@ namespace SurvivorRyze
             LaneClearMenu.AddItem(new MenuItem("LaneClearManaManager", "Mana Manager (%)").SetValue(new Slider(30, 1, 100)));
 
             Menu LastHitMenu = Menu.AddSubMenu(new Menu("Last Hit", "LastHit"));
-            LaneClearMenu.AddItem(new MenuItem("UseQLH", "Use Q to LastHit").SetValue(true));
-            LaneClearMenu.AddItem(new MenuItem("UseELH", "Use E to LastHit").SetValue(true));
-            LaneClearMenu.AddItem(new MenuItem("LaneHitManaManager", "Mana Manager (%)").SetValue(new Slider(30, 1, 100)));
+            LastHitMenu.AddItem(new MenuItem("UseQLH", "Use Q to LastHit").SetValue(true));
+            LastHitMenu.AddItem(new MenuItem("UseELH", "Use E to LastHit").SetValue(true));
+            LastHitMenu.AddItem(new MenuItem("LaneHitManaManager", "Mana Manager (%)").SetValue(new Slider(30, 1, 100)));
 
             Menu ItemsMenu = Menu.AddSubMenu(new Menu("Items Menu", "ItemsMenu"));
             ItemsMenu.AddItem(new MenuItem("UsePotions", "Use Potions").SetValue(true));
@@ -865,7 +865,7 @@ namespace SurvivorRyze
                     {
                         if (ryzeebuffed != null)
                         {
-                            if (ryzeebuffed.Health < Q.GetDamage(ryzeebuffed) + E.GetDamage(ryzeebuffed) + Q.GetDamage(ryzeebuffed) + 20 && ryzeebuffed.IsValidTarget(E.Range))
+                            if (ryzeebuffed.Health < Q.GetDamage(ryzeebuffed) + E.GetDamage(ryzeebuffed) + Q.GetDamage(ryzeebuffed) && ryzeebuffed.IsValidTarget(E.Range))
                             {
                                 Q.Cast(ryzeebuffed);
                                 if (ryzeebuffed.IsValidTarget(E.Range))
@@ -878,7 +878,7 @@ namespace SurvivorRyze
                         }
                         else if (ryzeebuffed == null)
                         {
-                            if (ryzenotebuffed.Health < Q.GetDamage(ryzenotebuffed) + E.GetDamage(ryzenotebuffed) + Q.GetDamage(ryzenotebuffed) + 20 && ryzenotebuffed.IsValidTarget(E.Range))
+                            if (ryzenotebuffed.Health < Q.GetDamage(ryzenotebuffed) + E.GetDamage(ryzenotebuffed) + Q.GetDamage(ryzenotebuffed) && ryzenotebuffed.IsValidTarget(E.Range))
                             {
                                 Q.Cast(ryzenotebuffed);
                                 if (ryzenotebuffed.IsValidTarget(E.Range))
