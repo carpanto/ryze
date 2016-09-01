@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using hsCamera.Handlers;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
@@ -14,97 +16,72 @@ namespace hsCamera
             CustomEvents.Game.OnGameLoad += HsCameraOnLoad;
         }
 
-        private static Menu _config;
+        private static Obj_AI_Hero Player { get { return ObjectManager.Player; } }
+        public static Menu _config;
+        public static List<Obj_AI_Hero> HeroList => HeroManager.Enemies.ToList();
 
+        private static void AddChampionMenu()
+        {
+            for (int i = 0; i < HeroList.Count; i++)
+            {
+                _config.AddItem(new MenuItem("enemies" + HeroList[i].ChampionName, "Show Enemy -> (" + HeroList[i].ChampionName + ")")
+                    .SetValue(new KeyBind(Convert.ToUInt32(96 + i), KeyBindType.Press)));
+
+                _config.Item("enemies"+ HeroList[i].ChampionName).ValueChanged += (sender, e) =>
+                 {
+                     if (e.GetNewValue<KeyBind>().Active == e.GetOldValue<KeyBind>().Active) return;
+                     if (e.GetNewValue<KeyBind>().Active == false) CameraMovement.SemiDynamic(Player.Position);
+                 };
+            }
+        }
+
+        /// <summary>
+        /// Amazing OnLoad :jew:
+        /// </summary>
+        /// <param name="args"></param>
         private static void HsCameraOnLoad(EventArgs args)
         {
-            _config = new Menu("hsCamera", "hsCamera", true);
+            _config = new Menu("hsCamera [Official]", "hsCamera", true);
             {
-                _config.AddItem(new MenuItem("show.enemy.1", "Show Enemy 1 Location").SetValue(new KeyBind(97, KeyBindType.Press)));
-                _config.AddItem(new MenuItem("show.enemy.2", "Show Enemy 2 Location").SetValue(new KeyBind(98, KeyBindType.Press)));
-                _config.AddItem(new MenuItem("show.enemy.3", "Show Enemy 3 Location").SetValue(new KeyBind(99, KeyBindType.Press)));
-                _config.AddItem(new MenuItem("show.enemy.4", "Show Enemy 4 Location").SetValue(new KeyBind(100, KeyBindType.Press)));
-                _config.AddItem(new MenuItem("show.enemy.5", "Show Enemy 5 Location").SetValue(new KeyBind(101, KeyBindType.Press)));
-                _config.AddItem(new MenuItem("semi.dynamic", "Semi-Dynamic Camera?").SetValue(new KeyBind(32, KeyBindType.Press))); //SPACEBAR
-                _config.AddItem(new MenuItem("follow.dynamic", "Follow-Champion Camera?").SetValue(new KeyBind(17, KeyBindType.Press))); //CTRL
+                AddChampionMenu();
+                _config.AddItem(
+                    new MenuItem("semi.dynamic", "Semi-Dynamic Camera?").SetValue(new KeyBind(32, KeyBindType.Press)))
+                    .ValueChanged += (sender, e) =>
+                    {
+                        if (e.GetNewValue<KeyBind>().Active == e.GetOldValue<KeyBind>().Active) return;
+                        if (e.GetNewValue<KeyBind>().Active == false) CameraMovement.SemiDynamic(Player.Position);
+                    };
+                _config.AddItem(new MenuItem("follow.dynamic", "Follow-Champion Camera?").SetValue(new KeyBind(17, KeyBindType.Press)));
+                _config.AddItem(new MenuItem("dynamicmode", "Camera Mode?").SetValue(new StringList(new[] { "Normal", "Follow Cursor", "Follow Teamfights" }, 2)));
+
+                _config.AddItem(new MenuItem("LastHit", "Last Hit").SetShared().SetValue(new KeyBind('X', KeyBindType.Press)));
+                _config.AddItem(new MenuItem("LaneClear", "LaneClear").SetShared().SetValue(new KeyBind('V', KeyBindType.Press)));
+                _config.AddItem(new MenuItem("Orbwalk", "Combo").SetShared().SetValue(new KeyBind(32, KeyBindType.Press)));
+                _config.AddItem(new MenuItem("credits", "                      .:Official Version of hsCamera:.")).SetFontStyle(System.Drawing.FontStyle.Bold, SharpDX.Color.DeepPink);
                 _config.AddToMainMenu();
             }
             Game.OnUpdate += HsCameraOnUpdate;
         }
 
+        
+
         private static void HsCameraOnUpdate(EventArgs args)
         {
-            if (_config.Item("show.enemy.1").GetValue<KeyBind>().Active)
-            {
-                var enemylist = HeroManager.Enemies.ToList();
-                if (enemylist[0].IsValid && enemylist[0] != null && enemylist[0].IsChampion())
-                {
-                    var position = enemylist[0].Position;
-                    Camera.Position = position;
-                }
-            }
-            if (_config.Item("show.enemy.2").GetValue<KeyBind>().Active)
-            {
-                var enemylist = HeroManager.Enemies.ToList();
-                if (enemylist[1].IsValid && enemylist[1] != null && enemylist[1].IsChampion())
-                {
-                    var position = enemylist[1].Position;
-                    Camera.Position = position;
-                }
-            }
-            if (_config.Item("show.enemy.3").GetValue<KeyBind>().Active)
-            {
-                var enemylist = HeroManager.Enemies.ToList();
-                if (enemylist[2].IsValid && enemylist[2] != null && enemylist[2].IsChampion())
-                {
-                    var position = enemylist[2].Position;
-                    Camera.Position = position;
-                }
-            }
-            if (_config.Item("show.enemy.4").GetValue<KeyBind>().Active)
-            {
-                var enemylist = HeroManager.Enemies.ToList();
-                if (enemylist[3].IsValid && enemylist[3] != null && enemylist[3].IsChampion())
-                {
-                    var position = enemylist[3].Position;
-                    Camera.Position = position;
-                }
-            }
-            if (_config.Item("show.enemy.5").GetValue<KeyBind>().Active)
-            {
-                var enemylist = HeroManager.Enemies.ToList();
-                if (enemylist[4].IsValid && enemylist[4] != null && enemylist[4].IsChampion())
-                {
-                    var position = enemylist[4].Position;
-                    Camera.Position = position;
-                }
-            }
+            AllModes.AllModes.CameraMode();
 
-            if (_config.Item("semi.dynamic").GetValue<KeyBind>().Active)
+            for (int i = 0; i < HeroList.Count; i++)
             {
-                SemiDynamic(Game.CursorPos);
+                if (_config.Item("enemies"+ HeroList[i].ChampionName).GetValue<KeyBind>().Active)
+                {
+                    if (HeroList[i].IsValid && HeroList[i] != null)
+                    {
+                        var position = HeroList[i].Position;
+                        Camera.Position = position;
+                    }
+                }
             }
-
-            if (_config.Item("follow.dynamic").GetValue<KeyBind>().Active)
-            {
-                SemiDynamic(ObjectManager.Player.Position);
-            }
+            
         }
-
-        private static void SemiDynamic(Vector3 position)
-        {
-            var distance = Camera.Position.Distance(position);
-
-
-            if (distance <= 1)
-            {
-                return;
-            }
-
-            var speed = Math.Max(0.2f, Math.Min(20, distance * 0.0007f * 20));
-            var direction = (position - Camera.Position).Normalized() * (speed);
-
-            Camera.Position = direction + Camera.Position;
-        }
+        
     }
 }
