@@ -3,22 +3,35 @@ using LeagueSharp.Common;
 
 namespace hsCamera.AllModes
 {
-    class AllModes : Program
+    internal class AllModes : Program
     {
         public static void CameraMode()
         {
-            if (_config.Item("LastHit").GetValue<KeyBind>().Active)
+            if (_config.Item("CLH").GetValue<KeyBind>().Active)
             {
                 Modes.FarmTracker();
             }
-            if (_config.Item("LaneClear").GetValue<KeyBind>().Active)
+            if (_config.Item("CLC").GetValue<KeyBind>().Active)
             {
                 Modes.FarmTracker();
             }
-            if (_config.Item("Orbwalk").GetValue<KeyBind>().Active)
+            if (_config.Item("CCombo").GetValue<KeyBind>().Active)
             {
-                Modes.EnemyTracker();
+                switch (_config.Item("dynamicmode").GetValue<StringList>().SelectedIndex)
+                {
+                    case 0:
+                        Modes.Normal();
+                        break;
+                    case 1:
+                        Modes.FollowCursor();
+                        break;
+                    case 2:
+                        Modes.EnemyTracker();
+                        break;
+                }
             }
+
+
         }
     }
 }

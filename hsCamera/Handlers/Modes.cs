@@ -1,25 +1,37 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 
 namespace hsCamera.Handlers
 {
-    class Modes : Program
+    internal class Modes : Program
     {
+        public static float IsRanged()
+        {
+            if (ObjectManager.Player.IsRanged)
+            {
+                return ObjectManager.Player.AttackRange;
+            }
+            else
+            {
+                return 330f;
+            }
+        }
         public static void EnemyTracker()
         {
             foreach (var enemy in HeroManager.Enemies.OrderBy(x => x.Distance(ObjectManager.Player.Position))
-                .Where(x => x.IsValidTarget(ObjectManager.Player.AttackRange + 100)))
+                .Where(x => x.IsValidTarget(IsRanged())))
             {
-                CameraMovement.SemiDynamic(enemy.Position);
+                CameraMovement.SemiDynamic(ObjectManager.Player.Position.Extend(enemy.Position, IsRanged()));
             }
-            CameraMovement.SemiDynamic(ObjectManager.Player.Position.Extend(Game.CursorPos, ObjectManager.Player.AttackRange));
+            CameraMovement.SemiDynamic(ObjectManager.Player.Position.Extend(Game.CursorPos, IsRanged()));
         }
 
         public static void FarmTracker()
         {
             var minions = MinionManager.GetMinions(ObjectManager.Player.Position,
-                (ObjectManager.Player.AttackRange + 100),
+                (IsRanged()),
                 MinionTypes.All, MinionTeam.NotAlly, MinionOrderTypes.Health)
                 .OrderBy(x => x.Distance(ObjectManager.Player.Position));
 
@@ -27,7 +39,21 @@ namespace hsCamera.Handlers
             {
                 CameraMovement.SemiDynamic(minion.Position);
             }
-            CameraMovement.SemiDynamic(ObjectManager.Player.Position.Extend(Game.CursorPos, ObjectManager.Player.AttackRange));
+            CameraMovement.SemiDynamic(ObjectManager.Player.Position.Extend(Game.CursorPos, IsRanged()));
+        }
+
+        public static void FollowCursor()
+        {
+            if (_config.Item("dynamicmode").GetValue<StringList>().SelectedIndex == 1)
+            {
+                CameraMovement.SemiDynamic(ObjectManager.Player.Position.Extend(Game.CursorPos,
+                    _config.Item("followoffset").GetValue<Slider>().Value));
+            }
+        }
+
+        public static void Normal()
+        {
+            CameraMovement.SemiDynamic(ObjectManager.Player.Position);
         }
     }
 }

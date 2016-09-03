@@ -9,7 +9,7 @@ using SharpDX;
 
 namespace hsCamera.Handlers
 {
-    class CameraMovement : Program
+    internal class CameraMovement : Program
     {
         public static void SemiDynamic(Vector3 position)
         {
@@ -32,13 +32,13 @@ namespace hsCamera.Handlers
                     break;
                 case 1:
                     {
-                        var direction = (position - Camera.Position).Normalized() * (22.3f);
+                        var direction = (position - Camera.Position).Normalized() * (_config.Item("followcurspeed").GetValue<Slider>().Value);
                         Camera.Position = direction + Camera.Position;
                     }
                     break;
                 case 2:
                     {
-                        var direction = (position - Camera.Position).Normalized() * (15.2f);
+                        var direction = (position - Camera.Position).Normalized() * (_config.Item("followtfspeed").GetValue<Slider>().Value);
                         Camera.Position = direction + Camera.Position;
                     }
                     break;
