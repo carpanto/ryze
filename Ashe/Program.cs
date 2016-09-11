@@ -76,6 +76,9 @@ namespace SurvivorAshe
 
             Menu UltimateMenu = Menu.AddSubMenu(new Menu("Ultimate Menu", "UltimateMenu"));
             UltimateMenu.AddItem(new MenuItem("InstaRSelectedTarget", "Instantly Ult [Selected Target] or Nearby").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)).SetTooltip("It'll Use the Ultimate if there's Enemy selected or enemy nearby.")).Permashow(true, "[Ashe]Insta Ult");
+            UltimateMenu.AddItem(
+                new MenuItem("DontUltEnemyIfAllyNearby", "Don't Ult if Ally is Near Almost Dead Enemy").SetValue(false));
+
 
             Menu MiscMenu = Menu.AddSubMenu(new Menu("Misc Menu", "MiscMenu"));
             MiscMenu.AddItem(new MenuItem("KillSteal", "Activate KillSteal?").SetValue(true));
@@ -313,10 +316,8 @@ namespace SurvivorAshe
                         LaneClear();
                     }
                     break;
-                case SebbyLib.Orbwalking.OrbwalkingMode.None:
-                    KSAshe();
-                    break;
             }
+            KSAshe();
 
             if (Menu.Item("InstaRSelectedTarget").GetValue<KeyBind>().Active)
             {
@@ -371,6 +372,19 @@ namespace SurvivorAshe
             }
         }
 
+        private static void DontREnemyNearAlly()
+        {
+            if (Menu.Item("DontUltEnemyIfAllyNearby").GetValue<bool>())
+            {
+                var enemy =
+                    HeroManager.Enemies.Where(
+                        x => x.IsValidTarget() && x.HealthPercent < 20 && x.CountAlliesInRange(500) > 0);
+
+                if (enemy == null || enemy != null)
+                    return;
+            }
+        }
+
         private static void KSAshe()
         {
             if (Menu.Item("KillSteal").GetValue<bool>())
@@ -379,13 +393,9 @@ namespace SurvivorAshe
 
                 if (target.IsValidTarget(W.Range) && target.Health < W.GetDamage(target) + R.GetDamage(target) + OktwCommon.GetIncomingDamage(target))
                 {
-                    if (!OktwCommon.IsSpellHeroCollision(target, R))
-                        SebbySpell(R, target);
+                    DontREnemyNearAlly();
                     if (!target.CanMove || target.IsStunned)
                         W.Cast(target.Position);
-                }
-                if (target.IsValidTarget(1600) && target.Health < R.GetDamage(target) + OktwCommon.GetIncomingDamage(target))
-                {
                     if (!OktwCommon.IsSpellHeroCollision(target, R))
                         SebbySpell(R, target);
                 }
@@ -399,6 +409,12 @@ namespace SurvivorAshe
                     {
                         W.Cast(target.Position);
                     }
+                }
+                if (target.IsValidTarget(1600) && target.Health < R.GetDamage(target) + OktwCommon.GetIncomingDamage(target))
+                {
+                    DontREnemyNearAlly();
+                    if (!OktwCommon.IsSpellHeroCollision(target, R))
+                        SebbySpell(R, target);
                 }
                 // More to be Added
             }
@@ -417,6 +433,7 @@ namespace SurvivorAshe
                     Q.Cast();
                 if (Menu.Item("ComboUseW").GetValue<bool>() && W.IsReady() && Player.Mana > W.Instance.ManaCost + R.Instance.ManaCost && target.IsValidTarget(W.Range))
                     SebbySpell(W, target);
+                DontREnemyNearAlly();
                 foreach (var ulttarget in HeroManager.Enemies.Where(ulttarget => target.IsValidTarget(2000) && OktwCommon.ValidUlt(ulttarget)))
                 {
                     if (Menu.Item("ComboUseR").GetValue<bool>() && target.IsValidTarget(W.Range) && target.Health < W.GetDamage(target) + R.GetDamage(target) + 3 * Player.GetAutoAttackDamage(target) + OktwCommon.GetIncomingDamage(target) && !target.HasBuff("rebirth"))
