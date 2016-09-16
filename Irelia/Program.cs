@@ -15,6 +15,7 @@ using LeagueSharp.Data;
 using SharpDX;
 using SebbyLib;
 using ItemData = LeagueSharp.Common.Data.ItemData;
+using Orbwalking = SebbyLib.Orbwalking;
 
 namespace SVIrelia
 {
@@ -149,6 +150,7 @@ namespace SVIrelia
                     drawingmenu.AddItem(new MenuItem("DrawQ", "Draw (Q) Range").SetValue(true));
                     drawingmenu.AddItem(new MenuItem("DrawR", "Draw (R) Range").SetValue(true));
                     drawingmenu.AddItem(new MenuItem("DrawStunnable", "Draw Stunnable?").SetValue(true));
+                    drawingmenu.AddItem(new MenuItem("QMinionDrawHelper", "Draw Q Circle on Minion if killable?").SetValue(true));
                     Menu.AddSubMenu(drawingmenu);
                 }
                 var miscmenu = new Menu(":: Misc Menu", "miscmenu");
@@ -198,19 +200,19 @@ namespace SVIrelia
         {
             float damage = 0;
 
-            if (Q.IsReady() && Player.Mana > Q.Instance.ManaCost)
+            if (Q.Instance.IsReady() && Player.Mana > Q.Instance.ManaCost)
             {
                 damage += Q.GetDamage(enemy) + GetSheenDamage(enemy);
             }
-            if (W.IsReady() && Player.Mana > W.Instance.ManaCost)
+            if (W.Instance.IsReady() && Player.Mana > W.Instance.ManaCost)
             {
                 damage += W.GetDamage(enemy);
             }
-            if (E.IsReady() && Player.Mana > E.Instance.ManaCost)
+            if (E.Instance.IsReady() && Player.Mana > E.Instance.ManaCost)
             {
                 damage += E.GetDamage(enemy);
             }
-            if (HasRBuff() || R.IsReady())
+            if (HasRBuff() || R.Instance.IsReady())
             {
                 damage += R.GetDamage(enemy);
             }
@@ -225,17 +227,13 @@ namespace SVIrelia
         /// <param name="args"></param>
         private static void OnUpdate(EventArgs args)
         {
-            var target = TargetSelector.GetTarget(900, TargetSelector.DamageType.Physical);
-            if (target == null || !target.IsValidTarget())
-                return;
-
             switch (Orbwalker.ActiveMode)
             {
                     case SebbyLib.Orbwalking.OrbwalkingMode.Combo:
                     Combo();
                     break;
                     case SebbyLib.Orbwalking.OrbwalkingMode.LaneClear:
-                    //JungleClear();
+                    JungleClear();
                     LaneClear();
                     break;
                     case SebbyLib.Orbwalking.OrbwalkingMode.Mixed:
@@ -243,6 +241,35 @@ namespace SVIrelia
                     break;
             }
             KSChecking();
+        }
+
+        private static void JungleClear()
+        {
+            if (Player.ManaPercent < Menu.Item("JungleClearManaManager").GetValue<Slider>().Value)
+                return;
+
+            var jgcq = Menu.Item("JGCQ").GetValue<bool>();
+            var jgcw = Menu.Item("JGCW").GetValue<bool>();
+            var jgce = Menu.Item("JGCE").GetValue<bool>();
+
+            var mob = MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth).FirstOrDefault();
+            if (mob == null)
+            {
+                return;
+            }
+
+            if (jgcq && Q.Instance.IsReady())
+            {
+                Q.CastOnUnit(mob);
+            }
+            if (jgce && E.Instance.IsReady())
+            {
+                E.CastOnUnit(mob);
+            }
+            if (jgcw && W.Instance.IsReady())
+            {
+                W.Cast();
+            }
         }
 
         /// <summary>
@@ -257,6 +284,20 @@ namespace SVIrelia
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Chartreuse);
             if (Menu.Item("DrawR").GetValue<bool>() && R.Level > 0 && R.Instance.IsReady())
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.DeepPink);
+
+            if (Menu.Item("QMinionDrawHelper").GetValue<bool>())
+            {
+                foreach (
+                    var creature in
+                    ObjectManager.Get<Obj_AI_Minion>()
+                        .Where(
+                            x =>
+                                x.Name.ToLower().Contains("minion") && x.IsHPBarRendered && x.IsValidTarget(1000) &&
+                                x.Health < Q.GetDamage(x) + GetSheenDamage(x) && x.IsEnemy))
+                {
+                    Render.Circle.DrawCircle(creature.Position, 35, System.Drawing.Color.Chartreuse);
+                }
+            }
 
             if (!Menu.Item("DrawStunnable").GetValue<bool>())
                 return;
@@ -376,9 +417,9 @@ namespace SVIrelia
             if (target.IsValidTarget(Q.Range) && !target.IsValidTarget(Player.AttackRange) && Q.IsReady() && useq)
             {
                 Q.CastOnUnit(target);
-                if (E.IsReady() && target.IsValidTarget(E.Range) && usee)
+                if (E.Instance.IsReady() && target.IsValidTarget(E.Range) && usee)
                     E.CastOnUnit(target);
-                if (W.IsReady() && usew && target.IsValidTarget(Player.AttackRange)) // Yes lads E.Range is intentionally here :gosh:
+                if (W.Instance.IsReady() && usew && target.IsValidTarget(Player.AttackRange)) // Yes lads E.Range is intentionally here :gosh:
                     W.Cast();
                 if (target.IsValidTarget(R.Range) && useR)
                 {
@@ -393,13 +434,13 @@ namespace SVIrelia
             }
             else if (target.IsValidTarget(E.Range))
             {
-                if (Q.IsReady() && useq)
+                if (Q.Instance.IsReady() && useq)
                     Q.CastOnUnit(target);
-                if (E.IsReady() && usee && target.IsValidTarget(E.Range))
+                if (E.Instance.IsReady() && usee && target.IsValidTarget(E.Range))
                     E.CastOnUnit(target);
-                if (W.IsReady() && usew && target.IsValidTarget(Player.AttackRange)) // Yes lads E.Range is intentionally here :gosh:
+                if (W.Instance.IsReady() && usew && target.IsValidTarget(Player.AttackRange)) // Yes lads E.Range is intentionally here :gosh:
                     W.Cast();
-                if (R.IsReady() && useR && target.IsValidTarget(R.Range))
+                if (R.Instance.IsReady() && useR && target.IsValidTarget(R.Range))
                 {
                     var pred = R.GetPrediction(target);
                     if (pred.Hitchance >= HitChance.High)
@@ -411,41 +452,6 @@ namespace SVIrelia
                 }
             }
         }
-
-        /// <summary>
-        /// Jungle Clear
-        /// </summary>
-        /*private static void JungleClear()
-        {
-            if (Player.ManaPercent < Menu.Item("JungleClearManaManager").GetValue<Slider>().Value)
-                return;
-
-            var jgcq = Menu.Item("JGCQ").GetValue<bool>();
-            var jgcw = Menu.Item("JGCW").GetValue<bool>();
-            var jgce = Menu.Item("JGCE").GetValue<bool>();
-
-            var orbwalkerTarget = Orbwalker.GetTarget();
-            var minion = orbwalkerTarget as Obj_AI_Minion;
-
-            var junglemobs = Cache.GetMinions(Player.Position, Q.Range, MinionTeam.Neutral)
-                        .OrderByDescending(x => x.MaxHealth)
-                        .FirstOrDefault();
-
-            if (junglemobs == null || minion == null)
-                return;
-
-            if (minion.Team == GameObjectTeam.Neutral)
-            {
-                if (jgcq && Q.IsReady())
-                    Q.CastOnUnit(minion);
-
-                if (jgcw && W.IsReady() && junglemobs.Distance(Player.Position) <= 125)
-                    W.Cast();
-
-                if (jgce && E.IsReady() && junglemobs.IsValidTarget(E.Range))
-                    E.CastOnUnit(minion);
-            }
-        }*/
 
         /// <summary>
         /// LaneClear Mode
@@ -468,7 +474,7 @@ namespace SVIrelia
             if (minionq == null)
                 return;
 
-            if (lcq && Q.IsReady())
+            if (lcq && Q.Instance.IsReady())
             {
                 Q.CastOnUnit(minionq);
             }
@@ -478,9 +484,9 @@ namespace SVIrelia
 
             foreach (var minion in minionwe)
             {
-                if (W.IsReady() && lcw && minion.HealthPercent > 5 && minionwe.Count > lcwslider)
+                if (W.Instance.IsReady() && lcw && minion.HealthPercent > 5 && minionwe.Count > lcwslider)
                     W.Cast();
-                if (E.IsReady() && lce && minion.Health < E.GetDamage(minion) && lce)
+                if (E.Instance.IsReady() && lce && minion.Health < E.GetDamage(minion) && lce)
                     E.CastOnUnit(minion);
             }
         }
