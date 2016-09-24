@@ -54,28 +54,25 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="clipper_library">
-      <HintPath>C:\Program Files (x86)\LeagueSharp\System\clipper_library.dll</HintPath>
+      <HintPath>F:\Program Files\SMMbu06D\References\clipper_library.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp">
-      <HintPath>C:\Program Files (x86)\LeagueSharp\System\LeagueSharp.dll</HintPath>
+      <HintPath>F:\Program Files\SMMbu06D\References\LeagueSharp.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Common">
-      <HintPath>C:\Program Files (x86)\LeagueSharp\System\LeagueSharp.Common.dll</HintPath>
+      <HintPath>F:\Program Files\SMMbu06D\References\LeagueSharp.Common.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Data">
-      <HintPath>C:\Program Files (x86)\LeagueSharp\System\LeagueSharp.Data.dll</HintPath>
+      <HintPath>F:\Program Files\SMMbu06D\References\LeagueSharp.Data.dll</HintPath>
     </Reference>
     <Reference Include="SebbyLib">
-      <HintPath>C:\Program Files (x86)\LeagueSharp\System\SebbyLib.dll</HintPath>
+      <HintPath>F:\Program Files\SMMbu06D\References\SebbyLib.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>C:\Program Files (x86)\LeagueSharp\System\SharpDX.dll</HintPath>
+      <HintPath>F:\Program Files\SMMbu06D\References\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
-      <HintPath>C:\Program Files (x86)\LeagueSharp\System\SharpDX.Direct3D9.dll</HintPath>
-    </Reference>
-    <Reference Include="SPrediction">
-      <HintPath>C:\Program Files (x86)\LeagueSharp\System\SPrediction.dll</HintPath>
+      <HintPath>F:\Program Files\SMMbu06D\References\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
