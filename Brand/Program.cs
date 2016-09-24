@@ -193,6 +193,28 @@ namespace SurvivorBrand
             //SebbyLib.OktwCommon.blockAttack = Menu.Item("CBlockAA").GetValue<bool>();
         }
 
+        private static void JungleClear()
+        {
+            if (Player.ManaPercent < Menu.Item("JungleClearManaManager").GetValue<Slider>().Value)
+                return;
+            var jgcq = Menu.Item("UseQJC").GetValue<bool>();
+            var jgcw = Menu.Item("UseWJC").GetValue<bool>();
+            var jgce = Menu.Item("UseEJC").GetValue<bool>();
+
+            var mob =
+                MinionManager.GetMinions(Player.ServerPosition, W.Range, MinionTypes.All, MinionTeam.Neutral,
+                    MinionOrderTypes.MaxHealth).FirstOrDefault();
+            if (mob == null)
+                return;
+
+            if (jgcw && W.IsReady())
+                W.Cast(mob.Position);
+            if (jgcq && Q.IsReady())
+                Q.Cast(mob);
+            if (jgce && E.IsReady())
+                E.CastOnUnit(mob);
+        }
+
         private static void OnUpdate(EventArgs args)
         {
             if (Player.IsDead || Player.IsRecalling())
@@ -206,7 +228,10 @@ namespace SurvivorBrand
                 Combo();
             //Lane
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear) // LaneClear mode broken? kappa
+            {
+                JungleClear();
                 LaneClear();
+            }
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed)
             {
                 AABlock();
