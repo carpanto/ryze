@@ -82,6 +82,10 @@ namespace SurvivorRyze
             HarassMenu.AddItem(new MenuItem("HarassManaManager", "Mana Manager (%)").SetValue(new Slider(30, 1, 100)));
 
             var LaneClearMenu = Menu.AddSubMenu(new Menu("Lane Clear", "LaneClear"));
+            LaneClearMenu.AddItem(
+                    new MenuItem("EnableFarming", "Enable Farming with Spells?").SetValue(true)
+                        .SetTooltip("You either change the value here by clicking or by Scrolling Down using the mouse"))
+                .Permashow(true, "Farming with Spells?");
             LaneClearMenu.AddItem(new MenuItem("UseQLC", "Use Q to LaneClear").SetValue(true));
             LaneClearMenu.AddItem(new MenuItem("UseELC", "Use E to LaneClear").SetValue(true));
             LaneClearMenu.AddItem(
@@ -212,10 +216,19 @@ namespace SurvivorRyze
             Obj_AI_Base.OnLevelUp += Obj_AI_Base_OnLevelUp;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
+            Game.OnWndProc += OnWndProc;
 
             #endregion
 
             Game.PrintChat("<font color='#800040'>[SurvivorSeries] Ryze</font> <font color='#ff6600'>Loaded.</font>");
+        }
+
+        private static void OnWndProc(WndEventArgs args)
+        {
+            if (args.Msg == 0x20a)
+            {
+                Menu.Item("EnableFarming").SetValue(!Menu.Item("EnableFarming").GetValue<bool>());
+            }
         }
 
         private static void OnEndScene(EventArgs args)
@@ -834,6 +847,9 @@ namespace SurvivorRyze
 
         private static void LaneClear()
         {
+            if (!Menu.Item("EnableFarming").GetValue<bool>())
+                return;
+
             // LaneClear | Notes: Rework on early levels not using that much abilities since Spell Damage is lower, higher Lvl is fine
             if (Menu.Item("UseQLC").GetValue<bool>() || Menu.Item("UseELC").GetValue<bool>())
                 if (Player.ManaPercent > Menu.Item("LaneClearManaManager").GetValue<Slider>().Value)
