@@ -341,7 +341,7 @@ namespace SVIrelia
             }
             else if (Items.HasItem(3100, Player))
             {
-                if (LichBane.IsReady())
+                if (Items.CanUseItem(3100))
                     totalDamage +=
                         (float)
                         Player.CalcDamage(target, Damage.DamageType.Magical,
