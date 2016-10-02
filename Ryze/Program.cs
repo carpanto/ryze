@@ -818,6 +818,17 @@ namespace SurvivorRyze
             // To be Done
             if (Player.ManaPercent > Menu.Item("LaneHitManaManager").GetValue<Slider>().Value)
             {
+                var specialQ = Cache.GetMinions(Player.Position, Q.Range, MinionTeam.Enemy).OrderBy(x => x.Distance(Player.Position));
+                if (Q.IsReady() && useQ)
+                {
+                    foreach (var omfgabriel in specialQ)
+                    {
+                        if (omfgabriel.Health < QGetRealDamage(omfgabriel))
+                        {
+                            Q.Cast(omfgabriel);
+                        }
+                    }
+                }
                 var allMinionsQ = Cache.GetMinions(Player.ServerPosition, Q.Range, MinionTeam.Enemy);
                 var allMinionsE = Cache.GetMinions(Player.ServerPosition, E.Range, MinionTeam.Enemy);
                 if (Q.IsReady() && useQ)
@@ -828,7 +839,7 @@ namespace SurvivorRyze
                             if (!minion.IsValidTarget() || (minion == null))
                                 return;
                             if (minion.Health < QGetRealDamage(minion))
-                                Q.Cast(minion.Position);
+                                Q.Cast(minion);
                         }
                 }
                 else if (E.IsReady() && useE)
