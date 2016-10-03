@@ -22,7 +22,7 @@ namespace SurvivorSeriesAIO.VersionCheck
                     {
                         var rawVersion =
                             c.DownloadString(
-                                "https://raw.githubusercontent.com/iamveto/vSeries/master/vSupportSeries/Properties/AssemblyInfo.cs");
+                                "https://raw.githubusercontent.com/SupportExTraGoZ/LeagueSharp/master/SurvivorSeriesAIO/Properties/AssemblyInfo.cs");
                         var match =
                             new Regex(@"\[assembly\: AssemblyVersion\(""(\d{1,})\.(\d{1,})\.(\d{1,})\.(\d{1,})""\)\]")
                                 .Match(rawVersion);
@@ -34,15 +34,11 @@ namespace SurvivorSeriesAIO.VersionCheck
                                     match.Groups[3], match.Groups[4]));
 
                             if (gitVersion != typeof(Program).Assembly.GetName().Version)
-                            {
                                 Game.PrintChat("<font color='#0993F9'>[SS Updater]</font> <font color='#FF0000'>" +
                                                "OUTDATED - Please Update to Version: " + gitVersion + "</font>");
-                            }
                             else
-                            {
                                 Game.PrintChat("<font color='#0993F9'>[SS Updater]</font> <font color='#FF8800'>" +
                                                "UPDATED - Version: " + gitVersion + "</font>");
-                            }
                         }
                     }
                 }

@@ -17,10 +17,8 @@ namespace SurvivorSeriesAIO.Utility
             Game.OnUpdate += Game_OnGameUpdate;
             Obj_AI_Base.OnLevelUp += Obj_AI_Base_OnLevelUp;
             if ((lvl2 == lvl3) || (lvl2 == lvl4) || (lvl3 == lvl4))
-            {
                 Game.PrintChat(
                     "<font color='#0993F9'>[SS AutoLeveler]</font> <font color='#FF8800'>Please select abilities to level up first.</font>");
-            }
         }
 
         public Configuration Config { get; }

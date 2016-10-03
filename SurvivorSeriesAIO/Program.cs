@@ -8,6 +8,11 @@ namespace SurvivorSeriesAIO
 {
     internal class Program
     {
+        /// <summary>
+        ///     SurvivorSeries AIO NEWS
+        /// </summary>
+        public static string SSNews = "Anti-Gapcloser [Soon]";
+
         public static IRootMenu RootMenu { get; set; }
 
         public static IChampion Champion { get; set; }
@@ -15,11 +20,6 @@ namespace SurvivorSeriesAIO
         public static IActivator Activator { get; set; }
 
         private static Obj_AI_Hero Player => ObjectManager.Player;
-
-        /// <summary>
-        /// SurvivorSeries AIO NEWS
-        /// </summary>
-        public static string SSNews = "Anti-Gapcloser [Soon]";
 
         private static void Main(string[] args)
         {
@@ -38,6 +38,7 @@ namespace SurvivorSeriesAIO
                 "<font color='#0993F9'>[SurvivorSeries AIO]</font> <font color='#FF8800'>Successfully Loaded.</font>");
 
             Game.PrintChat("<font color='#b756c5'>[SurvivorSeries] NEWS: </font>" + SSNews);
+
             #endregion
 
             RootMenu = new RootMenu("SurvivorSeries AIO");
