@@ -90,6 +90,9 @@ namespace SurvivorSeriesAIO.Champions
 
         private void OnWndProc(WndEventArgs args)
         {
+            if (!Config.EnableScrollToFarm.GetValue<bool>())
+                return;
+
             if (args.Msg == 0x20a)
                 Config.EnableFarming.SetValue(!Config.EnableFarming.GetValue<bool>());
         }
@@ -263,9 +266,9 @@ namespace SurvivorSeriesAIO.Champions
         private void ComboPlusCheck()
         {
             // Combo
-            var CUseQ = Config.CUseQ.GetValue<bool>();
+            var CUseQ = Config.ComboQUse.GetValue<bool>();
             //var CUseW = Menu.Item("CUseW").GetValue<bool>();
-            var CUseE = Config.CUseE.GetValue<bool>();
+            var CUseE = Config.ComboEUse.GetValue<bool>();
             // Checks
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
@@ -324,9 +327,9 @@ namespace SurvivorSeriesAIO.Champions
         private void Combo()
         {
             // Combo
-            var ComUseQ = Config.CUseQ.GetValue<bool>();
-            var ComUseW = Config.CUseW.GetValue<bool>();
-            var ComUseE = Config.CUseE.GetValue<bool>();
+            var ComUseQ = Config.ComboQUse.GetValue<bool>();
+            var ComUseW = Config.ComboWUse.GetValue<bool>();
+            var ComUseE = Config.ComboEUse.GetValue<bool>();
             // Checks
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
 
@@ -663,11 +666,11 @@ namespace SurvivorSeriesAIO.Champions
 
             public MenuItem drawQ { get; private set; }
 
-            public MenuItem drawW { get; private set; }
+            public MenuItem drawW { get; set; }
 
-            public MenuItem drawE { get; private set; }
+            public MenuItem drawE { get; set; }
 
-            public MenuItem drawR { get; private set; }
+            public MenuItem drawR { get; set; }
 
             public MenuItem laneclearE { get; private set; }
 
@@ -699,9 +702,9 @@ namespace SurvivorSeriesAIO.Champions
 
             public MenuItem HarassManaManager { get; private set; }
 
-            public MenuItem DrawRMinimap { get; private set; }
+            public MenuItem DrawRMinimap { get; set; }
 
-            public MenuItem drawWE { get; private set; }
+            public MenuItem drawWE { get; set; }
 
             public MenuItem KSQ { get; private set; }
 
@@ -721,11 +724,6 @@ namespace SurvivorSeriesAIO.Champions
 
             public MenuItem Combo2TimesMana { get; private set; }
 
-            public MenuItem CUseR { get; private set; }
-            public MenuItem CUseQ { get; private set; }
-            public MenuItem CUseW { get; private set; }
-            public MenuItem CUseE { get; private set; }
-
             public MenuItem CBlockAA { get; private set; }
 
             public MenuItem ComboMode { get; private set; }
@@ -736,23 +734,28 @@ namespace SurvivorSeriesAIO.Champions
             public Menu SkinsMenu { get; }
             public MenuItem SkinID { get; private set; }
             public MenuItem UseSkin { get; private set; }
-            public MenuItem EnableFarming { get; private set; }
+            public MenuItem EnableFarming { get; set; }
+            public MenuItem ComboEUse { get; set; }
+            public MenuItem ComboWUse { get; set; }
+            public MenuItem ComboQUse { get; set; }
+            public MenuItem ComboRUse { get; set; }
+            public MenuItem EnableScrollToFarm { get; set; }
 
             private void Combos(MenuItemFactory factory)
             {
-                CUseQ = factory.WithName("Use Q").WithValue(true).Build();
-                CUseW = factory.WithName("Use W").WithValue(true).Build();
-                CUseE = factory.WithName("Use E").WithValue(true).Build();
+                ComboQUse = null;
+                ComboWUse = null;
+                ComboEUse = null;
+                ComboQUse = factory.WithName("[Combo] Use Q").WithValue(true).Build();
+                //Game.PrintChat("ComboQUse Set to: "+ComboQUse.ValueSet + " | " + ComboQUse.GetValue<bool>().ToString());
+                ComboWUse = factory.WithName("[Combo] Use W").WithValue(true).WithValue(true).Build();
+                //Game.PrintChat("ComboWUse Set to: " + ComboWUse.ValueSet + " | " + ComboWUse.GetValue<bool>().ToString());
+                ComboEUse = factory.WithName("[Combo] Use E").WithValue(true).WithValue(true).Build();
+                //Game.PrintChat("ComboEUse Set to: " + ComboEUse.ValueSet + " | " + ComboEUse.GetValue<bool>().ToString());
                 CBlockAA = factory.WithName("Don't AA while doing Combo").WithValue(true).Build();
-                Combo2TimesMana =
-                    factory.WithName("Champion needs to have mana for atleast 2 times (Q/W/E)?")
-                        .WithValue(false)
-                        .WithTooltip(
-                            "If it's set to 'false' it'll need atleast mana for Q/W/E [1x] Post in thread if needs a change")
-                        .Build();
-                CUseR = factory.WithName("Ultimate (R) in Ultimate Menu").Build();
+                ComboRUse = factory.WithName("Ultimate (R) in Ultimate Menu").Build();
                 ComboMode =
-                    factory.WithName("Combo Mode")
+                    factory.WithName("[Combo Mode]")
                         .WithValue(new StringList(new[] {"Burst", "Survivor Mode"}, 0))
                         .Build();
             }
@@ -773,8 +776,8 @@ namespace SurvivorSeriesAIO.Champions
             private void Drawings(MenuItemFactory factory)
             {
                 // Drawing Menu
-                drawQ = factory.WithName("Draw Q Range").WithValue(false).Build();
-                drawWE = factory.WithName("Draw W/E Range").WithValue(false).Build();
+                drawQ = factory.WithName("Draw Q Range").WithValue(true).Build();
+                drawWE = factory.WithName("Draw W/E Range").WithValue(true).Build();
                 drawR = factory.WithName("Draw R Range").WithValue(false).Build();
                 DrawRMinimap = factory.WithName("Draw R Range | On Minimap").WithValue(true).Build();
                 DrawComboDamage = factory
@@ -812,6 +815,11 @@ namespace SurvivorSeriesAIO.Champions
             private void LaneClear(MenuItemFactory factory)
             {
                 // LaneClear Menu
+                EnableScrollToFarm =
+                    factory.WithName("Enable Mouse Scroll Farm")
+                        .WithValue(true)
+                        .WithTooltip("Enable using mouse scroll to enable/disable spell usage in farming?")
+                        .Build();
                 EnableFarming =
                     factory.WithName("Enable Farming with Spells?")
                         .WithValue(true)

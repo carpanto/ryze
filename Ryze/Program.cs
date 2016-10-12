@@ -683,6 +683,17 @@ namespace SurvivorRyze
                 }
         }
 
+        private static void ModeChanger()
+        {
+            if (Menu.Item("ModeChangerOnLowHP").GetValue<bool>())
+            {
+                if (Player.HealthPercent < Menu.Item("ModeChangerHPToChange").GetValue<Slider>().Value)
+                {
+                    //
+                }
+            }
+        }
+
         private static void Combo()
         {
             // Combo
