@@ -83,6 +83,8 @@ namespace SurvivorRyze
 
             var LaneClearMenu = Menu.AddSubMenu(new Menu("Lane Clear", "LaneClear"));
             LaneClearMenu.AddItem(
+                new MenuItem("EnableMouseScroll", "Enable Mouse Scroll to change Spell Farming?").SetValue(true));
+            LaneClearMenu.AddItem(
                     new MenuItem("EnableFarming", "Enable Farming with Spells?").SetValue(true)
                         .SetTooltip("You either change the value here by clicking or by Scrolling Down using the mouse"))
                 .Permashow(true, "Farming with Spells?");
@@ -225,6 +227,9 @@ namespace SurvivorRyze
 
         private static void OnWndProc(WndEventArgs args)
         {
+            if (!Menu.Item("EnableMouseScroll").GetValue<bool>())
+                return;
+
             if (args.Msg == 0x20a)
             {
                 Menu.Item("EnableFarming").SetValue(!Menu.Item("EnableFarming").GetValue<bool>());
