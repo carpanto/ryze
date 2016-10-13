@@ -11,7 +11,7 @@ namespace SurvivorSeriesAIO
         /// <summary>
         ///     SurvivorSeries AIO NEWS
         /// </summary>
-        public static string SSNews = "Anti-Gapcloser [Soon]";
+        public static string SSNews = "Reminders/Improvements/JungleClear for Ryze Added";
 
         public static IRootMenu RootMenu { get; set; }
 

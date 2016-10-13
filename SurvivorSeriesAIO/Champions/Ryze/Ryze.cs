@@ -15,6 +15,7 @@ using SurvivorSeriesAIO.Core;
 using SurvivorSeriesAIO.SurvivorMain;
 using SurvivorSeriesAIO.Utility;
 using Orbwalking = SebbyLib.Orbwalking;
+using System.Linq;
 
 #pragma warning disable CS0649
 
@@ -86,6 +87,22 @@ namespace SurvivorSeriesAIO.Champions
                 Render.Circle.DrawCircle(Player.Position, W.Range, Color.DeepPink);
             if (Config.drawR.GetValue<bool>())
                 Render.Circle.DrawCircle(Player.Position, RangeR, Color.Aqua);
+
+            if (!Config.DrawSpellFarm.GetValue<bool>())
+                return;
+
+            if (Config.EnableFarming.GetValue<bool>())
+            {
+                var drawPos = Drawing.WorldToScreen(Player.Position);
+                var textSize = Drawing.GetTextExtent("Spell Farm: ON");
+                Drawing.DrawText(drawPos.X - textSize.Width - 70f, drawPos.Y, Color.Chartreuse, "Spell Farm: ON");
+            }
+            else
+            {
+                var drawPos = Drawing.WorldToScreen(Player.Position);
+                var textSize = Drawing.GetTextExtent("Spell Farm: OFF");
+                Drawing.DrawText(drawPos.X - textSize.Width - 70f, drawPos.Y, Color.DeepPink, "Spell Farm: OFF");
+            }
         }
 
         private void OnWndProc(WndEventArgs args)
@@ -159,6 +176,7 @@ namespace SurvivorSeriesAIO.Champions
                     Harass();
                     break;
                 case Orbwalking.OrbwalkingMode.LaneClear:
+                    JungleClear();
                     LaneClear();
                     break;
                 case Orbwalking.OrbwalkingMode.LastHit:
@@ -174,6 +192,53 @@ namespace SurvivorSeriesAIO.Champions
                 Orbwalker.SetMovement(false);
                 Orbwalker.SetAttack(false);
                 REscape();
+            }
+        }
+
+        private void JungleClear()
+        {
+            if (Player.ManaPercent < Config.jungleclearMinimumMana.GetValue<Slider>().Value)
+                return;
+
+            var jgcq = Config.UseQJC.GetValue<bool>();
+            var jgcw = Config.UseWJC.GetValue<bool>();
+            var jgce = Config.UseEJC.GetValue<bool>();
+
+            var mob =
+                MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral,
+                    MinionOrderTypes.MaxHealth).FirstOrDefault();
+            if (mob == null)
+                return;
+            if (jgcq && jgce && Q.IsReady() && E.IsReady())
+            {
+                Q.Cast(mob.Position);
+                E.CastOnUnit(mob);
+                Q.Cast(mob.Position);
+                if (jgcw && W.IsReady() && !Q.IsReady())
+                {
+                    W.CastOnUnit(mob);
+                    Q.Cast(mob.Position);
+                }
+            }
+            else if (jgcq && jgce && !Q.IsReady() && E.IsReady())
+            {
+                E.CastOnUnit(mob);
+                Q.Cast(mob.Position);
+                if (jgcw && W.IsReady() && !Q.IsReady())
+                {
+                    W.CastOnUnit(mob);
+                    Q.Cast(mob.Position);
+                }
+            }
+            else if (jgcq && jgce && jgcw && !Q.IsReady() && !E.IsReady() && W.IsReady())
+            {
+                W.CastOnUnit(mob);
+                Q.Cast(mob.Position);
+                if (E.IsReady())
+                {
+                    E.CastOnUnit(mob);
+                    Q.Cast(mob.Position);
+                }
             }
         }
 
@@ -740,6 +805,11 @@ namespace SurvivorSeriesAIO.Champions
             public MenuItem ComboQUse { get; set; }
             public MenuItem ComboRUse { get; set; }
             public MenuItem EnableScrollToFarm { get; set; }
+            public MenuItem UseQJC { get; private set; }
+            public MenuItem UseWJC { get; private set; }
+            public MenuItem UseEJC { get; private set; }
+            public MenuItem jungleclearMinimumMana { get; private set; }
+            public MenuItem DrawSpellFarm { get; private set; }
 
             private void Combos(MenuItemFactory factory)
             {
@@ -780,6 +850,7 @@ namespace SurvivorSeriesAIO.Champions
                 drawWE = factory.WithName("Draw W/E Range").WithValue(true).Build();
                 drawR = factory.WithName("Draw R Range").WithValue(false).Build();
                 DrawRMinimap = factory.WithName("Draw R Range | On Minimap").WithValue(true).Build();
+                DrawSpellFarm = factory.WithName("Draw Spell Farm State? [On/Off]").WithValue(true).Build();
                 DrawComboDamage = factory
                     .WithName("Draw Combo Damage")
                     .WithValue(true)
@@ -826,19 +897,33 @@ namespace SurvivorSeriesAIO.Champions
                         .WithTooltip("You either change the value here by clicking or by Scrolling Down using the mouse")
                         .WithPerma("Farming with Spells?").Build();
 
-                UseQLC = factory.WithName("Use Q to LaneHit").WithValue(true).Build();
-                UseELC = factory.WithName("Use E to LaneHit").WithValue(true).Build();
+                UseQLC = factory.WithName("Use Q to LaneClear").WithValue(true).Build();
+                UseELC = factory.WithName("Use E to LaneClear").WithValue(true).Build();
 
                 laneclearMinimumMana = factory
                     .WithName("Minimum Mana%")
+                    .WithValue(new Slider(50))
+                    .WithTooltip("Minimum Mana that you need to have to LaneClear with Q/E.")
+                    .Build();
+            }
+
+            private void JungleClear(MenuItemFactory factory)
+            {
+                // JungleClear Menu
+                UseQJC = factory.WithName("Use Q to JungleClear").WithValue(true).Build();
+                UseWJC = factory.WithName("Use W to JungleClear").WithValue(true).Build();
+                UseEJC = factory.WithName("Use E to JungleClear").WithValue(true).Build();
+
+                jungleclearMinimumMana = factory
+                    .WithName("Minimum Mana%")
                     .WithValue(new Slider(30))
-                    .WithTooltip("Minimum Mana that you need to have to LaneHit with Q/E.")
+                    .WithTooltip("Minimum Mana that you need to have to JungleClear with Q/W/E.")
                     .Build();
             }
 
             private void LastHit(MenuItemFactory factory)
             {
-                // LaneHit Menu
+                // LastHit Menu
                 UseQLH = factory.WithName("Use Q to LaneHit").WithValue(true).Build();
                 UseELH = factory.WithName("Use E to LaneHit").WithValue(true).Build();
 

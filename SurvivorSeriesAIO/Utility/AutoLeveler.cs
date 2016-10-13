@@ -33,8 +33,19 @@ namespace SurvivorSeriesAIO.Utility
             lvl4 = Config.AutoLeveler4.GetValue<StringList>().SelectedIndex;
         }
 
+        private void GotStronger()
+        {
+            // Reminder
+            Game.PrintChat("<font color='#0993F9'>[SS AIO | Reminder]</font> <font color='#FF8800'>You got strong enough, Lower the LaneClear Mana Manager Sliders!</font>");
+        }
+
         private void Obj_AI_Base_OnLevelUp(Obj_AI_Base sender, EventArgs args)
         {
+            if (sender.IsMe && Config.Reminders.GetValue<bool>() && ObjectManager.Player.Level >= 6)
+            {
+                GotStronger();
+            }
+
             if (!sender.IsMe || !Menu.PlugAutoLeveler.GetValue<bool>() ||
                 (ObjectManager.Player.Level < Config.AutoLvlStartFrom.GetValue<Slider>().Value))
                 return;
@@ -86,6 +97,7 @@ namespace SurvivorSeriesAIO.Utility
             public MenuItem AutoLeveler4 { get; set; }
             public Menu AutoLevelerMenu { get; set; }
             public MenuItem AutoLvlStartFrom { get; set; }
+            public MenuItem Reminders { get; set; }
 
             public void AutoLevelerSettings(MenuItemFactory factory)
             {
@@ -103,6 +115,8 @@ namespace SurvivorSeriesAIO.Utility
 
                 AutoLvlStartFrom =
                     factory.WithName("AutoLeveler Start from Level: ").WithValue(new Slider(2, 6, 1)).Build();
+
+                Reminders = factory.WithName("Enable [SS AIO] Reminders?").WithValue(true).Build();
             }
         }
     }
