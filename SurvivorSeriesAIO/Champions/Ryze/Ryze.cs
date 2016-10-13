@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SebbyLib;
@@ -15,7 +16,6 @@ using SurvivorSeriesAIO.Core;
 using SurvivorSeriesAIO.SurvivorMain;
 using SurvivorSeriesAIO.Utility;
 using Orbwalking = SebbyLib.Orbwalking;
-using System.Linq;
 
 #pragma warning disable CS0649
 
@@ -207,7 +207,7 @@ namespace SurvivorSeriesAIO.Champions
             var mob =
                 MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral,
                     MinionOrderTypes.MaxHealth).FirstOrDefault();
-            if (mob == null)
+            if (mob == null || !mob.IsValidTarget())
                 return;
             if (jgcq && jgce && Q.IsReady() && E.IsReady())
             {
@@ -689,6 +689,7 @@ namespace SurvivorSeriesAIO.Champions
                 ComboMenu = MenuFactory.CreateMenu(root, "Combo");
                 HarassMenu = MenuFactory.CreateMenu(root, "Harass");
                 LaneClearMenu = MenuFactory.CreateMenu(root, "Lane Clear");
+                JungleClearMenu = MenuFactory.CreateMenu(root, "Jungle Clear");
                 LastHitMenu = MenuFactory.CreateMenu(root, "Last Hit");
                 MiscMenu = MenuFactory.CreateMenu(root, "Misc");
                 SkinsMenu = MenuFactory.CreateMenu(root, "Skins Menu");
@@ -698,6 +699,7 @@ namespace SurvivorSeriesAIO.Champions
                 Combos(MenuItemFactory.Create(ComboMenu));
                 Harass(MenuItemFactory.Create(HarassMenu));
                 LaneClear(MenuItemFactory.Create(LaneClearMenu));
+                JungleClear(MenuItemFactory.Create(JungleClearMenu));
                 LastHit(MenuItemFactory.Create(LastHitMenu));
                 Misc(MenuItemFactory.Create(MiscMenu));
                 Skins(MenuItemFactory.Create(SkinsMenu));
@@ -810,6 +812,7 @@ namespace SurvivorSeriesAIO.Champions
             public MenuItem UseEJC { get; private set; }
             public MenuItem jungleclearMinimumMana { get; private set; }
             public MenuItem DrawSpellFarm { get; private set; }
+            public Menu JungleClearMenu { get; }
 
             private void Combos(MenuItemFactory factory)
             {

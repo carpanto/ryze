@@ -36,15 +36,14 @@ namespace SurvivorSeriesAIO.Utility
         private void GotStronger()
         {
             // Reminder
-            Game.PrintChat("<font color='#0993F9'>[SS AIO | Reminder]</font> <font color='#FF8800'>You got strong enough, Lower the LaneClear Mana Manager Sliders!</font>");
+            Game.PrintChat(
+                "<font color='#0993F9'>[SS AIO | Reminder]</font> <font color='#FF8800'>You got strong enough, Lower the LaneClear Mana Manager Sliders!</font>");
         }
 
         private void Obj_AI_Base_OnLevelUp(Obj_AI_Base sender, EventArgs args)
         {
-            if (sender.IsMe && Config.Reminders.GetValue<bool>() && ObjectManager.Player.Level >= 6)
-            {
+            if (sender.IsMe && Config.Reminders.GetValue<bool>() && (ObjectManager.Player.Level >= 6))
                 GotStronger();
-            }
 
             if (!sender.IsMe || !Menu.PlugAutoLeveler.GetValue<bool>() ||
                 (ObjectManager.Player.Level < Config.AutoLvlStartFrom.GetValue<Slider>().Value))
