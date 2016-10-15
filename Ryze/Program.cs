@@ -160,6 +160,7 @@ namespace SurvivorRyze
             MiscMenu.AddItem(new MenuItem("WGapCloser", "Use W on Enemy GapCloser (Ex. Irelia's Q)").SetValue(true));
             MiscMenu.AddItem(new MenuItem("ChaseWithR", "Use R to Chase (Being Added)"));
             MiscMenu.AddItem(new MenuItem("EscapeWithR", "Use R to Escape (Ultimate Menu)"));
+            MiscMenu.AddItem(new MenuItem("Reminders", "Enable [SS AIO Type] Reminders?").SetValue(true));
 
             var AutoLevelerMenu = Menu.AddSubMenu(new Menu("AutoLeveler Menu", "AutoLevelerMenu"));
             AutoLevelerMenu.AddItem(new MenuItem("AutoLevelUp", "AutoLevel Up Spells?").SetValue(true));
@@ -179,6 +180,7 @@ namespace SurvivorRyze
             DrawingMenu.AddItem(new MenuItem("DrawWE", "Draw W/E Range").SetValue(true));
             DrawingMenu.AddItem(new MenuItem("DrawR", "Draw R Range").SetValue(false));
             DrawingMenu.AddItem(new MenuItem("DrawRMinimap", "Draw R Range | On Minimap").SetValue(true));
+            DrawingMenu.AddItem(new MenuItem("DrawSpellFarm", "Draw Spell Farm State? [On/Off]").SetValue(true));
 
             Menu.AddToMainMenu();
 
@@ -273,6 +275,22 @@ namespace SurvivorRyze
                 Render.Circle.DrawCircle(Player.Position, W.Range, System.Drawing.Color.AliceBlue);
             if (Menu.Item("DrawR").GetValue<bool>())
                 Render.Circle.DrawCircle(Player.Position, RangeR, System.Drawing.Color.Orchid);
+
+            if (!Menu.Item("DrawSpellFarm").GetValue<bool>())
+                return;
+
+            if (Menu.Item("EnableFarming").GetValue<bool>())
+            {
+                var drawPos = Drawing.WorldToScreen(Player.Position);
+                var textSize = Drawing.GetTextExtent("Spell Farm: ON");
+                Drawing.DrawText(drawPos.X - textSize.Width - 70f, drawPos.Y, System.Drawing.Color.Chartreuse, "Spell Farm: ON");
+            }
+            else
+            {
+                var drawPos = Drawing.WorldToScreen(Player.Position);
+                var textSize = Drawing.GetTextExtent("Spell Farm: OFF");
+                Drawing.DrawText(drawPos.X - textSize.Width - 70f, drawPos.Y, System.Drawing.Color.DeepPink, "Spell Farm: OFF");
+            }
         }
 
         private static void AABlock()
@@ -281,8 +299,18 @@ namespace SurvivorRyze
             //SebbyLib.OktwCommon.blockAttack = Menu.Item("CBlockAA").GetValue<bool>();
         }
 
+        private static void GotStronger()
+        {
+            // Reminder
+            Game.PrintChat(
+                "<font color='#0993F9'>[SS AIO | Reminder]</font> <font color='#FF8800'>You got strong enough, Lower the LaneClear Mana Manager Sliders!</font>");
+        }
+
         private static void Obj_AI_Base_OnLevelUp(Obj_AI_Base sender, EventArgs args)
         {
+            if (sender.IsMe && Menu.Item("Reminders").GetValue<bool>() && (ObjectManager.Player.Level >= 6))
+                GotStronger();
+
             if (!sender.IsMe || !Menu.Item("AutoLevelUp").GetValue<bool>() ||
                 (ObjectManager.Player.Level < Menu.Item("AutoLvlStartFrom").GetValue<Slider>().Value))
                 return;
