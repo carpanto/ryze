@@ -61,7 +61,7 @@ namespace SurvivorRyze
             var ComboMenu = Menu.AddSubMenu(new Menu("Combo", "Combo"));
             ComboMenu.AddItem(
                 new MenuItem("ComboMode", "Combo Mode:").SetValue(
-                        new StringList(new[] {"Burst", "Survivor Mode (Shield)"}))
+                        new StringList(new[] {"Burst", "Survivor Mode (Shield)", "As Fast As Possible (Spam)"}))
                     .SetTooltip("Survivor Mode - Will try to stack Shield 99% of the time."));
             ComboMenu.AddItem(new MenuItem("CUseQ", "Cast Q").SetValue(true));
             ComboMenu.AddItem(new MenuItem("CUseW", "Cast W").SetValue(true));
@@ -233,9 +233,7 @@ namespace SurvivorRyze
                 return;
 
             if (args.Msg == 0x20a)
-            {
                 Menu.Item("EnableFarming").SetValue(!Menu.Item("EnableFarming").GetValue<bool>());
-            }
         }
 
         private static void OnEndScene(EventArgs args)
@@ -283,13 +281,15 @@ namespace SurvivorRyze
             {
                 var drawPos = Drawing.WorldToScreen(Player.Position);
                 var textSize = Drawing.GetTextExtent("Spell Farm: ON");
-                Drawing.DrawText(drawPos.X - textSize.Width - 70f, drawPos.Y, System.Drawing.Color.Chartreuse, "Spell Farm: ON");
+                Drawing.DrawText(drawPos.X - textSize.Width - 70f, drawPos.Y, System.Drawing.Color.Chartreuse,
+                    "Spell Farm: ON");
             }
             else
             {
                 var drawPos = Drawing.WorldToScreen(Player.Position);
                 var textSize = Drawing.GetTextExtent("Spell Farm: OFF");
-                Drawing.DrawText(drawPos.X - textSize.Width - 70f, drawPos.Y, System.Drawing.Color.DeepPink, "Spell Farm: OFF");
+                Drawing.DrawText(drawPos.X - textSize.Width - 70f, drawPos.Y, System.Drawing.Color.DeepPink,
+                    "Spell Farm: OFF");
             }
         }
 
@@ -719,12 +719,10 @@ namespace SurvivorRyze
         private static void ModeChanger()
         {
             if (Menu.Item("ModeChangerOnLowHP").GetValue<bool>())
-            {
                 if (Player.HealthPercent < Menu.Item("ModeChangerHPToChange").GetValue<Slider>().Value)
                 {
                     //
                 }
-            }
         }
 
         private static void Combo()
@@ -785,16 +783,16 @@ namespace SurvivorRyze
                         // Try having Full Charge if either W or E spells are ready...
                         if (RyzeCharge1() && Q.IsReady() && (W.IsReady() || E.IsReady()))
                         {
-                            if (E.IsReady())
+                            if (E.IsReady() && CUseE)
                                 E.Cast(target);
-                            if (W.IsReady())
+                            if (W.IsReady() && CUseW)
                                 W.Cast(target);
                         }
                         // Rest in Piece XDDD
-                        if (RyzeCharge1() && !E.IsReady() && !W.IsReady())
+                        if (RyzeCharge1() && !E.IsReady() && !W.IsReady() && CUseQ)
                             SebbySpell(Q, target);
 
-                        if (RyzeCharge0() && !E.IsReady() && !W.IsReady())
+                        if (RyzeCharge0() && !E.IsReady() && !W.IsReady() && CUseQ)
                             SebbySpell(Q, target);
 
                         if (!RyzeCharge2())
@@ -809,18 +807,37 @@ namespace SurvivorRyze
                     }
                     else
                     {
-                        if (target.IsValidTarget(Q.Range) && Q.IsReady())
+                        if (target.IsValidTarget(Q.Range) && Q.IsReady() && CUseQ)
                             SebbySpell(Q, target);
 
-                        if (target.IsValidTarget(W.Range) && W.IsReady())
+                        if (target.IsValidTarget(W.Range) && W.IsReady() && CUseW)
                             W.Cast(target);
 
-                        if (target.IsValidTarget(E.Range) && E.IsReady())
+                        if (target.IsValidTarget(E.Range) && E.IsReady() && CUseE)
                             E.Cast(target);
                     }
 
                     #endregion
 
+                    break;
+                case 2:
+                {
+                    #region As Fast As Possible (SPAM)
+
+                    if (Menu.Item("CUseIgnite").GetValue<bool>() &&
+                        (target.Health <
+                         OktwCommon.GetIncomingDamage(target) +
+                         Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite)))
+                        Player.Spellbook.CastSpell(IgniteSlot, target);
+                    if (target.IsValidTarget(Q.Range) && Q.IsReady() && CUseQ)
+                        SebbySpell(Q, target);
+                    if (target.IsValidTarget(W.Range) && W.IsReady() && CUseW)
+                        W.CastOnUnit(target);
+                    if (target.IsValidTarget(E.Range) && E.IsReady() && CUseE)
+                        E.CastOnUnit(target);
+
+                    #endregion
+                }
                     break;
             }
         }
@@ -862,17 +879,13 @@ namespace SurvivorRyze
             // To be Done
             if (Player.ManaPercent > Menu.Item("LaneHitManaManager").GetValue<Slider>().Value)
             {
-                var specialQ = Cache.GetMinions(Player.Position, Q.Range, MinionTeam.Enemy).OrderBy(x => x.Distance(Player.Position));
+                var specialQ =
+                    Cache.GetMinions(Player.Position, Q.Range, MinionTeam.Enemy)
+                        .OrderBy(x => x.Distance(Player.Position));
                 if (Q.IsReady() && useQ)
-                {
                     foreach (var omfgabriel in specialQ)
-                    {
                         if (omfgabriel.Health < QGetRealDamage(omfgabriel))
-                        {
                             Q.Cast(omfgabriel);
-                        }
-                    }
-                }
                 var allMinionsQ = Cache.GetMinions(Player.ServerPosition, Q.Range, MinionTeam.Enemy);
                 var allMinionsE = Cache.GetMinions(Player.ServerPosition, E.Range, MinionTeam.Enemy);
                 if (Q.IsReady() && useQ)
