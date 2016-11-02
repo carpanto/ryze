@@ -151,6 +151,10 @@ namespace SSKhaZix
                 new MenuItem("DrawIsolated", "Draw Isolated?").SetValue(true).SetTooltip("Preferably set to 'true'."));
             DrawingMenu.AddItem(new MenuItem("DrawIsMidAirDebug", "Draw isMidAir (Debug)").SetValue(false));
 
+            var MiscMenu = Config.AddSubMenu(new Menu(":: Misc", "Misc"));
+            MiscMenu.AddItem(
+                new MenuItem("HitChance", "Hit Chance").SetValue(new StringList(new[] {"Medium", "High", "Very High"}, 1)));
+
             #region DrawDamage
 
             var drawdamage = new Menu(":: Draw Damage", "drawdamage");
@@ -210,6 +214,56 @@ namespace SSKhaZix
             }
         }
 
+        private void SebbySpell(Spell W, Obj_AI_Base target)
+        {
+            var CoreType2 = LeagueSharp.Common.SkillshotType.SkillshotLine;
+            var aoe2 = false;
+
+            if (W.Type == SkillshotType.SkillshotCircle)
+            {
+                CoreType2 = LeagueSharp.Common.SkillshotType.SkillshotCircle;
+                aoe2 = true;
+            }
+
+            if ((W.Width > 80) && !W.Collision)
+                aoe2 = true;
+
+            var predInput2 = new PredictionInput
+            {
+                Aoe = aoe2,
+                Collision = W.Collision,
+                Speed = W.Speed,
+                Delay = W.Delay,
+                Range = W.Range,
+                From = Player.ServerPosition,
+                Radius = W.Width,
+                Unit = target,
+                Type = CoreType2
+            };
+            var poutput2 = Prediction.GetPrediction(predInput2);
+
+            if (OktwCommon.CollisionYasuo(Player.ServerPosition, poutput2.CastPosition))
+                return;
+
+            if ((W.Speed != float.MaxValue) && OktwCommon.CollisionYasuo(Player.ServerPosition, poutput2.CastPosition))
+                return;
+
+            if (Config.Item("HitChance").GetValue<StringList>().SelectedIndex == 0)
+            {
+                if (poutput2.Hitchance >= HitChance.Medium)
+                    W.Cast(poutput2.CastPosition);
+            }
+            else if (Config.Item("HitChance").GetValue<StringList>().SelectedIndex == 1)
+            {
+                if (poutput2.Hitchance >= HitChance.High)
+                    W.Cast(poutput2.CastPosition);
+            }
+            else if (Config.Item("HitChance").GetValue<StringList>().SelectedIndex == 2)
+            {
+                if (poutput2.Hitchance >= HitChance.VeryHigh)
+                    W.Cast(poutput2.CastPosition);
+            }
+        }
 
         private void DrawingOnOnDraw(EventArgs args)
         {
@@ -319,8 +373,9 @@ namespace SSKhaZix
 
                 if (Config.Item("KSQ").GetValue<bool>() && Q.Instance.IsReady() && target.Health < GetRealQDamage(target) + OktwCommon.GetIncomingDamage(target))
                     Q.CastOnUnit(target);
-                if (Config.Item("KSW").GetValue<bool>() && W.Instance.IsReady() && target.Health < OktwCommon.GetKsDamage(target, W))
-                    W.Cast(target.ServerPosition);
+                if (Config.Item("KSW").GetValue<bool>() && W.Instance.IsReady() &&
+                    target.Health < OktwCommon.GetKsDamage(target, W))
+                    SebbySpell(W, target);
                 if (Config.Item("KSE").GetValue<bool>() && E.Instance.IsReady() && target.Health < OktwCommon.GetKsDamage(target, E))
                     E.Cast(target.ServerPosition);
                 /*if (Config.Item("KSIgnite").GetValue<bool>() && Ignite.Slot != SpellSlot.Unknown && Player.Spellbook.GetSpell(Ignite.Slot).State == SpellState.Ready &&
@@ -367,7 +422,7 @@ namespace SSKhaZix
                     Tiamat.Cast();
             }
             if (UseW && W.Instance.IsReady())
-                W.Cast(target.Position);
+                SebbySpell(W, target);
 
             if (Youmuu.IsReady() && target.IsValidTarget(Player.AttackRange + 400))
                 Youmuu.Cast();
@@ -397,7 +452,7 @@ namespace SSKhaZix
                 Q.CastOnUnit(target);
 
             if (UseW && W.Instance.IsReady() && target.IsValidTarget(W.Range))
-                W.Cast(target.Position);
+                SebbySpell(W, target);
         }
 
         private void LastHit()
