@@ -4,7 +4,11 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SebbyLib;
+using Color = SharpDX.Color;
+using HitChance = SebbyLib.Prediction.HitChance;
 using Orbwalking = SebbyLib.Orbwalking;
+using Prediction = SebbyLib.Prediction.Prediction;
+using PredictionInput = SebbyLib.Prediction.PredictionInput;
 
 namespace SSKhaZix
 {
@@ -48,6 +52,7 @@ namespace SSKhaZix
                 return;
 
             #region Spells && Items
+
             IgniteSlot = Player.GetSpellSlot("summonerdot");
             var smite = Player.Spellbook.Spells.FirstOrDefault(x => x.Name.ToLower().Contains("smite"));
             Q = new Spell(SpellSlot.Q, 325f);
@@ -57,9 +62,9 @@ namespace SSKhaZix
             W.SetSkillshot(0.225f, 80f, 825f, true, SkillshotType.SkillshotLine);
             E.SetSkillshot(0.25f, 100f, 1000f, false, SkillshotType.SkillshotCircle);
             if (IgniteSlot != SpellSlot.Unknown)
-            Ignite = new Spell(IgniteSlot, 550f);
-            if (smite != null && smite.Slot != SpellSlot.Unknown)
-            Smite = new Spell(smite.Slot, 500f, TargetSelector.DamageType.True);
+                Ignite = new Spell(IgniteSlot, 550f);
+            if ((smite != null) && (smite.Slot != SpellSlot.Unknown))
+                Smite = new Spell(smite.Slot, 500f, TargetSelector.DamageType.True);
 
             Hydra = new Items.Item(3074, 225f);
             Tiamat = new Items.Item(3077, 225f);
@@ -72,7 +77,7 @@ namespace SSKhaZix
 
             #region Config
 
-            Config = new Menu("SurvivorKhaZix", "SurvivorKhaZix", true).SetFontStyle(FontStyle.Bold, SharpDX.Color.Crimson);
+            Config = new Menu("SurvivorKhaZix", "SurvivorKhaZix", true).SetFontStyle(FontStyle.Bold, Color.Crimson);
 
             var OrbwalkerMenu = Config.AddSubMenu(new Menu(":: Orbwalker", "Orbwalker"));
             Orbwalker = new Orbwalking.Orbwalker(OrbwalkerMenu);
@@ -116,7 +121,8 @@ namespace SSKhaZix
             JungleClearMenu.AddItem(new MenuItem("JungleClearW", "Use W").SetValue(true));
             JungleClearMenu.AddItem(new MenuItem("JungleClearE", "Use E").SetValue(false));
             JungleClearMenu.AddItem(new MenuItem("JungleClearItems", "Use Hydra/Tiamat to JungleClear?").SetValue(true));
-            JungleClearMenu.AddItem(new MenuItem("JungleClearDontEQRange", "Don't Use E if Mobs are in Q Range?").SetValue(true));
+            JungleClearMenu.AddItem(
+                new MenuItem("JungleClearDontEQRange", "Don't Use E if Mobs are in Q Range?").SetValue(true));
             JungleClearMenu.AddItem(
                 new MenuItem("JungleClearManaManager", "JungleClear Mana Manager").SetValue(new Slider(50, 0, 100)));
             JungleClearMenu.AddItem(
@@ -139,7 +145,8 @@ namespace SSKhaZix
             KillStealMenu.AddItem(new MenuItem("KSQ", "KS with Q?").SetValue(true));
             KillStealMenu.AddItem(new MenuItem("KSW", "KS with W").SetValue(true));
             KillStealMenu.AddItem(new MenuItem("KSE", "KS with E").SetValue(true));
-            KillStealMenu.AddItem(new MenuItem("UnavailableService", "KS with Ignite/Smite is currently (Temporary) Unavailable."));
+            KillStealMenu.AddItem(new MenuItem("UnavailableService",
+                "KS with Ignite/Smite is currently (Temporary) Unavailable."));
             KillStealMenu.AddItem(new MenuItem("KSIgnite", "KS with Ignite").SetValue(false));
             KillStealMenu.AddItem(new MenuItem("KSSmite", "KS with Smite").SetValue(false));
 
@@ -163,7 +170,7 @@ namespace SSKhaZix
                     new MenuItem("SurvivorKhaZix.DrawComboDamage", "Draw Damage on Enemy's HP Bar").SetValue(true);
                 var drawFill =
                     new MenuItem("SurvivorKhaZix.DrawColour", "Fill Color", true).SetValue(
-                        new Circle(true, Color.Chartreuse));
+                        new Circle(true, System.Drawing.Color.Chartreuse));
                 drawdamage.AddItem(drawFill);
                 drawdamage.AddItem(dmgAfterShave);
                 DrawDamage.DamageToUnit = CalculateDamage;
@@ -191,10 +198,12 @@ namespace SSKhaZix
             #endregion
 
             #region Subscriptions
+
             Game.OnUpdate += GameOnUpdate;
             Drawing.OnDraw += DrawingOnOnDraw;
             Obj_AI_Base.OnProcessSpellCast += ObjAiHeroOnOnProcessSpellCast;
             Game.PrintChat("<font color='#800040'>[SurvivorSeries] Kha'Zix</font> <font color='#ff6600'>Loaded.</font>");
+
             #endregion
         }
 
@@ -203,7 +212,7 @@ namespace SSKhaZix
             if (!sender.IsMe)
                 return;
 
-            if (sender.IsMe && (args.SData.Name == "KhazixE") || (args.SData.DisplayName == "KhazixE") ||
+            if ((sender.IsMe && (args.SData.Name == "KhazixE")) || (args.SData.DisplayName == "KhazixE") ||
                 (args.SData.Name == "KhazixELong") || (args.SData.DisplayName == "KhazixELong"))
             {
                 IsMidAir = true;
@@ -216,12 +225,12 @@ namespace SSKhaZix
 
         private void SebbySpell(Spell W, Obj_AI_Base target)
         {
-            var CoreType2 = LeagueSharp.Common.SkillshotType.SkillshotLine;
+            var CoreType2 = SebbyLib.Prediction.SkillshotType.SkillshotLine;
             var aoe2 = false;
 
             if (W.Type == SkillshotType.SkillshotCircle)
             {
-                CoreType2 = LeagueSharp.Common.SkillshotType.SkillshotCircle;
+                CoreType2 = SebbyLib.Prediction.SkillshotType.SkillshotCircle;
                 aoe2 = true;
             }
 
@@ -271,11 +280,11 @@ namespace SSKhaZix
                 return;
 
             if (Config.Item("DrawQ").GetValue<bool>() && Q.IsReady())
-                Render.Circle.DrawCircle(Player.Position, Q.Range, Color.Crimson);
+                Render.Circle.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Crimson);
             if (Config.Item("DrawW").GetValue<bool>() && W.IsReady())
-                Render.Circle.DrawCircle(Player.Position, W.Range, Color.Aqua);
+                Render.Circle.DrawCircle(Player.Position, W.Range, System.Drawing.Color.Aqua);
             if (Config.Item("DrawE").GetValue<bool>() && E.IsReady())
-                Render.Circle.DrawCircle(Player.Position, E.Range, Color.Chartreuse);
+                Render.Circle.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Chartreuse);
 
             if (Config.Item("DrawIsMidAirDebug").GetValue<bool>())
                 switch (IsMidAir)
@@ -284,7 +293,7 @@ namespace SSKhaZix
                     {
                         var drawPos = Drawing.WorldToScreen(Player.Position);
                         var textSize = Drawing.GetTextExtent("IsMidAir: True");
-                        Drawing.DrawText(drawPos.X - textSize.Width - 70f, drawPos.Y, Color.Chartreuse,
+                        Drawing.DrawText(drawPos.X - textSize.Width - 70f, drawPos.Y, System.Drawing.Color.Chartreuse,
                             "IsMidAir: True");
                     }
                         break;
@@ -292,7 +301,7 @@ namespace SSKhaZix
                     {
                         var drawPos = Drawing.WorldToScreen(Player.Position);
                         var textSize = Drawing.GetTextExtent("IsMidAir: False");
-                        Drawing.DrawText(drawPos.X - textSize.Width - 70f, drawPos.Y, Color.DeepPink,
+                        Drawing.DrawText(drawPos.X - textSize.Width - 70f, drawPos.Y, System.Drawing.Color.DeepPink,
                             "IsMidAir: False");
                     }
                         break;
@@ -301,11 +310,14 @@ namespace SSKhaZix
             if (!Config.Item("DrawIsolated").GetValue<bool>())
                 return;
 
-            foreach (var enemy in HeroManager.Enemies.Where(x => IsIsolated(x) && x.IsValidTarget() && x.Distance(Player.ServerPosition) < 3000))
+            foreach (
+                var enemy in
+                HeroManager.Enemies.Where(
+                    x => IsIsolated(x) && x.IsValidTarget() && (x.Distance(Player.ServerPosition) < 3000)))
             {
                 var drawPos = Drawing.WorldToScreen(enemy.Position);
                 var textSize = Drawing.GetTextExtent("Isolated!");
-                Drawing.DrawText(drawPos.X - textSize.Width/2f, drawPos.Y, Color.Chartreuse, "Isolated!");
+                Drawing.DrawText(drawPos.X - textSize.Width/2f, drawPos.Y, System.Drawing.Color.Chartreuse, "Isolated!");
             }
         }
 
@@ -368,15 +380,17 @@ namespace SSKhaZix
             if (Config.Item("EnableKS").GetValue<bool>())
             {
                 var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
-                if (target == null || !target.IsValidTarget())
+                if ((target == null) || !target.IsValidTarget())
                     return;
 
-                if (Config.Item("KSQ").GetValue<bool>() && Q.Instance.IsReady() && target.Health < GetRealQDamage(target) + OktwCommon.GetIncomingDamage(target))
+                if (Config.Item("KSQ").GetValue<bool>() && Q.Instance.IsReady() &&
+                    (target.Health < GetRealQDamage(target) + OktwCommon.GetIncomingDamage(target)))
                     Q.CastOnUnit(target);
                 if (Config.Item("KSW").GetValue<bool>() && W.Instance.IsReady() &&
-                    target.Health < OktwCommon.GetKsDamage(target, W))
+                    (target.Health < OktwCommon.GetKsDamage(target, W)))
                     SebbySpell(W, target);
-                if (Config.Item("KSE").GetValue<bool>() && E.Instance.IsReady() && target.Health < OktwCommon.GetKsDamage(target, E))
+                if (Config.Item("KSE").GetValue<bool>() && E.Instance.IsReady() &&
+                    (target.Health < OktwCommon.GetKsDamage(target, E)))
                     E.Cast(target.ServerPosition);
                 /*if (Config.Item("KSIgnite").GetValue<bool>() && Ignite.Slot != SpellSlot.Unknown && Player.Spellbook.GetSpell(Ignite.Slot).State == SpellState.Ready &&
                     target.Health < OktwCommon.GetKsDamage(target, Ignite))
@@ -411,7 +425,7 @@ namespace SSKhaZix
             }
             if (UseQ && Q.Instance.IsReady())
                 Q.CastOnUnit(target);
-            if (IsMidAir && target.IsValidTarget(Hydra.Range) || target.IsValidTarget(Tiamat.Range) ||
+            if ((IsMidAir && target.IsValidTarget(Hydra.Range)) || target.IsValidTarget(Tiamat.Range) ||
                 target.IsValidTarget(TitanicHydra.Range))
             {
                 if (Hydra.IsReady())
@@ -550,7 +564,7 @@ namespace SSKhaZix
             if (minionsw == null)
                 return;
 
-            if (Config.Item("JungleClearDontEQRange").GetValue<bool>() && Player.Distance(minionse.Position) > Q.Range)
+            if (Config.Item("JungleClearDontEQRange").GetValue<bool>() && (Player.Distance(minionse.Position) > Q.Range))
             {
                 if ((minionse.MinionsHit >= MinimumEJungleMobs) && UseE && E.Instance.IsReady())
                     E.Cast(minionse.Position);
