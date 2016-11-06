@@ -303,39 +303,6 @@ namespace SSIvern
             if (Config.Item("DrawR").GetValue<bool>() && R.IsReady())
                 Render.Circle.DrawCircle(Player.Position, R.Range, System.Drawing.Color.DarkOrange);
             //ivernqallyjump in attack range
-            /*if (Config.Item("DrawIsMidAirDebug").GetValue<bool>())
-                switch (IsMidAir)
-                {
-                    case true:
-                    {
-                        var drawPos = Drawing.WorldToScreen(Player.Position);
-                        var textSize = Drawing.GetTextExtent("IsMidAir: True");
-                        Drawing.DrawText(drawPos.X - textSize.Width - 70f, drawPos.Y, System.Drawing.Color.Chartreuse,
-                            "IsMidAir: True");
-                    }
-                        break;
-                    case false:
-                    {
-                        var drawPos = Drawing.WorldToScreen(Player.Position);
-                        var textSize = Drawing.GetTextExtent("IsMidAir: False");
-                        Drawing.DrawText(drawPos.X - textSize.Width - 70f, drawPos.Y, System.Drawing.Color.DeepPink,
-                            "IsMidAir: False");
-                    }
-                        break;
-                }*/
-
-            /*if (!Config.Item("DrawIsolated").GetValue<bool>())
-                return;
-
-            foreach (
-                var enemy in
-                HeroManager.Enemies.Where(
-                    x => IsIsolated(x) && x.IsValidTarget() && (x.Distance(Player.ServerPosition) < 3000)))
-            {
-                var drawPos = Drawing.WorldToScreen(enemy.Position);
-                var textSize = Drawing.GetTextExtent("Isolated!");
-                Drawing.DrawText(drawPos.X - textSize.Width/2f, drawPos.Y, System.Drawing.Color.Chartreuse, "Isolated!");
-            }*/
         }
 
         private void GameOnUpdate(EventArgs args)
