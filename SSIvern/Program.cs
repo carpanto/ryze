@@ -17,8 +17,9 @@ namespace SSIvern
     {
         protected static Spell Q, W, E, R, Ignite, Smite;
         protected static Orbwalking.Orbwalker Orbwalker;
+        protected static Obj_AI_Base Daisy;
         protected static Menu Config;
-        private static bool SPredictionLoaded = false;
+        private static bool SPredictionLoaded;
 
         //protected static int lvl1, lvl2, lvl3, lvl4;
 
@@ -49,8 +50,8 @@ namespace SSIvern
 
             #region Spells && Items
 
-            IgniteSlot = Player.GetSpellSlot("summonerdot");
-            var smite = Player.Spellbook.Spells.FirstOrDefault(x => x.Name.ToLower().Contains("smite"));
+            //IgniteSlot = Player.GetSpellSlot("summonerdot");
+            //var smite = Player.Spellbook.Spells.FirstOrDefault(x => x.Name.ToLower().Contains("smite"));
             Q = new Spell(SpellSlot.Q, 1100f);
             W = new Spell(SpellSlot.W, 1600f);
             E = new Spell(SpellSlot.E, 750f);
@@ -58,12 +59,13 @@ namespace SSIvern
             Q.SetSkillshot(0.5f, 65f, 1300f, true, SkillshotType.SkillshotLine);
             W.SetSkillshot(0.5f, 50f, 1600f, false, SkillshotType.SkillshotCircle);
             R.SetSkillshot(0.5f, 100f, 1200f, false, SkillshotType.SkillshotCircle);
-            if (IgniteSlot != SpellSlot.Unknown)
+            /*if ((Ignite != null) && (IgniteSlot != SpellSlot.Unknown))
                 Ignite = new Spell(IgniteSlot, 550f);
             if ((smite != null) && (smite.Slot != SpellSlot.Unknown))
-                Smite = new Spell(smite.Slot, 500f, TargetSelector.DamageType.True);
+                Smite = new Spell(smite.Slot, 500f, TargetSelector.DamageType.True);*/
             GLP800 = new Items.Item(3030, 800f);
             Protobelt = new Items.Item(3152, 850f);
+
             #endregion
 
             #region Config
@@ -94,9 +96,14 @@ namespace SSIvern
                     .SetTooltip(
                         "Will use R if there's more than 1 target"));
 
+            var DaisyMenu = Config.AddSubMenu(new Menu(":: Daisy", "Daisy"));
+            DaisyMenu.AddItem(new MenuItem("AutoDaisy", "Auto-Play Daisy?").SetValue(true));
+            DaisyMenu.AddItem(new MenuItem("DaisyFooter", ":: Soon More Options! <3"));
+
             var LaneClearMenu = Config.AddSubMenu(new Menu(":: LaneClear", "LaneClear"));
             LaneClearMenu.AddItem(new MenuItem("LaneClearQ", "Use Q").SetValue(true));
             LaneClearMenu.AddItem(new MenuItem("LaneClearE", "Use E").SetValue(false));
+            LaneClearMenu.AddItem(new MenuItem("LaneClearEAlly", "Use E on Ally to Farm").SetValue(false));
             LaneClearMenu.AddItem(
                 new MenuItem("LaneClearManaManager", "LaneClear Mana Manager").SetValue(new Slider(50, 0, 100)));
             LaneClearMenu.AddItem(
@@ -126,7 +133,8 @@ namespace SSIvern
             DrawingMenu.AddItem(new MenuItem("DrawQ", "Draw Q Range").SetValue(true));
             DrawingMenu.AddItem(new MenuItem("DrawW", "Draw W Range").SetValue(false));
             DrawingMenu.AddItem(new MenuItem("DrawE", "Draw E Range").SetValue(true));
-            DrawingMenu.AddItem(new MenuItem("DrawR", "Draw R Range").SetValue(true));
+            DrawingMenu.AddItem(new MenuItem("DrawR", "Draw R Range").SetValue(false));
+            DrawingMenu.AddItem(new MenuItem("DrawDaisy", "Draw Daisy Attack Range").SetValue(true));
 
             var MiscMenu = Config.AddSubMenu(new Menu(":: Settings", "Settings"));
             MiscMenu.AddItem(
@@ -134,18 +142,28 @@ namespace SSIvern
             var Prediction = MiscMenu.AddItem(
                 new MenuItem("Prediction", "Prediction").SetValue(new StringList(
                     new[] {"Common", "OKTW", "SPrediction"}, 1)));
+            if (Prediction.GetValue<StringList>().SelectedIndex == 2)
+            {
+                if (!SPredictionLoaded)
+                {
+                    SPrediction.Prediction.Initialize(MiscMenu, "SPrediction Settings");
+                    var SPreditctionLoaded =
+                        MiscMenu.AddItem(new MenuItem("SPredictionLoaded", "SPrediction Loaded!"));
+                    SPredictionLoaded = true;
+                }
+            }
             Prediction.ValueChanged += (sender, eventArgs) =>
             {
                 if (eventArgs.GetNewValue<StringList>().SelectedIndex == 2)
-                {
                     if (!SPredictionLoaded)
                     {
                         SPrediction.Prediction.Initialize(MiscMenu, "SPrediction Settings");
-                        var SPreditctionLoaded = new MenuItem("SPredictionLoaded", "SPrediction Loaded!");
-                        
+                        var SPreditctionLoaded =
+                            MiscMenu.AddItem(new MenuItem("SPredictionLoaded", "SPrediction Loaded!"));
+                        Game.PrintChat("<font color='#0993F9'>[SS Ivern Warning]</font> <font color='#FF8800'>Please exit the menu and click back on it again, to see the settings or Reload (F5)</font>");
+
                         SPredictionLoaded = true;
                     }
-                }
             };
             MiscMenu.AddItem(
                 new MenuItem("MinimumEnemiesNearEDistance", "Distance between You and Enemies before E-ing?").SetValue(
@@ -192,6 +210,7 @@ namespace SSIvern
 
             Game.OnUpdate += GameOnUpdate;
             Drawing.OnDraw += DrawingOnOnDraw;
+            GameObject.OnCreate += Obj_AI_Base_OnCreate;
             //Obj_AI_Base.OnProcessSpellCast += ObjAiHeroOnOnProcessSpellCast;
             Game.PrintChat("<font color='#800040'>[SurvivorSeries] Ivern</font> <font color='#ff6600'>Loaded.</font>");
 
@@ -290,6 +309,12 @@ namespace SSIvern
             }
         }
 
+        private void Obj_AI_Base_OnCreate(GameObject obj, EventArgs args)
+        {
+            if (obj.IsValid && obj.IsAlly && obj is Obj_AI_Minion && (obj.Name.ToLower() == "ivernminion"))
+                Daisy = obj as Obj_AI_Base;
+        }
+
         private void DrawingOnOnDraw(EventArgs args)
         {
             if (Player.IsDead)
@@ -302,7 +327,9 @@ namespace SSIvern
                 Render.Circle.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Chartreuse);
             if (Config.Item("DrawR").GetValue<bool>() && R.IsReady())
                 Render.Circle.DrawCircle(Player.Position, R.Range, System.Drawing.Color.DarkOrange);
-            //ivernqallyjump in attack range
+            if (Config.Item("DrawDaisy").GetValue<bool>() && R.IsReady())
+                if ((Daisy != null) && Daisy.IsValid)
+                    Render.Circle.DrawCircle(Daisy.Position, 200f, System.Drawing.Color.Chartreuse);
         }
 
         private void GameOnUpdate(EventArgs args)
@@ -312,6 +339,7 @@ namespace SSIvern
 
             KillStealCheck();
             TakingFatalDamageCheck();
+            DaisyProgram();
             switch (Orbwalker.ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
@@ -341,13 +369,20 @@ namespace SSIvern
                     return;
 
                 if (Config.Item("KSQ").GetValue<bool>() && Q.Instance.IsReady() &&
-                    (target.Health < Q.GetDamage(target) + OktwCommon.GetIncomingDamage(target)))
+                    (target.Health < OktwCommon.GetKsDamage(target, Q)))
                     SebbySpell(Q, target);
-                /*if (Config.Item("KSIgnite").GetValue<bool>() && Ignite.Slot != SpellSlot.Unknown && Player.Spellbook.GetSpell(Ignite.Slot).State == SpellState.Ready &&
-                    target.Health < OktwCommon.GetKsDamage(target, Ignite))
+                if (Config.Item("KSItems").GetValue<bool>())
+                {
+                    if (GLP800.IsReady() && target.IsValidTarget(GLP800.Range) && target.Health < OktwCommon.GetIncomingDamage(target) + (100 + Player.TotalMagicalDamage) * 100)
+                        GLP800.Cast(target.ServerPosition);
+                    if (Protobelt.IsReady() && target.IsValidTarget(Protobelt.Range) && target.Health < OktwCommon.GetIncomingDamage(target) + (75 + Player.TotalMagicalDamage) * 100)
+                        Protobelt.Cast(target.ServerPosition);
+                }
+                /*if (Config.Item("KSIgnite").GetValue<bool>() && Ignite != null && Ignite.Slot != SpellSlot.Unknown && Player.Spellbook.GetSpell(Ignite.Slot).State == SpellState.Ready &&
+                    target.Health < OktwCommon.GetIncomingDamage(target) + Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite))
                     Player.Spellbook.CastSpell(Ignite.Slot, target);
-                if (Config.Item("KSSmite").GetValue<bool>() && Smite.Slot != SpellSlot.Unknown &&
-                    target.Health < OktwCommon.GetKsDamage(target, Smite))
+                if (Config.Item("KSSmite").GetValue<bool>() && Smite != null && Smite.Slot != SpellSlot.Unknown &&
+                    target.Health < OktwCommon.GetIncomingDamage(target) + Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Smite))
                     Player.Spellbook.CastSpell(Smite.Slot, target);*/
             }
         }
@@ -364,7 +399,7 @@ namespace SSIvern
             var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if ((target == null) || !target.IsValidTarget())
                 return;
-            if (Player.HasBuff("ivernqallyjump") && target.CountEnemiesInRange(1000) <= 1)
+            if (Player.HasBuff("ivernqallyjump") && (target.CountEnemiesInRange(1000) <= 1))
                 Q.Cast();
             if (UseE && E.Instance.IsReady() && target.IsValidTarget(E.Range))
                 E.CastOnUnit(Player);
@@ -387,7 +422,11 @@ namespace SSIvern
 
         private void TakingFatalDamageCheck()
         {
-            if (Player.Health + 100 < OktwCommon.GetIncomingDamage(Player))
+            foreach (var allyprotector in HeroManager.Allies.Where(x => x.Health + 50 < OktwCommon.GetIncomingDamage(x))
+            )
+                if (E.Instance.IsReady())
+                    E.CastOnUnit(allyprotector);
+            if (Player.Health + 50 < OktwCommon.GetIncomingDamage(Player))
                 E.CastOnUnit(Player);
             if (Player.CountEnemiesInRange(Config.Item("MinimumEnemiesNearEDistance").GetValue<Slider>().Value) >
                 Config.Item("MinimumEnemiesNearE").GetValue<Slider>().Value)
@@ -425,6 +464,47 @@ namespace SSIvern
             }
         }
 
+        private void DaisyProgram()
+        {
+            if (R.Instance.IsReady())
+                if (Config.Item("AutoDaisy").GetValue<bool>() && (Daisy != null) && Daisy.IsValid)
+                {
+                    var enemy =
+                        HeroManager.Enemies.Where(
+                                x => x.IsValidTarget() && (Daisy.Distance(x.Position) < 1000) && !x.UnderTurret(true))
+                            .OrderBy(x => x.Distance(Daisy))
+                            .FirstOrDefault();
+                    if (enemy != null)
+                    {
+                        if (Daisy.Distance(enemy.Position) > 200)
+                            Player.IssueOrder(GameObjectOrder.MovePet, enemy);
+                        else
+                        {
+                            Daisy.IssueOrder(GameObjectOrder.AttackUnit, enemy);
+                            E.CastOnUnit(Daisy);
+                        }
+                    }
+                    else
+                    {
+                        var iverntarget = Orbwalker.GetTarget() as Obj_AI_Base;
+                        if (iverntarget != null)
+                            if (Daisy.Distance(iverntarget.Position) > 200)
+                                Player.IssueOrder(GameObjectOrder.MovePet, iverntarget);
+                            else
+                            {
+                                Daisy.IssueOrder(GameObjectOrder.AttackUnit, iverntarget);
+                                E.CastOnUnit(Daisy);
+                            }
+                        else if (Daisy.UnderTurret(true))
+                            Player.IssueOrder(GameObjectOrder.MovePet, Player);
+                    }
+                }
+                else
+                {
+                    Daisy = null;
+                }
+        }
+
         private void LastHit()
         {
             var UseQ = Config.Item("LastHitQ").GetValue<bool>();
@@ -457,7 +537,10 @@ namespace SSIvern
                 return;
 
             var minionselist = Cache.GetMinions(Player.ServerPosition, 120, MinionTeam.Enemy);
-
+            var minionallylist = Cache.GetMinions(Player.Position, 2*E.Range, MinionTeam.Enemy).FirstOrDefault();
+            var ally = HeroManager.Allies.Where(x => x.Distance(minionallylist) <= 120);
+            if (ally.Any())
+                E.CastOnUnit(ally.FirstOrDefault());
             if (UseQ && Q.Instance.IsReady() && minionsq.IsValidTarget() && (minionsq != null) &&
                 (minionsq.Health < Q.GetDamage(minionsq)))
                 Q.CastOnUnit(minionsq);
@@ -472,6 +555,8 @@ namespace SSIvern
 
             if (Q.Instance.IsReady())
                 damage += Q.GetDamage(enemy);
+            if (E.Instance.IsReady())
+                damage += E.GetDamage(enemy);
 
             damage += Player.GetAutoAttackDamage(enemy);
 
