@@ -231,20 +231,12 @@ namespace SSIvern
             Drawing.OnDraw += DrawingOnOnDraw;
             GameObject.OnCreate += Obj_AI_Base_OnCreate;
             GameObject.OnDelete += GameObjectOnOnDelete;
-            Obj_AI_Base.OnBuffAdd += ObjAiBaseOnOnBuffAdd;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             //Obj_AI_Base.OnProcessSpellCast += ObjAiHeroOnOnProcessSpellCast;
             Game.PrintChat("<font color='#800040'>[SurvivorSeries] Ivern</font> <font color='#ff6600'>Loaded.</font>");
 
             #endregion
-        }
-
-        private void ObjAiBaseOnOnBuffAdd(Obj_AI_Base sender, Obj_AI_BaseBuffAddEventArgs args)
-        {
-            if (sender.Distance(Player.Position) > 400)
-                return;
-            Game.PrintChat(sender.Name + " | " + args.Buff.Name + " | " + args.Buff.DisplayName);
         }
 
         private void GameObjectOnOnDelete(GameObject sender, EventArgs args)
