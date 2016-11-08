@@ -136,6 +136,19 @@ namespace SSIvern
             DrawingMenu.AddItem(new MenuItem("DrawR", "Draw R Range").SetValue(false));
             DrawingMenu.AddItem(new MenuItem("DrawDaisy", "Draw Daisy Attack Range").SetValue(true));
 
+            var GapCloserInterrupter =
+                Config.AddSubMenu(
+                    new Menu(":: Anti-GapCloser/Interrupter", "GapCloserInterrupter").SetFontStyle(FontStyle.Bold,
+                        Color.Chartreuse));
+            GapCloserInterrupter.AddItem(new MenuItem("QToInterrupt", "Q to Interrupt?").SetValue(true));
+            GapCloserInterrupter.AddItem(new MenuItem("GapCloserAutoE", "E on Gapclose enemy near you?").SetValue(false));
+            GapCloserInterrupter.AddItem(new MenuItem("GapCloserInfo", "                 .:Gap-Closer Q on Enemy (Whitelist):."));
+            foreach (var enemy in HeroManager.Enemies)
+                GapCloserInterrupter
+                    .AddItem(
+                        new MenuItem("GapCloserEnemies" + enemy.ChampionName, enemy.ChampionName).SetValue(true)
+                            .SetTooltip("Use Q on GapClosing Champions"));
+
             var MiscMenu = Config.AddSubMenu(new Menu(":: Settings", "Settings"));
             MiscMenu.AddItem(
                 new MenuItem("HitChance", "Hit Chance").SetValue(new StringList(new[] {"Medium", "High", "Very High"}, 1)));
@@ -211,10 +224,31 @@ namespace SSIvern
             Game.OnUpdate += GameOnUpdate;
             Drawing.OnDraw += DrawingOnOnDraw;
             GameObject.OnCreate += Obj_AI_Base_OnCreate;
+            Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
+            AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             //Obj_AI_Base.OnProcessSpellCast += ObjAiHeroOnOnProcessSpellCast;
             Game.PrintChat("<font color='#800040'>[SurvivorSeries] Ivern</font> <font color='#ff6600'>Loaded.</font>");
 
             #endregion
+        }
+
+        private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
+        {
+            if (Q.Instance.IsReady())
+            {
+                var GapCloser = gapcloser.Sender;
+                if (Config.Item("GapCloserEnemies" + GapCloser.ChampionName).GetValue<bool>() &&
+                    GapCloser.IsValidTarget(400))
+                    Q.Cast(GapCloser.ServerPosition);
+                if (Config.Item("GapCloserAutoE").GetValue<bool>() && GapCloser.IsValidTarget(200))
+                    E.CastOnUnit(Player);
+            }
+        }
+
+        private void Interrupter2_OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
+        {
+            if (Config.Item("QToInterrupt").GetValue<bool>() && sender.IsValidTarget(Q.Range) && Q.IsReady())
+                Q.Cast(sender);
         }
 
         private void ObjAiHeroOnOnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
