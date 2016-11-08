@@ -8,7 +8,7 @@ using SPrediction;
 using Color = SharpDX.Color;
 using HitChance = SebbyLib.Prediction.HitChance;
 using Orbwalking = SebbyLib.Orbwalking;
-using Prediction = SebbyLib.Prediction.Prediction;
+using Prediction = SPrediction.Prediction;
 using PredictionInput = SebbyLib.Prediction.PredictionInput;
 
 namespace SSIvern
@@ -89,6 +89,10 @@ namespace SSIvern
             ComboMenu.AddItem(new MenuItem("ComboUseE", "Use E").SetValue(true));
             ComboMenu.AddItem(new MenuItem("ComboUseItems", "Use Items?").SetValue(true));
             ComboMenu.AddItem(
+                new MenuItem("SemiManualR", "Semi-Manual R Casting?").SetValue(false)
+                    .SetTooltip("True - Script will Auto R | False - You will R when you decide - preferably",
+                        Color.Chartreuse));
+            ComboMenu.AddItem(
                 new MenuItem("ComboMinimumREnemies", "Minimum Enemies in E Range Before Casting R").SetValue(
                     new Slider(2, 1, 5)));
             ComboMenu.AddItem(
@@ -124,6 +128,7 @@ namespace SSIvern
             var KillStealMenu = Config.AddSubMenu(new Menu(":: Killsteal", "Killsteal"));
             KillStealMenu.AddItem(new MenuItem("EnableKS", "Enable Killsteal?").SetValue(true));
             KillStealMenu.AddItem(new MenuItem("KSQ", "KS with Q?").SetValue(true));
+            KillStealMenu.AddItem(new MenuItem("KSItems", "KS with Items?").SetValue(true));
             KillStealMenu.AddItem(new MenuItem("UnavailableService",
                 "KS with Ignite/Smite is currently (Temporary) Unavailable."));
             KillStealMenu.AddItem(new MenuItem("KSIgnite", "KS with Ignite").SetValue(false));
@@ -135,6 +140,7 @@ namespace SSIvern
             DrawingMenu.AddItem(new MenuItem("DrawE", "Draw E Range").SetValue(true));
             DrawingMenu.AddItem(new MenuItem("DrawR", "Draw R Range").SetValue(false));
             DrawingMenu.AddItem(new MenuItem("DrawDaisy", "Draw Daisy Attack Range").SetValue(true));
+            DrawingMenu.AddItem(new MenuItem("DrawJungleMobPassive", "Draw Jungle Mob Ready!").SetValue(true));
 
             var GapCloserInterrupter =
                 Config.AddSubMenu(
@@ -142,38 +148,38 @@ namespace SSIvern
                         Color.Chartreuse));
             GapCloserInterrupter.AddItem(new MenuItem("QToInterrupt", "Q to Interrupt?").SetValue(true));
             GapCloserInterrupter.AddItem(new MenuItem("GapCloserAutoE", "E on Gapclose enemy near you?").SetValue(false));
-            GapCloserInterrupter.AddItem(new MenuItem("GapCloserInfo", "                   .:Gap-Closer Q on Enemy (Whitelist):."));
+            GapCloserInterrupter.AddItem(new MenuItem("GapCloserInfo",
+                "                   .:Gap-Closer Q on Enemy (Whitelist):."));
             foreach (var enemy in HeroManager.Enemies)
                 GapCloserInterrupter
                     .AddItem(
                         new MenuItem("GapCloserEnemies" + enemy.ChampionName, enemy.ChampionName).SetValue(true)
-                            .SetTooltip("Use Q on GapClosing Champion ("+enemy.ChampionName+")"));
+                            .SetTooltip("Use Q on GapClosing Champion (" + enemy.ChampionName + ")"));
 
             var MiscMenu = Config.AddSubMenu(new Menu(":: Settings", "Settings"));
             MiscMenu.AddItem(
                 new MenuItem("HitChance", "Hit Chance").SetValue(new StringList(new[] {"Medium", "High", "Very High"}, 1)));
-            var Prediction = MiscMenu.AddItem(
-                new MenuItem("Prediction", "Prediction").SetValue(new StringList(
-                    new[] {"Common", "OKTW", "SPrediction"}, 1)));
-            if (Prediction.GetValue<StringList>().SelectedIndex == 2)
-            {
+            var PredictionVar = MiscMenu.AddItem(
+                new MenuItem("Prediction", "Prediction:").SetValue(new StringList(
+                    new[] {"Common", "OKTW", "SPrediction"}, 0)));
+            if (PredictionVar.GetValue<StringList>().SelectedIndex == 2)
                 if (!SPredictionLoaded)
                 {
-                    SPrediction.Prediction.Initialize(MiscMenu, "SPrediction Settings");
+                    Prediction.Initialize(MiscMenu, "SPrediction Settings");
                     var SPreditctionLoaded =
                         MiscMenu.AddItem(new MenuItem("SPredictionLoaded", "SPrediction Loaded!"));
                     SPredictionLoaded = true;
                 }
-            }
-            Prediction.ValueChanged += (sender, eventArgs) =>
+            PredictionVar.ValueChanged += (sender, eventArgs) =>
             {
                 if (eventArgs.GetNewValue<StringList>().SelectedIndex == 2)
                     if (!SPredictionLoaded)
                     {
-                        SPrediction.Prediction.Initialize(MiscMenu, "SPrediction Settings");
+                        Prediction.Initialize(MiscMenu, "SPrediction Settings");
                         var SPreditctionLoaded =
                             MiscMenu.AddItem(new MenuItem("SPredictionLoaded", "SPrediction Loaded!"));
-                        Game.PrintChat("<font color='#0993F9'>[SS Ivern Warning]</font> <font color='#FF8800'>Please exit the menu and click back on it again, to see the settings or Reload (F5)</font>");
+                        Game.PrintChat(
+                            "<font color='#0993F9'>[SS Ivern Warning]</font> <font color='#FF8800'>Please exit the menu and click back on it again, to see the settings or Reload (F5)</font>");
 
                         SPredictionLoaded = true;
                     }
@@ -224,12 +230,29 @@ namespace SSIvern
             Game.OnUpdate += GameOnUpdate;
             Drawing.OnDraw += DrawingOnOnDraw;
             GameObject.OnCreate += Obj_AI_Base_OnCreate;
+            GameObject.OnDelete += GameObjectOnOnDelete;
+            Obj_AI_Base.OnBuffAdd += ObjAiBaseOnOnBuffAdd;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             //Obj_AI_Base.OnProcessSpellCast += ObjAiHeroOnOnProcessSpellCast;
             Game.PrintChat("<font color='#800040'>[SurvivorSeries] Ivern</font> <font color='#ff6600'>Loaded.</font>");
 
             #endregion
+        }
+
+        private void ObjAiBaseOnOnBuffAdd(Obj_AI_Base sender, Obj_AI_BaseBuffAddEventArgs args)
+        {
+            if (sender.Distance(Player.Position) > 400)
+                return;
+            Game.PrintChat(sender.Name + " | " + args.Buff.Name + " | " + args.Buff.DisplayName);
+        }
+
+        private void GameObjectOnOnDelete(GameObject sender, EventArgs args)
+        {
+            if (sender.IsValid && sender.IsAlly && sender is Obj_AI_Minion && (sender.Name.ToLower() == "ivernminion"))
+                Daisy = null;
+            //if (obj.IsValid && obj.IsAlly && obj is Obj_AI_Minion && (obj.Name.ToLower() == "ivernminion"))
+            //    Daisy = obj as Obj_AI_Base;
         }
 
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -245,7 +268,8 @@ namespace SSIvern
             }
         }
 
-        private void Interrupter2_OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
+        private void Interrupter2_OnInterruptableTarget(Obj_AI_Hero sender,
+            Interrupter2.InterruptableTargetEventArgs args)
         {
             if (Config.Item("QToInterrupt").GetValue<bool>() && sender.IsValidTarget(Q.Range) && Q.IsReady())
                 Q.Cast(sender);
@@ -288,7 +312,7 @@ namespace SSIvern
                     Unit = target,
                     Type = CoreType2
                 };
-                var poutput2 = Prediction.GetPrediction(predInput2);
+                var poutput2 = SebbyLib.Prediction.Prediction.GetPrediction(predInput2);
 
                 if (OktwCommon.CollisionYasuo(Player.ServerPosition, poutput2.CastPosition))
                     return;
@@ -354,16 +378,22 @@ namespace SSIvern
             if (Player.IsDead)
                 return;
             if (Config.Item("DrawQ").GetValue<bool>() && Q.IsReady())
-                Render.Circle.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Crimson);
+                Render.Circle.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Chartreuse);
             if (Config.Item("DrawW").GetValue<bool>() && W.IsReady())
                 Render.Circle.DrawCircle(Player.Position, W.Range, System.Drawing.Color.DeepPink);
             if (Config.Item("DrawE").GetValue<bool>() && E.IsReady())
-                Render.Circle.DrawCircle(Player.Position, E.Range, System.Drawing.Color.Chartreuse);
+                Render.Circle.DrawCircle(Player.Position, E.Range, System.Drawing.Color.GreenYellow);
             if (Config.Item("DrawR").GetValue<bool>() && R.IsReady())
                 Render.Circle.DrawCircle(Player.Position, R.Range, System.Drawing.Color.DarkOrange);
             if (Config.Item("DrawDaisy").GetValue<bool>() && R.IsReady())
                 if ((Daisy != null) && Daisy.IsValid)
                     Render.Circle.DrawCircle(Daisy.Position, 200f, System.Drawing.Color.Chartreuse);
+            if (Config.Item("DrawJungleMobPassive").GetValue<bool>())
+                foreach (var junglemob in Cache.MinionsListNeutral.Where(x => x.HasBuff("ivernpmanager")))
+                    if (!junglemob.HasBuff("ivernpmonsterready"))
+                        Render.Circle.DrawCircle(junglemob.Position, 200, System.Drawing.Color.DarkOrange, 15);
+                    else if (junglemob.HasBuff("ivernpmonsterready"))
+                        Render.Circle.DrawCircle(junglemob.Position, 200, System.Drawing.Color.Chartreuse, 15);
         }
 
         private void GameOnUpdate(EventArgs args)
@@ -398,7 +428,7 @@ namespace SSIvern
         {
             if (Config.Item("EnableKS").GetValue<bool>())
             {
-                var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Physical);
+                var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
                 if ((target == null) || !target.IsValidTarget())
                     return;
 
@@ -407,9 +437,11 @@ namespace SSIvern
                     SebbySpell(Q, target);
                 if (Config.Item("KSItems").GetValue<bool>())
                 {
-                    if (GLP800.IsReady() && target.IsValidTarget(GLP800.Range) && target.Health < OktwCommon.GetIncomingDamage(target) + (100 + Player.TotalMagicalDamage) * 100)
+                    if (GLP800.IsReady() && target.IsValidTarget(GLP800.Range) &&
+                        (target.Health < OktwCommon.GetIncomingDamage(target) + (100 + Player.TotalMagicalDamage)*100))
                         GLP800.Cast(target.ServerPosition);
-                    if (Protobelt.IsReady() && target.IsValidTarget(Protobelt.Range) && target.Health < OktwCommon.GetIncomingDamage(target) + (75 + Player.TotalMagicalDamage) * 100)
+                    if (Protobelt.IsReady() && target.IsValidTarget(Protobelt.Range) &&
+                        (target.Health < OktwCommon.GetIncomingDamage(target) + (75 + Player.TotalMagicalDamage)*100))
                         Protobelt.Cast(target.ServerPosition);
                 }
                 /*if (Config.Item("KSIgnite").GetValue<bool>() && Ignite != null && Ignite.Slot != SpellSlot.Unknown && Player.Spellbook.GetSpell(Ignite.Slot).State == SpellState.Ready &&
@@ -439,8 +471,9 @@ namespace SSIvern
                 E.CastOnUnit(Player);
             if (UseQ && Q.Instance.IsReady())
                 SebbySpell(Q, target);
-            if (UseR && (Player.CountEnemiesInRange(E.Range) >= ComboMinimumREnemies) && R.Instance.IsReady())
-                R.Cast(target.ServerPosition);
+            if (!Config.Item("SemiManualR").GetValue<bool>())
+                if (UseR && (Player.CountEnemiesInRange(E.Range) >= ComboMinimumREnemies) && R.Instance.IsReady())
+                    R.Cast(target.ServerPosition);
             if (UseW && W.Instance.IsReady() && (target.Distance(Player) > Player.AttackRange) &&
                 (target.Distance(Player) < 450) && !Player.HasBuff("IvernW"))
                 W.Cast(Player.ServerPosition);
@@ -572,9 +605,12 @@ namespace SSIvern
 
             var minionselist = Cache.GetMinions(Player.ServerPosition, 120, MinionTeam.Enemy);
             var minionallylist = Cache.GetMinions(Player.Position, 2*E.Range, MinionTeam.Enemy).FirstOrDefault();
-            var ally = HeroManager.Allies.Where(x => x.Distance(minionallylist) <= 120);
-            if (ally.Any())
-                E.CastOnUnit(ally.FirstOrDefault());
+            if ((minionallylist != null) || minionallylist.IsValidTarget())
+            {
+                var ally = HeroManager.Allies.Where(x => x.Distance(minionallylist) <= 120);
+                if (ally.Any())
+                    E.CastOnUnit(ally.FirstOrDefault());
+            }
             if (UseQ && Q.Instance.IsReady() && minionsq.IsValidTarget() && (minionsq != null) &&
                 (minionsq.Health < Q.GetDamage(minionsq)))
                 Q.CastOnUnit(minionsq);
