@@ -142,12 +142,12 @@ namespace SSIvern
                         Color.Chartreuse));
             GapCloserInterrupter.AddItem(new MenuItem("QToInterrupt", "Q to Interrupt?").SetValue(true));
             GapCloserInterrupter.AddItem(new MenuItem("GapCloserAutoE", "E on Gapclose enemy near you?").SetValue(false));
-            GapCloserInterrupter.AddItem(new MenuItem("GapCloserInfo", "                 .:Gap-Closer Q on Enemy (Whitelist):."));
+            GapCloserInterrupter.AddItem(new MenuItem("GapCloserInfo", "                   .:Gap-Closer Q on Enemy (Whitelist):."));
             foreach (var enemy in HeroManager.Enemies)
                 GapCloserInterrupter
                     .AddItem(
                         new MenuItem("GapCloserEnemies" + enemy.ChampionName, enemy.ChampionName).SetValue(true)
-                            .SetTooltip("Use Q on GapClosing Champions"));
+                            .SetTooltip("Use Q on GapClosing Champion ("+enemy.ChampionName+")"));
 
             var MiscMenu = Config.AddSubMenu(new Menu(":: Settings", "Settings"));
             MiscMenu.AddItem(
