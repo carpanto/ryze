@@ -161,7 +161,7 @@ namespace SSIvern
                 new MenuItem("HitChance", "Hit Chance").SetValue(new StringList(new[] {"Medium", "High", "Very High"}, 1)));
             var PredictionVar = MiscMenu.AddItem(
                 new MenuItem("Prediction", "Prediction:").SetValue(new StringList(
-                    new[] {"Common", "OKTW", "SPrediction"}, 0)));
+                    new[] {"Common", "OKTW", "SPrediction"}, 1)));
             if (PredictionVar.GetValue<StringList>().SelectedIndex == 2)
                 if (!SPredictionLoaded)
                 {
