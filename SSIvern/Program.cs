@@ -195,10 +195,10 @@ namespace SSIvern
             var drawdamage = new Menu(":: Draw Damage", "drawdamage");
             {
                 var dmgAfterShave =
-                    new MenuItem("SurvivorIvern.DrawComboDamage", "Draw Damage on Enemy's HP Bar").SetValue(true);
+                    DrawingMenu.AddItem(new MenuItem("SurvivorIvern.DrawComboDamage", "Draw Damage on Enemy's HP Bar").SetValue(true));
                 var drawFill =
-                    new MenuItem("SurvivorIvern.DrawColour", "Fill Color", true).SetValue(
-                        new Circle(true, System.Drawing.Color.Chartreuse));
+                    DrawingMenu.AddItem(new MenuItem("SurvivorIvern.DrawColour", "Fill Color", true).SetValue(
+                        new Circle(true, System.Drawing.Color.Chartreuse)));
                 drawdamage.AddItem(drawFill);
                 drawdamage.AddItem(dmgAfterShave);
                 DrawDamage.DamageToUnit = CalculateDamage;

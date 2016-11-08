@@ -1,0 +1,12 @@
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\SurvivorSeriesUpdater\SurvivorSeriesUpdater\bin\Debug\SurvivorSeriesUpdater.exe.config
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\SurvivorSeriesUpdater\SurvivorSeriesUpdater\bin\Debug\SurvivorSeriesUpdater.exe
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\SurvivorSeriesUpdater\SurvivorSeriesUpdater\bin\Debug\SurvivorSeriesUpdater.pdb
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\SurvivorSeriesUpdater\SurvivorSeriesUpdater\bin\Debug\MetroFramework.Design.dll
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\SurvivorSeriesUpdater\SurvivorSeriesUpdater\bin\Debug\MetroFramework.dll
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\SurvivorSeriesUpdater\SurvivorSeriesUpdater\bin\Debug\MetroFramework.Fonts.dll
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\SurvivorSeriesUpdater\SurvivorSeriesUpdater\obj\Debug\SurvivorSeriesUpdater.Properties.Resources.resources
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\SurvivorSeriesUpdater\SurvivorSeriesUpdater\obj\Debug\SurvivorSeriesUpdater.csproj.GenerateResource.Cache
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\SurvivorSeriesUpdater\SurvivorSeriesUpdater\obj\Debug\SurvivorSeriesUpdater.exe
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\SurvivorSeriesUpdater\SurvivorSeriesUpdater\obj\Debug\SurvivorSeriesUpdater.pdb
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\SurvivorSeriesUpdater\SurvivorSeriesUpdater\obj\Debug\SurvivorSeriesUpdater.MainWindow.resources
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\SurvivorSeriesUpdater\SurvivorSeriesUpdater\obj\Debug\SurvivorSeriesUpdater.csprojResolveAssemblyReference.cache

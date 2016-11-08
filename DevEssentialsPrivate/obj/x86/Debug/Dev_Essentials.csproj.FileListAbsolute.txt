@@ -1,0 +1,16 @@
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\DevEssentialsPrivate\bin\Debug\Dev_Essentials.exe.config
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\DevEssentialsPrivate\bin\Debug\Dev_Essentials.exe
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\DevEssentialsPrivate\bin\Debug\Dev_Essentials.pdb
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\DevEssentialsPrivate\bin\Debug\LeagueSharp.Common.dll
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\DevEssentialsPrivate\bin\Debug\LeagueSharp.dll
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\DevEssentialsPrivate\bin\Debug\SharpDX.dll
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\DevEssentialsPrivate\bin\Debug\SharpDX.Direct3D9.dll
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\DevEssentialsPrivate\bin\Debug\LeagueSharp.Data.dll
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\DevEssentialsPrivate\bin\Debug\clipper_library.dll
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\DevEssentialsPrivate\bin\Debug\Newtonsoft.Json.dll
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\DevEssentialsPrivate\bin\Debug\LeagueSharp.Common.pdb
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\DevEssentialsPrivate\bin\Debug\LeagueSharp.Data.pdb
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\DevEssentialsPrivate\bin\Debug\clipper_library.pdb
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\DevEssentialsPrivate\obj\x86\Debug\Dev_Essentials.csprojResolveAssemblyReference.cache
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\DevEssentialsPrivate\obj\x86\Debug\Dev_Essentials.exe
+C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\DevEssentialsPrivate\obj\x86\Debug\Dev_Essentials.pdb
