@@ -64,7 +64,7 @@ namespace hsCamera
                 _config.AddItem(new MenuItem("credits", "                      .:Official Version of hsCamera:.")).SetFontStyle(System.Drawing.FontStyle.Bold, SharpDX.Color.DeepPink);
                 _config.AddToMainMenu();
             }
-            Game.PrintChat("<font color='#800040'>hsCamera</font> <font color='#ff6600'>Loaded!</font>");
+            Game.PrintChat("<font color='#800040'>[6.17] hsCamera</font> <font color='#ff6600'>Loaded!</font>");
             Game.OnUpdate += HsCameraOnUpdate;
         }
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using LeagueSharp;
@@ -91,13 +90,6 @@ namespace SSKhaZix
 
             #region Config Items
 
-            var AssassinManagerMenu = Config.AddSubMenu(new Menu(":: AssassinManager", "AssassinManager"));
-            foreach (var champion in HeroManager.Enemies.Where(x => x.IsValidTarget()))
-            {
-                AssassinManagerMenu.AddItem(
-                    new MenuItem("champion" + champion.ChampionName, champion.ChampionName).SetValue(TargetSelector.GetPriority(champion) >= 3).SetTooltip("Still Work in Progress!"));
-            }
-
             var ComboMenu = Config.AddSubMenu(new Menu(":: Combo", "Combo"));
             ComboMenu.AddItem(new MenuItem("ComboUseQ", "Use Q").SetValue(true));
             ComboMenu.AddItem(new MenuItem("ComboUseW", "Use W").SetValue(true));
@@ -166,17 +158,9 @@ namespace SSKhaZix
                 new MenuItem("DrawIsolated", "Draw Isolated?").SetValue(true).SetTooltip("Preferably set to 'true'."));
             DrawingMenu.AddItem(new MenuItem("DrawIsMidAirDebug", "Draw isMidAir (Debug)").SetValue(false));
 
-            var MiscMenu = Config.AddSubMenu(new Menu(":: Misc", "Misc")); // AssassinateTargetDive
+            var MiscMenu = Config.AddSubMenu(new Menu(":: Misc", "Misc"));
             MiscMenu.AddItem(
                 new MenuItem("HitChance", "Hit Chance").SetValue(new StringList(new[] {"Medium", "High", "Very High"}, 1)));
-
-            var AssassinMenu = Config.AddSubMenu(new Menu(":: Assasinate Target", "AssassinateTarget"));
-                // AssassinateTargetDive
-            AssassinMenu.AddItem(
-                new MenuItem("AssassinateTargetDive", "Don't Dive Under-Turret to Assassinate Target?").SetValue(false));
-            AssassinMenu.AddItem(
-                new MenuItem("AssassinateTarget", "Assassinate Target?").SetValue(new KeyBind("T".ToCharArray()[0],
-                    KeyBindType.Press)));
 
             #region DrawDamage
 
@@ -237,12 +221,6 @@ namespace SSKhaZix
                 else
                     Utility.DelayAction.Add(1200, () => IsMidAir = false);
             }
-        }
-
-        private void AssassinManager()
-        {
-            // TODO: Finish up AssassinManager
-
         }
 
         private void SebbySpell(Spell W, Obj_AI_Base target)
@@ -376,8 +354,6 @@ namespace SSKhaZix
 
             Orbwalker.SetAttack(!IsInvisible());
             KillStealCheck();
-            if (Config.Item("AssassinateTarget").GetValue<KeyBind>().Active)
-                AssassinateTarget();
             switch (Orbwalker.ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
@@ -422,106 +398,6 @@ namespace SSKhaZix
                 if (Config.Item("KSSmite").GetValue<bool>() && Smite.Slot != SpellSlot.Unknown &&
                     target.Health < OktwCommon.GetKsDamage(target, Smite))
                     Player.Spellbook.CastSpell(Smite.Slot, target);*/
-            }
-        }
-
-        private void QEFarmingLogic()
-        {
-            var minions = Cache.GetMinions(Player.Position, E.Range + Q.Range);
-            var splitminion = minions.FirstOrDefault(x => x.IsValidTarget() && x.Health < Q.GetDamage(x) || x.Health < E.GetDamage(x));
-            var linearminion = Q.GetLineFarmLocation(minions).MinionsHit > Config.Item("LineFarmHit").GetValue<Slider>().Value;
-            var circularminion = Q.GetCircularFarmLocation(minions).MinionsHit > Config.Item("CircularFarmHit").GetValue<Slider>().Value;
-
-            // Might aswell do a switch case of Q.State instead of if statement.
-            if (Q.Instance.IsReady() && splitminion.IsValidTarget()) // && Q.State is NOT Charged
-             {
-                if (Player.CharacterState == GameObjectCharacterState.Fleeing)
-                {
-                    Q.Cast();
-                }
-                else
-                {
-                    if (linearminion)
-                        Q.Cast(Q.GetLineFarmLocation(minions).Position);
-                }
-            }
-            if (Q.Instance.IsReady() && splitminion.IsValidTarget()) // && Q.State IS Charged
-            {
-                if (Player.CharacterState == GameObjectCharacterState.Fleeing)
-                {
-                    Q.Cast(Q.GetCircularFarmLocation(minions).MinionsHit > Config.Item("CircularFarmHit").GetValue<Slider>().Value);
-                }
-            }
-            if (E.Instance.IsReady() && splitminion.IsValidTarget()) // && E.State == None
-            {
-                E.CastOnUnit(splitminion);
-                // Utility.DelayAction, the dash delay, till it gets to end point, so it doesn't miss the next line.
-                if (E.GetDash(splitminion) == Q.GetCircularFarmLocation(minions).MinionsHit > Config.Item("CircularFarmHit").GetValue<Slider>().Value)
-                    Q.Cast();
-            }
-        }
-
-        private void AssassinateTarget()
-        {
-            var DontDive = Config.Item("AssassinateTargetDive").GetValue<bool>();
-
-            var target = TargetSelector.GetSelectedTarget();
-            if ((target == null) || !target.IsValidTarget())
-                return;
-
-            if (target.IsValidTarget(Player.AttackRange+100))
-            Orbwalking.Orbwalk(target, Game.CursorPos);
-            else
-            Orbwalking.MoveTo(Game.CursorPos);
-
-            if (DontDive && target.UnderTurret())
-                return;
-
-            if (target.IsValidTarget(Q.Range))
-            {
-                if (target.CountEnemiesInRange(800) > 2)
-                    R.Cast();
-                if (Q.IsReady())
-                    Q.CastOnUnit(target);
-                if (Youmuu.IsReady() && target.IsValidTarget(Player.AttackRange + 400))
-                    Youmuu.Cast();
-                if (Hydra.IsReady() && target.IsValidTarget(Hydra.Range))
-                    Hydra.Cast();
-                if (TitanicHydra.IsReady() && target.IsValidTarget(TitanicHydra.Range))
-                    TitanicHydra.Cast();
-                if (Tiamat.IsReady() && target.IsValidTarget(Tiamat.Range))
-                    Tiamat.Cast();
-                if (W.IsReady())
-                    SebbySpell(W, target);
-                if (E.IsReady())
-                    if (Player.CountAlliesInRange(E.Range) > 0)
-                        E.Cast(HeroManager.Allies.FirstOrDefault(x => x.CountEnemiesInRange(350) <= 0));
-                    else
-                        E.Cast(Game.CursorPos);
-            }
-            else if (target.IsValidTarget(E.Range) && !Q.IsInRange(target))
-            {
-                if (target.CountEnemiesInRange(800) > 2)
-                    R.Cast();
-                if (E.IsReady())
-                    E.Cast(target.ServerPosition);
-                if (Q.IsReady())
-                    Q.CastOnUnit(target);
-                if (Youmuu.IsReady() && target.IsValidTarget(Player.AttackRange + 400))
-                    Youmuu.Cast();
-                if (Hydra.IsReady() && target.IsValidTarget(Hydra.Range))
-                    Hydra.Cast();
-                if (TitanicHydra.IsReady() && target.IsValidTarget(TitanicHydra.Range))
-                    TitanicHydra.Cast();
-                if (Tiamat.IsReady() && target.IsValidTarget(Tiamat.Range))
-                    Tiamat.Cast();
-                if (W.IsReady())
-                    SebbySpell(W, target);
-                if (E.IsReady())
-                    if (Player.CountAlliesInRange(E.Range) > 0)
-                        E.Cast(HeroManager.Allies.FirstOrDefault(x => x.CountEnemiesInRange(350) <= 0));
-                    else
-                        E.Cast(Game.CursorPos);
             }
         }
 

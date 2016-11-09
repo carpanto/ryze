@@ -1,6 +1,0 @@
-C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\TutorialForSoviet\TutorialForSoviet\bin\Debug\TutorialForSoviet.exe.config
-C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\TutorialForSoviet\TutorialForSoviet\bin\Debug\TutorialForSoviet.exe
-C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\TutorialForSoviet\TutorialForSoviet\bin\Debug\TutorialForSoviet.pdb
-C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\TutorialForSoviet\TutorialForSoviet\obj\Debug\TutorialForSoviet.csprojResolveAssemblyReference.cache
-C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\TutorialForSoviet\TutorialForSoviet\obj\Debug\TutorialForSoviet.exe
-C:\Users\SupportExTragoZ\Github\Source\Repos\LeagueSharp\TutorialForSoviet\TutorialForSoviet\obj\Debug\TutorialForSoviet.pdb

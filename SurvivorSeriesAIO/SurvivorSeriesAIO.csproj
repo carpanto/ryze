@@ -54,29 +54,31 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="clipper_library">
-      <HintPath>C:\Prioritized Programs\SMMbu06D\References\clipper_library.dll</HintPath>
+    <Reference Include="clipper_library, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>F:\Program Files\SMMbu06D\References\clipper_library.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp">
-      <HintPath>C:\Prioritized Programs\SMMbu06D\References\LeagueSharp.dll</HintPath>
+      <HintPath>F:\Program Files\SMMbu06D\References\LeagueSharp.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Common">
-      <HintPath>C:\Prioritized Programs\SMMbu06D\References\LeagueSharp.Common.dll</HintPath>
+      <HintPath>F:\Program Files\SMMbu06D\References\LeagueSharp.Common.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Data">
-      <HintPath>C:\Prioritized Programs\SMMbu06D\References\LeagueSharp.Data.dll</HintPath>
+      <HintPath>F:\Program Files\SMMbu06D\References\LeagueSharp.Data.dll</HintPath>
     </Reference>
     <Reference Include="SebbyLib">
-      <HintPath>C:\Prioritized Programs\SMMbu06D\References\SebbyLib.dll</HintPath>
+      <HintPath>F:\Program Files\SMMbu06D\References\SebbyLib.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>C:\Prioritized Programs\SMMbu06D\References\SharpDX.dll</HintPath>
+      <HintPath>F:\Program Files\SMMbu06D\References\SharpDX.dll</HintPath>
     </Reference>
-    <Reference Include="SharpDX.Direct3D9">
-      <HintPath>C:\Prioritized Programs\SMMbu06D\References\SharpDX.Direct3D9.dll</HintPath>
+    <Reference Include="SharpDX.Direct3D9, Version=2.6.3.0, Culture=neutral, PublicKeyToken=345b829e6e492981, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>F:\Program Files\SMMbu06D\References\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
     <Reference Include="SPrediction">
-      <HintPath>C:\Prioritized Programs\SMMbu06D\References\SPrediction.dll</HintPath>
+      <HintPath>F:\Program Files\SMMbu06D\References\SPrediction.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -134,9 +136,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

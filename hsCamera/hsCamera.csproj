@@ -53,23 +53,31 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="clipper_library">
-      <HintPath>F:\Program Files\SMMbu06D\References\clipper_library.dll</HintPath>
+    <Reference Include="clipper_library, Version=1.0.0.0, Culture=neutral, PublicKeyToken=07aeca4266f4b547, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\LghG3Uy5S\References\clipper_library.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp">
-      <HintPath>F:\Program Files\SMMbu06D\References\LeagueSharp.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\LghG3Uy5S\References\LeagueSharp.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Common">
-      <HintPath>F:\Program Files\SMMbu06D\References\LeagueSharp.Common.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\LghG3Uy5S\References\LeagueSharp.Common.dll</HintPath>
     </Reference>
-    <Reference Include="LeagueSharp.Data">
-      <HintPath>F:\Program Files\SMMbu06D\References\LeagueSharp.Data.dll</HintPath>
+    <Reference Include="LeagueSharp.Data, Version=1.1.0.1, Culture=neutral, PublicKeyToken=7b6e8d26eaf0534f, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\LghG3Uy5S\References\LeagueSharp.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>C:\Program Files (x86)\LghG3Uy5S\References\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>F:\Program Files\SMMbu06D\References\SharpDX.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\LghG3Uy5S\References\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
-      <HintPath>F:\Program Files\SMMbu06D\References\SharpDX.Direct3D9.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\LghG3Uy5S\References\SharpDX.Direct3D9.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.XInput">
+      <HintPath>C:\Program Files (x86)\LghG3Uy5S\References\SharpDX.XInput.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
