@@ -15,7 +15,7 @@ namespace SSIvern
 {
     internal class SSIvernInit
     {
-        protected static Spell Q, W, E, R;
+        protected static Spell Q, W, E, R, Ignite, Smite;
         protected static Orbwalking.Orbwalker Orbwalker;
         protected static Obj_AI_Base Daisy;
         protected static Menu Config;
@@ -243,6 +243,8 @@ namespace SSIvern
         {
             if (sender.IsValid && sender.IsAlly && sender is Obj_AI_Minion && (sender.Name.ToLower() == "ivernminion"))
                 Daisy = null;
+            //if (obj.IsValid && obj.IsAlly && obj is Obj_AI_Minion && (obj.Name.ToLower() == "ivernminion"))
+            //    Daisy = obj as Obj_AI_Base;
         }
 
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
@@ -359,18 +361,6 @@ namespace SSIvern
 
         private void Obj_AI_Base_OnCreate(GameObject obj, EventArgs args)
         {
-            if (obj.Name == "Ivern_Base_P_cas.troy")
-            {
-                Notifications.AddNotification(
-                    new Notification("Jungle Camp claiming.", 4000).SetTextColor(
-                        System.Drawing.Color.Chartreuse));
-            }
-            if (obj.Name == "Ivern_Base_P_FinishedGround.troy")
-            {
-                Notifications.AddNotification(
-                    new Notification("Jungle Camp is now ready.", 4000).SetTextColor(
-                        System.Drawing.Color.Chartreuse));
-            }
             if (obj.IsValid && obj.IsAlly && obj is Obj_AI_Minion && (obj.Name.ToLower() == "ivernminion"))
                 Daisy = obj as Obj_AI_Base;
         }
@@ -391,7 +381,7 @@ namespace SSIvern
                 if ((Daisy != null) && Daisy.IsValid)
                     Render.Circle.DrawCircle(Daisy.Position, 200f, System.Drawing.Color.Chartreuse);
             if (Config.Item("DrawJungleMobPassive").GetValue<bool>())
-                foreach (var junglemob in ObjectManager.Get<Obj_AI_Minion>().Where(x => x.HasBuff("ivernpmanager")))
+                foreach (var junglemob in Cache.MinionsListNeutral.Where(x => x.HasBuff("ivernpmanager")))
                     if (!junglemob.HasBuff("ivernpmonsterready"))
                         Render.Circle.DrawCircle(junglemob.Position, 200, System.Drawing.Color.DarkOrange, 15);
                     else if (junglemob.HasBuff("ivernpmonsterready"))
