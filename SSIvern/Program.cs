@@ -491,14 +491,14 @@ namespace SSIvern
 
         private void TakingFatalDamageCheck()
         {
-            foreach (var allyprotector in HeroManager.Allies.Where(x => x.Health + 50 < OktwCommon.GetIncomingDamage(x))
+            foreach (var allyprotector in HeroManager.Allies.Where(x => x.Health <= OktwCommon.GetIncomingDamage(x) && x.IsValidTarget(E.Range))
             )
                 if (E.Instance.IsReady())
                     E.CastOnUnit(allyprotector);
-            if (Player.Health + 50 < OktwCommon.GetIncomingDamage(Player))
+            if (Player.Health <= OktwCommon.GetIncomingDamage(Player) && E.IsReady())
                 E.CastOnUnit(Player);
-            if (Player.CountEnemiesInRange(Config.Item("MinimumEnemiesNearEDistance").GetValue<Slider>().Value) >
-                Config.Item("MinimumEnemiesNearE").GetValue<Slider>().Value)
+            if (Player.CountEnemiesInRange(Config.Item("MinimumEnemiesNearEDistance").GetValue<Slider>().Value) >=
+                Config.Item("MinimumEnemiesNearE").GetValue<Slider>().Value && E.IsReady())
                 E.CastOnUnit(Player);
         }
 
