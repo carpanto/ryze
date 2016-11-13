@@ -169,6 +169,7 @@ namespace SSIvern
                 Config.AddSubMenu(
                     new Menu(":: Anti-GapCloser/Interrupter", "GapCloserInterrupter").SetFontStyle(FontStyle.Bold,
                         Color.Chartreuse));
+            GapCloserInterrupter.AddItem(new MenuItem("EnableAntiGapCloser", "Enable Anti-GapCloser?").SetValue(true));
             GapCloserInterrupter.AddItem(new MenuItem("QToInterrupt", "Q to Interrupt?").SetValue(true));
             GapCloserInterrupter.AddItem(new MenuItem("GapCloserAutoE", "E on Gapclose enemy near you?").SetValue(false));
             GapCloserInterrupter.AddItem(new MenuItem("GapCloserInfo",
@@ -269,6 +270,8 @@ namespace SSIvern
 
         private void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
         {
+            if (!Config.Item("EnableAntiGapCloser").GetValue<bool>())
+                return;
             if (Q.Instance.IsReady())
             {
                 var GapCloser = gapcloser.Sender;
