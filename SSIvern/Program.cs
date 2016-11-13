@@ -113,7 +113,7 @@ namespace SSIvern
                         "Will use R if there's more than 1 target"));
 
             var DaisyMenu = Config.AddSubMenu(new Menu(":: Daisy", "Daisy"));
-            DaisyMenu.AddItem(new MenuItem("AutoDaisy", "Auto-Play Daisy?").SetValue(true));
+            DaisyMenu.AddItem(new MenuItem("AutoDaisy", "Auto-Play Daisy?").SetValue(false));
             DaisyMenu.AddItem(new MenuItem("DaisyFooter", ":: Soon More Options! <3"));
 
             var EWhitelistMenu = Config.AddSubMenu(new Menu(":: (E) Protector", "Protector").SetFontStyle(FontStyle.Bold, Color.HotPink));
@@ -163,6 +163,7 @@ namespace SSIvern
             DrawingMenu.AddItem(new MenuItem("DrawDaisy", "Draw Daisy Attack Range").SetValue(true));
             DrawingMenu.AddItem(new MenuItem("DrawDaisyStatus", "Draw Daisy Status/Mode!").SetValue(true));
             DrawingMenu.AddItem(new MenuItem("DrawJungleMobPassive", "Draw Jungle Mob Ready!").SetValue(true));
+            DrawingMenu.AddItem(new MenuItem("NotifyProtectedAlly", "Notify when Protected Ally?").SetValue(true));
 
             var GapCloserInterrupter =
                 Config.AddSubMenu(
@@ -215,15 +216,13 @@ namespace SSIvern
 
             #region DrawDamage
 
-            var drawdamage = new Menu(":: Draw Damage", "drawdamage");
+            var drawdamage = DrawingMenu.AddSubMenu(new Menu(":: Draw Damage", "drawdamage"));
             {
                 var dmgAfterShave =
-                    new MenuItem("SurvivorIvern.DrawComboDamage", "Draw Damage on Enemy's HP Bar").SetValue(true);
+                    drawdamage.AddItem(new MenuItem("SurvivorIvern.DrawComboDamage", "Draw Damage on Enemy's HP Bar").SetValue(true));
                 var drawFill =
-                    new MenuItem("SurvivorIvern.DrawColour", "Fill Color", true).SetValue(
-                        new Circle(true, System.Drawing.Color.Chartreuse));
-                drawdamage.AddItem(drawFill);
-                drawdamage.AddItem(dmgAfterShave);
+                    drawdamage.AddItem(new MenuItem("SurvivorIvern.DrawColour", "Fill Color", true).SetValue(
+                        new Circle(true, System.Drawing.Color.Chartreuse)));
                 DrawDamage.DamageToUnit = CalculateDamage;
                 DrawDamage.Enabled = dmgAfterShave.GetValue<bool>();
                 DrawDamage.Fill = drawFill.GetValue<Circle>().Active;
@@ -292,19 +291,70 @@ namespace SSIvern
         {
             if (args.Target is Obj_AI_Minion || !(sender is Obj_AI_Hero))
                 return;
+
+            #region Spell Data Grab
+
             /*Game.PrintChat("Spell: " + args.SData.Name + " | Width: " + args.SData.LineWidth + " | Speed: " +
                            args.SData.MissileSpeed + " | Delay: " + args.SData.DelayCastOffsetPercent);*/
-            if (E.Instance.IsReady() && sender.IsEnemy && args.Target != null && ((Obj_AI_Base)args.Target).IsValidTarget(E.Range))
+
+            #endregion
+            if (E.Instance.IsReady())
             {
-                //Game.PrintChat(sender.Target.Name + " | " + args.Target.Type + " | " + args.SData.Name + " | " + sender.Name + " | " + (Obj_AI_Hero)args.Target);
-                if (args.Target is Obj_AI_Hero && Config.Item("EProtectionAlly."+((Obj_AI_Hero)args.Target).ChampionName).GetValue<bool>()
-                    && sender.GetSpellDamage(((Obj_AI_Base)args.Target), args.SData.Name) + 150 > ((Obj_AI_Base)args.Target).Health)
+                foreach (var hero in HeroManager.Allies)
                 {
-                    E.CastOnUnit((Obj_AI_Base)args.Target);
+                    if (Config.Item("EProtectionAlly." + hero.ChampionName).GetValue<bool>())
+                    {
+                        if (hero.Distance(Player.ServerPosition) <= E.Range)
+                        {
+                            if (OktwCommon.GetIncomingDamage(hero, 2, true) > 0)
+                            {
+                                E.CastOnUnit(hero);
+                                if (Config.Item("NotifyProtectedAlly").GetValue<bool>())
+                                {
+                                    Notifications.AddNotification(
+                                        new Notification("Protected " + "Ally (" + hero.ChampionName + ")", 4000).SetTextColor(
+                                            System.Drawing.Color.Chartreuse));
+                                }
+                            }
+
+                        }
+                    }
+                }
+                #region Useless Stuff
+                /*if (AllyTarget != null && AllyTarget is Obj_AI_Hero && sender.Target.HealthPercent <= 50 && SpellDamage + 1000 < sender.Target.Health && AllyTarget.IsValidTarget(E.Range))
+                {
+                    if (hero.IncomeDamage > 0 || hero.MinionDamage > hero.Player.Health)
+                        E.CastOnUnit();
+                    E.CastOnUnit((Obj_AI_Base)AllyTarget);
+                    if (Config.Item("NotifyProtectedAlly").GetValue<bool>())
+                    {
+                        Notifications.AddNotification(
+                            new Notification("Protected " + "(" + AllyTarget.Name + ")", 3000).SetTextColor(
+                                System.Drawing.Color.Chartreuse));
+                    }
+                }*/
+                #region Other Logic
+                //Game.PrintChat(sender.Target.Name + " | " + args.Target.Type + " | " + args.SData.Name + " | " + sender.Name + " | " + (Obj_AI_Hero)args.Target);
+                /*if (args.Target.Type == GameObjectType.obj_AI_Hero && Config.Item("EProtectionAlly."+((Obj_AI_Hero)args.Target).ChampionName).GetValue<bool>()
+                    &&  > ((Obj_AI_Base)args.Target).Health)
+                {
+                    E.Cast((Obj_AI_Base)args.Target);
                     Notifications.AddNotification(
                         new Notification("Successfully protected " + ((Obj_AI_Hero)args.Target).ChampionName, 3000).SetTextColor(
                             System.Drawing.Color.Chartreuse));
-                }
+                }*/
+                #endregion
+                /*if (AllyProtect != null)
+                {
+                    E.CastOnUnit(AllyProtect);
+                    if (Config.Item("NotifyProtectedAlly").GetValue<bool>())
+                    {
+                        Notifications.AddNotification(
+                            new Notification("Protected " + "(" + AllyProtect.ChampionName + ")", 3000).SetTextColor(
+                                System.Drawing.Color.Chartreuse));
+                    }
+                }*/
+                #endregion
             }
         }
 
