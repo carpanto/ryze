@@ -336,17 +336,17 @@ namespace SSIvern
                 #region Useless Stuff
 
 /*if (AllyTarget != null && AllyTarget is Obj_AI_Hero && sender.Target.HealthPercent <= 50 && SpellDamage + 1000 < sender.Target.Health && AllyTarget.IsValidTarget(E.Range))
-                                                                                                                {
-                                                                                                                    if (hero.IncomeDamage > 0 || hero.MinionDamage > hero.Player.Health)
-                                                                                                                        E.CastOnUnit();
-                                                                                                                    E.CastOnUnit((Obj_AI_Base)AllyTarget);
-                                                                                                                    if (Config.Item("NotifyProtectedAlly").GetValue<bool>())
-                                                                                                                    {
-                                                                                                                        Notifications.AddNotification(
-                                                                                                                            new Notification("Protected " + "(" + AllyTarget.Name + ")", 3000).SetTextColor(
-                                                                                                                                System.Drawing.Color.Chartreuse));
-                                                                                                                    }
-                                                                                                                }*/
+                                                                                                                                                                {
+                                                                                                                                                                    if (hero.IncomeDamage > 0 || hero.MinionDamage > hero.Player.Health)
+                                                                                                                                                                        E.CastOnUnit();
+                                                                                                                                                                    E.CastOnUnit((Obj_AI_Base)AllyTarget);
+                                                                                                                                                                    if (Config.Item("NotifyProtectedAlly").GetValue<bool>())
+                                                                                                                                                                    {
+                                                                                                                                                                        Notifications.AddNotification(
+                                                                                                                                                                            new Notification("Protected " + "(" + AllyTarget.Name + ")", 3000).SetTextColor(
+                                                                                                                                                                                System.Drawing.Color.Chartreuse));
+                                                                                                                                                                    }
+                                                                                                                                                                }*/
 
                 #region Other Logic
 
@@ -363,15 +363,15 @@ namespace SSIvern
                 #endregion
 
 /*if (AllyProtect != null)
-                                                                                {
-                                                                                    E.CastOnUnit(AllyProtect);
-                                                                                    if (Config.Item("NotifyProtectedAlly").GetValue<bool>())
-                                                                                    {
-                                                                                        Notifications.AddNotification(
-                                                                                            new Notification("Protected " + "(" + AllyProtect.ChampionName + ")", 3000).SetTextColor(
-                                                                                                System.Drawing.Color.Chartreuse));
-                                                                                    }
-                                                                                }*/
+                                                                                                                {
+                                                                                                                    E.CastOnUnit(AllyProtect);
+                                                                                                                    if (Config.Item("NotifyProtectedAlly").GetValue<bool>())
+                                                                                                                    {
+                                                                                                                        Notifications.AddNotification(
+                                                                                                                            new Notification("Protected " + "(" + AllyProtect.ChampionName + ")", 3000).SetTextColor(
+                                                                                                                                System.Drawing.Color.Chartreuse));
+                                                                                                                    }
+                                                                                                                }*/
 
                 #endregion
             }
