@@ -260,8 +260,8 @@ namespace SurvivorBrand
                     {
                         if (Q.IsReady() && E.IsReady())
                             E.CastOnUnit(t);
-                        else if (Q.IsReady() && W.IsReady())
-                            SebbySpell(W, t);
+                        if (t.HasBuff("brandablaze") && Q.IsReady())
+                            SebbySpell(Q, t);
                     }
                 }
             }
@@ -367,7 +367,7 @@ namespace SurvivorBrand
             if (!m.IsValidTarget())
                 return;
             // Q Improvement + KS Below
-            if (OktwCommon.GetKsDamage(m, Q) + BonusDmg(m) + OktwCommon.GetEchoLudenDamage(m) > m.Health)
+            if (OktwCommon.GetKsDamage(m, Q) + BonusDmg(m) > m.Health)
                 SebbySpell(Q, m);
             if (Menu.Item("QOnlyAblazed").GetValue<bool>())
             {
@@ -432,42 +432,42 @@ namespace SurvivorBrand
             }
         }
 
-        private static void SebbySpell(Spell QWER, Obj_AI_Base target)
+        private static void SebbySpell(Spell QW, Obj_AI_Base target)
         {
             var CoreType2 = SebbyLib.Prediction.SkillshotType.SkillshotLine;
             var aoe2 = false;
 
-            if (QWER.Type == SkillshotType.SkillshotCircle)
+            if (QW.Type == SkillshotType.SkillshotCircle)
             {
                 CoreType2 = SebbyLib.Prediction.SkillshotType.SkillshotCircle;
                 aoe2 = true;
             }
 
-            if ((QWER.Width > 80) && !QWER.Collision)
+            if ((QW.Width > 80) && !QW.Collision)
                 aoe2 = true;
 
             var predInput2 = new PredictionInput
             {
                 Aoe = aoe2,
-                Collision = QWER.Collision,
-                Speed = QWER.Speed,
-                Delay = QWER.Delay,
-                Range = QWER.Range,
+                Collision = QW.Collision,
+                Speed = QW.Speed,
+                Delay = QW.Delay,
+                Range = QW.Range,
                 From = Player.ServerPosition,
-                Radius = QWER.Width,
+                Radius = QW.Width,
                 Unit = target,
                 Type = CoreType2
             };
             var poutput2 = Prediction.GetPrediction(predInput2);
 
-            //var poutput2 = QWER.GetPrediction(target);
+            //var poutput2 = QW.GetPrediction(target);
 
-            if ((QWER.Speed != float.MaxValue) &&
+            if ((QW.Speed != float.MaxValue) &&
                 OktwCommon.CollisionYasuo(Player.ServerPosition, poutput2.CastPosition))
                 return;
 
             if (poutput2.Hitchance >= HitChance.High)
-                QWER.Cast(poutput2.CastPosition);
+                QW.Cast(poutput2.CastPosition);
         }
 
         private static void RManaCost()
@@ -552,12 +552,6 @@ namespace SurvivorBrand
                 }
         }
 
-        private static void KSHPPrediction(Obj_AI_Base enemy)
-        {
-            // Thanks Sebby for making such a wonderful Lib :feelsniceman:
-            //var TargetHP = SebbyLib.HealthPrediction.GetHealthPrediction(enemy, 500) + SebbyLib.OktwCommon.GetIncomingDamage(enemy);
-        }
-
         private static void RUsage()
         {
             if (Menu.Item("ComboUseRKillable").GetValue<bool>())
@@ -614,14 +608,6 @@ namespace SurvivorBrand
                                 totalDmg += BonusDmg(t2);
                                 totalDmg += OktwCommon.GetEchoLudenDamage(t2);
 
-                                // Hex
-                                if (Items.HasItem(3155, t2))
-                                    totalDmg = totalDmg - 250;
-
-                                // MoM
-                                if (Items.HasItem(3156, t2))
-                                    totalDmg = totalDmg - 300;
-
                                 if ((totalDmg > t2.Health - OktwCommon.GetIncomingDamage(t2)) &&
                                     (Player.GetAutoAttackDamage(t2)*2 < t2.Health))
                                     R.CastOnUnit(t2);
@@ -672,8 +658,10 @@ namespace SurvivorBrand
 
         private static void Combo()
         {
-            // If Mana is < ManaManager : return;
             // Combo
+            if (HeroManager.Enemies.FirstOrDefault(x => x.IsValidTarget(Q.Range) && x.HasBuff("brandablaze")).IsValidTarget())
+            QUsage();
+            else
             WUsage();
             QUsage();
             EUsage();
