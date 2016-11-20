@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Malzahar.cs" company="SurvivorSeriesAIO">
-//     Copyright (c) SurvivorSeriesAIO. All rights reserved.
+// <copyright file="Malzahar.cs.cs" company="SurvivorSeriesAIO">
+//      Copyright (c) SurvivorSeriesAIO. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 

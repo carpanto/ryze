@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IRootMenu.cs" company="SurvivorSeriesAIO">
-//     Copyright (c) SurvivorSeriesAIO. All rights reserved.
+// <copyright file="IRootMenu.cs.cs" company="SurvivorSeriesAIO">
+//      Copyright (c) SurvivorSeriesAIO. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 

@@ -1,4 +1,10 @@
-﻿using System;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="ActivatorFactory.cs.cs" company="SurvivorSeriesAIO">
+//      Copyright (c) SurvivorSeriesAIO. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+using System;
 using Activator = SurvivorSeriesAIO.Utility.Activator;
 
 namespace SurvivorSeriesAIO.Core

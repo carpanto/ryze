@@ -1,9 +1,8 @@
-﻿/**
- * 
- * Love Ya Lads!
- * 
- * 
- **/
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="Ryze.cs.cs" company="SurvivorSeriesAIO">
+//      Copyright (c) SurvivorSeriesAIO. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -207,7 +206,7 @@ namespace SurvivorSeriesAIO.Champions
             var mob =
                 MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral,
                     MinionOrderTypes.MaxHealth).FirstOrDefault();
-            if (mob == null || !mob.IsValidTarget())
+            if ((mob == null) || !mob.IsValidTarget())
                 return;
             if (jgcq && jgce && Q.IsReady() && E.IsReady())
             {

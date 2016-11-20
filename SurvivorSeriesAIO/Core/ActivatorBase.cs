@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ActivatorBase.cs" company="SurvivorSeriesAIO">
-//     Copyright (c) SurvivorSeriesAIO. All rights reserved.
+// <copyright file="ActivatorBase.cs.cs" company="SurvivorSeriesAIO">
+//      Copyright (c) SurvivorSeriesAIO. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 

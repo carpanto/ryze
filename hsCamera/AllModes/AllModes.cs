@@ -1,4 +1,10 @@
-﻿using hsCamera.Handlers;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="AllModes.cs.cs" company="hsCamera">
+//      Copyright (c) hsCamera. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+using hsCamera.Handlers;
 using LeagueSharp.Common;
 
 namespace hsCamera.AllModes
@@ -8,15 +14,10 @@ namespace hsCamera.AllModes
         public static void CameraMode()
         {
             if (_config.Item("CLH").GetValue<KeyBind>().Active)
-            {
                 Modes.FarmTracker();
-            }
             if (_config.Item("CLC").GetValue<KeyBind>().Active)
-            {
                 Modes.FarmTracker();
-            }
             if (_config.Item("CCombo").GetValue<KeyBind>().Active)
-            {
                 switch (_config.Item("dynamicmode").GetValue<StringList>().SelectedIndex)
                 {
                     case 0:
@@ -29,10 +30,6 @@ namespace hsCamera.AllModes
                         Modes.EnemyTracker();
                         break;
                 }
-            }
-
-
         }
     }
 }
-

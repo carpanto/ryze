@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IChampion.cs" company="SurvivorSeriesAIO">
-//     Copyright (c) SurvivorSeriesAIO. All rights reserved.
+// <copyright file="IChampion.cs.cs" company="SurvivorSeriesAIO">
+//      Copyright (c) SurvivorSeriesAIO. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 

@@ -1,4 +1,10 @@
-﻿using LeagueSharp;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="SpellCast.cs.cs" company="SurvivorSeriesAIO">
+//      Copyright (c) SurvivorSeriesAIO. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+using LeagueSharp;
 using LeagueSharp.Common;
 using SebbyLib;
 using SPrediction;

@@ -1,8 +1,8 @@
-﻿/**
- * 
- * Thank you Sebby
- * 
- **/
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="Program.cs.cs" company="SurvivorAshe">
+//      Copyright (c) SurvivorAshe. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
 
 using System;
 using System.Drawing;

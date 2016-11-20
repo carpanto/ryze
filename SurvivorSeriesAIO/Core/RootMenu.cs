@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="RootMenu.cs" company="SurvivorSeriesAIO">
-//     Copyright (c) SurvivorSeriesAIO. All rights reserved.
+// <copyright file="RootMenu.cs.cs" company="SurvivorSeriesAIO">
+//      Copyright (c) SurvivorSeriesAIO. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 

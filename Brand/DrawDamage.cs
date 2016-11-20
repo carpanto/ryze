@@ -1,4 +1,10 @@
-﻿using System;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="DrawDamage.cs.cs" company="SurvivorSeriesBrand">
+//      Copyright (c) SurvivorSeriesBrand. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+using System;
 using System.Drawing;
 using System.Linq;
 using LeagueSharp;

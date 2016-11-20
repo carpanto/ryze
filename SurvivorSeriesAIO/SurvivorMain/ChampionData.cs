@@ -1,4 +1,10 @@
-﻿using LeagueSharp;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="ChampionData.cs.cs" company="SurvivorSeriesAIO">
+//      Copyright (c) SurvivorSeriesAIO. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+using LeagueSharp;
 
 namespace SurvivorSeriesAIO.SurvivorMain
 {

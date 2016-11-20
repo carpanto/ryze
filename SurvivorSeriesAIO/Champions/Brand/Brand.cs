@@ -1,7 +1,8 @@
-/**
- * 
- * 
- **/
+// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="Brand.cs.cs" company="SurvivorSeriesAIO">
+//      Copyright (c) SurvivorSeriesAIO. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;

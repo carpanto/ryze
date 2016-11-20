@@ -1,4 +1,10 @@
-﻿using System;
+﻿// // --------------------------------------------------------------------------------------------------------------------
+// // <copyright file="Program.cs.cs" company="SVIrelia">
+// //     Copyright (c) SVIrelia. All rights reserved.
+// // </copyright>
+// // --------------------------------------------------------------------------------------------------------------------
+
+using System;
 using System.Drawing;
 using System.Linq;
 using LeagueSharp;
@@ -326,13 +332,13 @@ namespace SVIrelia
             {
                 if (Items.CanUseItem(3025))
                     totalDamage +=
-                        (float)Player.CalcDamage(target, Damage.DamageType.Physical, Player.TotalAttackDamage);
+                        (float) Player.CalcDamage(target, Damage.DamageType.Physical, Player.TotalAttackDamage);
             }
             else if (Items.HasItem(3078, Player)) // Trinity
             {
                 if (Items.CanUseItem(3078))
                     totalDamage +=
-                        (float)Player.CalcDamage(target, Damage.DamageType.Physical, Player.TotalAttackDamage * 2);
+                        (float) Player.CalcDamage(target, Damage.DamageType.Physical, Player.TotalAttackDamage*2);
             }
             else if (Items.HasItem(3100, Player)) // Lich Bane
             {
@@ -340,7 +346,7 @@ namespace SVIrelia
                     totalDamage +=
                         (float)
                         Player.CalcDamage(target, Damage.DamageType.Magical,
-                            75/Player.TotalAttackDamage * 100 + 50/Player.TotalMagicalDamage*100);
+                            75/Player.TotalAttackDamage*100 + 50/Player.TotalMagicalDamage*100);
             }
             return totalDamage;
         }

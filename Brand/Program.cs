@@ -1,8 +1,8 @@
-/**
- * 
- * Credits: Sebby for the Lib and Brand R Logic + few other stuff (Since I'm "newbie" to his Lib :kappa:)
- * 
- **/
+// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="Program.cs.cs" company="SurvivorSeriesBrand">
+//      Copyright (c) SurvivorSeriesBrand. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
 
 using System;
 using System.Linq;

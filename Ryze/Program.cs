@@ -1,9 +1,8 @@
-﻿/**
- * 
- * Love Ya Lads!
- * 
- * 
- **/
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="Program.cs.cs" company="SurvivorRyze">
+//      Copyright (c) SurvivorRyze. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
 
 using System;
 using System.Drawing;

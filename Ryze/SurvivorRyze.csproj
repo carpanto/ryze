@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F3FD80CA-06A9-492F-AF3D-5DB95D880189}</ProjectGuid>
+    <ProjectGuid>{84633140-DB53-46C1-BEF1-A3ED342F0E00}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SurvivorRyze</RootNamespace>

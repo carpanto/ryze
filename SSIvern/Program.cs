@@ -1,4 +1,10 @@
-﻿using System;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="Program.cs.cs" company="SSIvern">
+//      Copyright (c) SSIvern. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+using System;
 using System.Drawing;
 using System.Linq;
 using LeagueSharp;
@@ -102,7 +108,11 @@ namespace SSIvern
             ComboMenu.AddItem(new MenuItem("ComboUseW", "Use W").SetValue(true));
             ComboMenu.AddItem(new MenuItem("ComboUseE", "Use E").SetValue(true));
             ComboMenu.AddItem(new MenuItem("ComboUseItems", "Use Items?").SetValue(true));
-            ComboMenu.AddItem(new MenuItem("ComboDashIfPossibleQ", "Use Q Again to Dash/Gapclose?").SetValue(false).SetTooltip("Will Use Q in Combo Mode again if, Near enemy, there is no more than 1 enemy => Range (1500)", Color.Chartreuse));
+            ComboMenu.AddItem(
+                new MenuItem("ComboDashIfPossibleQ", "Use Q Again to Dash/Gapclose?").SetValue(false)
+                    .SetTooltip(
+                        "Will Use Q in Combo Mode again if, Near enemy, there is no more than 1 enemy => Range (1500)",
+                        Color.Chartreuse));
             ComboMenu.AddItem(
                 new MenuItem("SemiManualR", "Semi-Manual R Casting?").SetValue(false)
                     .SetTooltip("True - Script will Auto R | False - You will R when you decide - preferably",
@@ -291,7 +301,8 @@ namespace SSIvern
         private void Interrupter2_OnInterruptableTarget(Obj_AI_Hero sender,
             Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (Config.Item("QToInterrupt").GetValue<bool>() && !Player.HasBuff("ivernqallyjump") && sender.IsValidTarget(Q.Range) && Q.IsReady())
+            if (Config.Item("QToInterrupt").GetValue<bool>() && !Player.HasBuff("ivernqallyjump") &&
+                sender.IsValidTarget(Q.Range) && Q.IsReady())
                 Q.Cast(sender);
         }
 
@@ -325,17 +336,17 @@ namespace SSIvern
                 #region Useless Stuff
 
 /*if (AllyTarget != null && AllyTarget is Obj_AI_Hero && sender.Target.HealthPercent <= 50 && SpellDamage + 1000 < sender.Target.Health && AllyTarget.IsValidTarget(E.Range))
-                                                                {
-                                                                    if (hero.IncomeDamage > 0 || hero.MinionDamage > hero.Player.Health)
-                                                                        E.CastOnUnit();
-                                                                    E.CastOnUnit((Obj_AI_Base)AllyTarget);
-                                                                    if (Config.Item("NotifyProtectedAlly").GetValue<bool>())
-                                                                    {
-                                                                        Notifications.AddNotification(
-                                                                            new Notification("Protected " + "(" + AllyTarget.Name + ")", 3000).SetTextColor(
-                                                                                System.Drawing.Color.Chartreuse));
-                                                                    }
-                                                                }*/
+                                                                                                                {
+                                                                                                                    if (hero.IncomeDamage > 0 || hero.MinionDamage > hero.Player.Health)
+                                                                                                                        E.CastOnUnit();
+                                                                                                                    E.CastOnUnit((Obj_AI_Base)AllyTarget);
+                                                                                                                    if (Config.Item("NotifyProtectedAlly").GetValue<bool>())
+                                                                                                                    {
+                                                                                                                        Notifications.AddNotification(
+                                                                                                                            new Notification("Protected " + "(" + AllyTarget.Name + ")", 3000).SetTextColor(
+                                                                                                                                System.Drawing.Color.Chartreuse));
+                                                                                                                    }
+                                                                                                                }*/
 
                 #region Other Logic
 
@@ -352,15 +363,15 @@ namespace SSIvern
                 #endregion
 
 /*if (AllyProtect != null)
-                                                {
-                                                    E.CastOnUnit(AllyProtect);
-                                                    if (Config.Item("NotifyProtectedAlly").GetValue<bool>())
-                                                    {
-                                                        Notifications.AddNotification(
-                                                            new Notification("Protected " + "(" + AllyProtect.ChampionName + ")", 3000).SetTextColor(
-                                                                System.Drawing.Color.Chartreuse));
-                                                    }
-                                                }*/
+                                                                                {
+                                                                                    E.CastOnUnit(AllyProtect);
+                                                                                    if (Config.Item("NotifyProtectedAlly").GetValue<bool>())
+                                                                                    {
+                                                                                        Notifications.AddNotification(
+                                                                                            new Notification("Protected " + "(" + AllyProtect.ChampionName + ")", 3000).SetTextColor(
+                                                                                                System.Drawing.Color.Chartreuse));
+                                                                                    }
+                                                                                }*/
 
                 #endregion
             }
