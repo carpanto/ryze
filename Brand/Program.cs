@@ -659,12 +659,10 @@ namespace SurvivorBrand
         private static void Combo()
         {
             // Combo
-            if (
-                HeroManager.Enemies.FirstOrDefault(x => x.IsValidTarget(Q.Range) && x.HasBuff("brandablaze"))
-                    .IsValidTarget())
-                QUsage();
+            if (HeroManager.Enemies.FirstOrDefault(x => x.IsValidTarget(Q.Range) && x.HasBuff("brandablaze")).IsValidTarget())
+            QUsage();
             else
-                WUsage();
+            WUsage();
             QUsage();
             EUsage();
             RUsage();
