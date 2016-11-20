@@ -302,7 +302,7 @@ namespace SurvivorRyze
         {
             // Reminder
             Game.PrintChat(
-                "<font color='#0993F9'>[SS AIO | Reminder]</font> <font color='#FF8800'>You got strong enough, Lower the LaneClear Mana Manager Sliders!</font>");
+                "<font color='#0993F9'>[SS Ryze | Reminder]</font> <font color='#FF8800'>You got strong enough, Lower the LaneClear Mana Manager Sliders!</font>");
         }
 
         private static void Obj_AI_Base_OnLevelUp(Obj_AI_Base sender, EventArgs args)
