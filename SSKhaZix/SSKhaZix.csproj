@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1CA615FD-AEFF-4004-BD02-C0FB704FD57B}</ProjectGuid>
+    <ProjectGuid>{6B8DB9A6-0FB1-43B5-8067-6988FE0BCD17}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SSKhaZix</RootNamespace>

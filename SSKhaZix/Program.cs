@@ -1,4 +1,10 @@
-﻿using System;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="Program.cs.cs" company="SSKhaZix">
+//      Copyright (c) SSKhaZix. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+using System;
 using System.Drawing;
 using System.Linq;
 using LeagueSharp;
@@ -21,6 +27,16 @@ namespace SSKhaZix
 
         //protected static int lvl1, lvl2, lvl3, lvl4;
         protected bool BoolEvolvedQ, BoolEvolvedW, BoolEvolvedE;
+
+        protected string[] HighChamps =
+        {
+            "Ahri", "Anivia", "Annie", "Ashe", "Azir", "Brand", "Caitlyn", "Cassiopeia", "Corki", "Draven",
+            "Ezreal", "Graves", "Jinx", "Kalista", "Karma", "Karthus", "Katarina", "Kennen", "KogMaw", "Leblanc",
+            "Lucian", "Lux", "Malzahar", "MasterYi", "MissFortune", "Orianna", "Quinn", "Sivir", "Syndra", "Talon",
+            "Teemo", "Tristana", "TwistedFate", "Twitch", "Varus", "Vayne", "Veigar", "VelKoz", "Viktor", "Xerath",
+            "Zed", "Ziggs", "Kindred", "Jhin"
+        };
+
         protected Obj_AI_Base KhaETrail, KhaELand;
 
         public SsKhaXiz()
@@ -90,6 +106,22 @@ namespace SSKhaZix
             #endregion
 
             #region Config Items
+
+            var AssassinManagerMenu = Config.AddSubMenu(new Menu(":: Assassin Manager", "AssassinManager"));
+            AssassinManagerMenu.AddItem(
+                new MenuItem("AssassinateTarget", "Assassinate Target").SetValue(new KeyBind("T".ToCharArray()[0],
+                    KeyBindType.Press))).Permashow(true, "Assassinating?");
+            foreach (var enemy in HeroManager.Enemies.Where(x => x.IsValid))
+                if (HighChamps.Contains(enemy.ChampionName))
+                    AssassinManagerMenu.AddItem(
+                        new MenuItem("AssassinManager." + enemy.ChampionName,
+                                "Assassination (Priority Main): " + enemy.ChampionName).SetValue(new Slider(5, 0, 5))
+                            .SetFontStyle(FontStyle.Bold, Color.Chartreuse));
+                else
+                    AssassinManagerMenu.AddItem(
+                        new MenuItem("AssassinManager." + enemy.ChampionName,
+                                "Assassination (Priority): " + enemy.ChampionName).SetValue(new Slider(3, 0, 5))
+                            .SetFontStyle(FontStyle.Bold, Color.Crimson));
 
             var comboMenu = Config.AddSubMenu(new Menu(":: Combo", "Combo"));
             comboMenu.AddItem(new MenuItem("ComboUseQ", "Use Q").SetValue(true));
@@ -209,6 +241,120 @@ namespace SSKhaZix
             Game.PrintChat("<font color='#800040'>[SurvivorSeries] Kha'Zix</font> <font color='#ff6600'>Loaded.</font>");
 
             #endregion
+        }
+
+        private void AssassinManager()
+        {
+            Orbwalking.MoveTo(Game.CursorPos);
+            var _SelectedTarget = TargetSelector.GetSelectedTarget();
+            if (_SelectedTarget.IsValidTarget())
+            {
+                if (E.Instance.IsReady() && !Q.IsInRange(_SelectedTarget))
+                    E.Cast(_SelectedTarget.Position);
+                if (Q.Instance.IsReady())
+                    Q.CastOnUnit(_SelectedTarget);
+                if ((_isMidAir && _SelectedTarget.IsValidTarget(Hydra.Range)) ||
+                    _SelectedTarget.IsValidTarget(Tiamat.Range) ||
+                    _SelectedTarget.IsValidTarget(TitanicHydra.Range))
+                {
+                    if (Hydra.IsReady())
+                        Hydra.Cast();
+                    if (TitanicHydra.IsReady())
+                        TitanicHydra.Cast();
+                    if (Tiamat.IsReady())
+                        Tiamat.Cast();
+                }
+                if (W.Instance.IsReady())
+                    SebbySpell(W, _SelectedTarget);
+
+                if (Youmuu.IsReady() && _SelectedTarget.IsValidTarget(Player.AttackRange + 400))
+                    Youmuu.Cast();
+                if (Hydra.IsReady() && _SelectedTarget.IsValidTarget(Hydra.Range))
+                    Hydra.Cast();
+                if (TitanicHydra.IsReady() && _SelectedTarget.IsValidTarget(TitanicHydra.Range))
+                    TitanicHydra.Cast();
+                if (Tiamat.IsReady() && _SelectedTarget.IsValidTarget(Tiamat.Range))
+                    Tiamat.Cast();
+            }
+            else if (_SelectedTarget == null)
+            {
+                foreach (var enemy in HeroManager.Enemies.Where(x => x.IsValidTarget(E.Range)))
+                {
+                    #region Target Acquire
+
+                    Obj_AI_Hero mostPriority = null;
+                    switch (Config.Item("AssassinManager." + enemy.ChampionName).GetValue<Slider>().Value)
+                    {
+                        case 5:
+                        {
+                            if (Config.Item("AssassinManager." + enemy.ChampionName).GetValue<Slider>().Value == 5)
+                                mostPriority = enemy;
+                            break;
+                        }
+                        case 4:
+                        {
+                            if (Config.Item("AssassinManager." + enemy.ChampionName).GetValue<Slider>().Value == 4)
+                                mostPriority = enemy;
+                            break;
+                        }
+                        case 3:
+                        {
+                            if (Config.Item("AssassinManager." + enemy.ChampionName).GetValue<Slider>().Value == 3)
+                                mostPriority = enemy;
+                            break;
+                        }
+                        case 2:
+                        {
+                            if (Config.Item("AssassinManager." + enemy.ChampionName).GetValue<Slider>().Value == 2)
+                                mostPriority = enemy;
+                            break;
+                        }
+                        case 1:
+                        {
+                            if (Config.Item("AssassinManager." + enemy.ChampionName).GetValue<Slider>().Value == 1)
+                                mostPriority = enemy;
+                            break;
+                        }
+                        default:
+                            mostPriority = null;
+                            break;
+                    }
+
+                    #endregion
+
+                    if ((mostPriority != null) && mostPriority.IsValidTarget())
+                    {
+                        TargetSelector.SetTarget(mostPriority);
+                        Orbwalking.Orbwalk(mostPriority, Game.CursorPos);
+                        if (E.Instance.IsReady() && !Q.IsInRange(mostPriority))
+                            E.Cast(mostPriority.Position);
+                        if (Q.Instance.IsReady())
+                            Q.CastOnUnit(mostPriority);
+                        if ((_isMidAir && mostPriority.IsValidTarget(Hydra.Range)) ||
+                            mostPriority.IsValidTarget(Tiamat.Range) ||
+                            mostPriority.IsValidTarget(TitanicHydra.Range))
+                        {
+                            if (Hydra.IsReady())
+                                Hydra.Cast();
+                            if (TitanicHydra.IsReady())
+                                TitanicHydra.Cast();
+                            if (Tiamat.IsReady())
+                                Tiamat.Cast();
+                        }
+                        if (W.Instance.IsReady())
+                            SebbySpell(W, mostPriority);
+
+                        if (Youmuu.IsReady() && mostPriority.IsValidTarget(Player.AttackRange + 400))
+                            Youmuu.Cast();
+                        if (Hydra.IsReady() && mostPriority.IsValidTarget(Hydra.Range))
+                            Hydra.Cast();
+                        if (TitanicHydra.IsReady() && mostPriority.IsValidTarget(TitanicHydra.Range))
+                            TitanicHydra.Cast();
+                        if (Tiamat.IsReady() && mostPriority.IsValidTarget(Tiamat.Range))
+                            Tiamat.Cast();
+                    }
+                }
+            }
         }
 
         private void GameObjectOnOnDelete(GameObject sender, EventArgs args)
@@ -422,6 +568,8 @@ namespace SSKhaZix
 
             Orbwalker.SetAttack(!IsInvisible());
             KillStealCheck();
+            if (Config.Item("AssassinateTarget").GetValue<KeyBind>().Active)
+                AssassinManager();
             switch (Orbwalker.ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
@@ -656,14 +804,14 @@ namespace SSKhaZix
                 !ObjectManager.Get<Obj_AI_Base>()
                     .Any(
                         x =>
-                            (x.NetworkId != enemy.NetworkId) && (x.Team == enemy.Team) && (x.Distance(enemy) <= 500) &&
+                            (x.NetworkId != enemy.NetworkId) && (x.Team == enemy.Team) && (x.Distance(enemy) <= 450) &&
                             ((x.Type == GameObjectType.obj_AI_Hero) || (x.Type == GameObjectType.obj_AI_Minion) ||
                              (x.Type == GameObjectType.obj_AI_Turret)));
         }
 
         private double GetRealQDamage(Obj_AI_Base enemy)
         {
-            if (Q.Range < 326)
+            /*if (Q.Range < 326)
                 return 0.984*Player.GetSpellDamage(enemy, SpellSlot.Q, IsIsolated(enemy) ? 1 : 0);
             if (Q.Range > 325)
             {
@@ -671,6 +819,11 @@ namespace SSKhaZix
                 if (isolated)
                     return 0.984*Player.GetSpellDamage(enemy, SpellSlot.Q, 3);
                 return Player.GetSpellDamage(enemy, SpellSlot.Q, 0);
+            }*/
+            if (Q.Range < 326)
+                return 0.984*Player.GetSpellDamage(enemy, SpellSlot.Q, 3);
+            if (Q.Range > 325)
+            {
             }
             return 0;
         }
