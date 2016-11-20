@@ -1,10 +1,4 @@
-﻿/*
- *
- * Thanks to imsosharp for the Q to get closer to enemy if he's not in your Q Range (using minions to gapclose) [Code Snippet - Simple Champion, no need for 1289321 logics] 
- * 
- */
-
-using System;
+﻿using System;
 using System.Drawing;
 using System.Linq;
 using LeagueSharp;
@@ -321,31 +315,32 @@ namespace SVIrelia
         {
             float totalDamage = 0;
 
+            // Sheen
             if (Items.HasItem(3057, Player))
             {
                 if (Items.CanUseItem(3057))
                     totalDamage +=
                         (float) Player.CalcDamage(target, Damage.DamageType.Physical, Player.TotalAttackDamage);
             }
-            else if (Items.HasItem(3025, Player))
+            else if (Items.HasItem(3025, Player)) // Iceborn
             {
                 if (Items.CanUseItem(3025))
                     totalDamage +=
-                        (float) Player.CalcDamage(target, Damage.DamageType.Physical, Player.TotalAttackDamage);
+                        (float)Player.CalcDamage(target, Damage.DamageType.Physical, Player.TotalAttackDamage);
             }
-            else if (Items.HasItem(3078, Player))
+            else if (Items.HasItem(3078, Player)) // Trinity
             {
                 if (Items.CanUseItem(3078))
                     totalDamage +=
-                        (float) Player.CalcDamage(target, Damage.DamageType.Physical, Player.TotalAttackDamage*2);
+                        (float)Player.CalcDamage(target, Damage.DamageType.Physical, Player.TotalAttackDamage * 2);
             }
-            else if (Items.HasItem(3100, Player))
+            else if (Items.HasItem(3100, Player)) // Lich Bane
             {
                 if (Items.CanUseItem(3100))
                     totalDamage +=
                         (float)
                         Player.CalcDamage(target, Damage.DamageType.Magical,
-                            75/Player.TotalAttackDamage*100 + 50/Player.TotalMagicalDamage*100);
+                            75/Player.TotalAttackDamage * 100 + 50/Player.TotalMagicalDamage*100);
             }
             return totalDamage;
         }
@@ -446,17 +441,17 @@ namespace SVIrelia
             var lce = Menu.Item("LCE").GetValue<bool>();
             var lcwslider = Menu.Item("LCWSlider").GetValue<Slider>().Value;
 
-            var minionq =
-                Cache.GetMinions(Player.Position, Q.Range)
-                    .FirstOrDefault(x => Q.GetDamage(x) + GetSheenDamage(x) > x.Health);
+            if (lcq && Q.Instance.IsReady())
+            {
+                var minionq =
+                    MinionManager.GetMinions(Player.Position, Q.Range)
+                        .FirstOrDefault(x => Q.GetDamage(x) + GetSheenDamage(x) > x.Health);
+
+                if (minionq != null)
+                    Q.Cast(minionq);
+            }
 
             var minionwe = Cache.GetMinions(Player.Position, 275);
-
-            if (minionq == null)
-                return;
-
-            if (lcq && Q.Instance.IsReady())
-                Q.CastOnUnit(minionq);
 
             if (minionwe == null)
                 return;
