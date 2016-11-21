@@ -119,8 +119,6 @@ namespace SurvivorBrand
             DrawingMenu.AddItem(new MenuItem("DrawE", "Draw E Range").SetValue(true));
             DrawingMenu.AddItem(new MenuItem("DrawR", "Draw R Range").SetValue(true));
 
-            Menu.AddToMainMenu();
-
             #endregion
 
             var SkinMenu = Menu.AddSubMenu(new Menu("Skins Menu", "SkinMenu"));
@@ -135,10 +133,11 @@ namespace SurvivorBrand
 
             #region DrawHPDamage
 
-            var dmgAfterShave = new MenuItem("SurvivorBrand.DrawComboDamage", "Draw Combo Damage").SetValue(true);
+            var dmgAfterShave =
+                DrawingMenu.AddItem(new MenuItem("SurvivorBrand.DrawComboDamage", "Draw Combo Damage").SetValue(true));
             var drawFill =
-                new MenuItem("SurvivorBrand.DrawColour", "Fill Color", true).SetValue(
-                    new Circle(true, Color.FromArgb(204, 255, 0, 1)));
+                DrawingMenu.AddItem(new MenuItem("SurvivorBrand.DrawColour", "Fill Color", true).SetValue(
+                    new Circle(true, Color.FromArgb(204, 255, 0, 1))));
             DrawingMenu.AddItem(drawFill);
             DrawingMenu.AddItem(dmgAfterShave);
             DrawDamage.DamageToUnit = CalculateDamage;
@@ -158,6 +157,8 @@ namespace SurvivorBrand
             };
 
             #endregion
+
+            Menu.AddToMainMenu();
 
             #region Subscriptions
 

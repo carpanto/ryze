@@ -161,13 +161,15 @@ namespace SVIrelia
 
                 #region DrawHPDamage
 
-                var drawdamage = new Menu(":: Draw Damage", "drawdamage");
+                var drawdamage = drawingmenu.AddSubMenu(new Menu(":: Draw Damage", "drawdamage"));
                 {
                     var dmgAfterShave =
-                        new MenuItem("SurvivorAshe.DrawComboDamage", "Draw Damage on Enemy's HP Bar").SetValue(true);
+                        drawingmenu.AddItem(
+                            new MenuItem("SurvivorIrelia.DrawComboDamage", "Draw Damage on Enemy's HP Bar").SetValue(
+                                true));
                     var drawFill =
-                        new MenuItem("SurvivorAshe.DrawColour", "Fill Color", true).SetValue(
-                            new Circle(true, Color.Chartreuse));
+                        drawingmenu.AddItem(new MenuItem("SurvivorIrelia.DrawColour", "Fill Color", true).SetValue(
+                            new Circle(true, Color.Chartreuse)));
                     drawdamage.AddItem(drawFill);
                     drawdamage.AddItem(dmgAfterShave);
                     DrawDamage.DamageToUnit = CalculateDamage;

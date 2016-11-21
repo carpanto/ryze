@@ -143,7 +143,8 @@ namespace SurvivorMalzahar
 
             #region DrawHPDamage
 
-            var dmgAfterShave = DrawingMenu.AddItem(new MenuItem("SurvivorMalzahar.DrawComboDamage", "Draw Combo Damage").SetValue(true));
+            var dmgAfterShave =
+                DrawingMenu.AddItem(new MenuItem("SurvivorMalzahar.DrawComboDamage", "Draw Combo Damage").SetValue(true));
             var drawFill =
                 DrawingMenu.AddItem(new MenuItem("SurvivorMalzahar.DrawColour", "Fill Color", true).SetValue(
                     new Circle(true, Color.FromArgb(204, 255, 0, 1))));
@@ -168,6 +169,7 @@ namespace SurvivorMalzahar
             #endregion
 
             Menu.AddToMainMenu();
+
             #region Subscriptions
 
             Game.OnUpdate += OnUpdate;
@@ -273,9 +275,7 @@ namespace SurvivorMalzahar
                         h =>
                             h.IsValidTarget(Q.Range) &&
                             (h.Health < OktwCommon.GetKsDamage(h, Q) + OktwCommon.GetEchoLudenDamage(h))))
-                {
                     SebbySpell(Q, h);
-                }
             //Combo
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
@@ -396,7 +396,7 @@ namespace SurvivorMalzahar
             if ((m != null) && Menu.Item("autoharass").GetValue<bool>())
                 E.CastOnUnit(m);
             if ((m != null) && Menu.Item("autoharassuseQ").GetValue<bool>())
-               SebbySpell(Q, m);
+                SebbySpell(Q, m);
         }
 
         private static bool HasRBuff()

@@ -128,17 +128,16 @@ namespace SurvivorAshe
             DrawingMenu.AddItem(new MenuItem("DrawAA", "Draw AA Range").SetValue(true));
             DrawingMenu.AddItem(new MenuItem("DrawW", "Draw W Range").SetValue(true));
 
-            Menu.AddToMainMenu();
-
             #endregion
 
             #region DrawHPDamage
 
             var dmgAfterShave =
-                new MenuItem("SurvivorAshe.DrawComboDamage", "Draw Damage on Enemy's HP Bar").SetValue(true);
+                DrawingMenu.AddItem(
+                    new MenuItem("SurvivorAshe.DrawComboDamage", "Draw Damage on Enemy's HP Bar").SetValue(true));
             var drawFill =
-                new MenuItem("SurvivorAshe.DrawColour", "Fill Color", true).SetValue(
-                    new Circle(true, Color.SeaGreen));
+                DrawingMenu.AddItem(new MenuItem("SurvivorAshe.DrawColour", "Fill Color", true).SetValue(
+                    new Circle(true, Color.SeaGreen)));
             DrawingMenu.AddItem(drawFill);
             DrawingMenu.AddItem(dmgAfterShave);
             DrawDamage.DamageToUnit = CalculateDamage;
@@ -158,6 +157,8 @@ namespace SurvivorAshe
             };
 
             #endregion
+
+            Menu.AddToMainMenu();
 
             #region Subscriptions
 

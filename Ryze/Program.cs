@@ -181,16 +181,15 @@ namespace SurvivorRyze
             DrawingMenu.AddItem(new MenuItem("DrawRMinimap", "Draw R Range | On Minimap").SetValue(true));
             DrawingMenu.AddItem(new MenuItem("DrawSpellFarm", "Draw Spell Farm State? [On/Off]").SetValue(true));
 
-            Menu.AddToMainMenu();
-
             #endregion
 
             #region DrawHPDamage
 
-            var dmgAfterShave = new MenuItem("SurvivorRyze.DrawComboDamage", "Draw Combo Damage").SetValue(true);
+            var dmgAfterShave =
+                DrawingMenu.AddItem(new MenuItem("SurvivorRyze.DrawComboDamage", "Draw Combo Damage").SetValue(true));
             var drawFill =
-                new MenuItem("SurvivorRyze.DrawColour", "Fill Color", true).SetValue(
-                    new Circle(true, System.Drawing.Color.SeaGreen));
+                DrawingMenu.AddItem(new MenuItem("SurvivorRyze.DrawColour", "Fill Color", true).SetValue(
+                    new Circle(true, System.Drawing.Color.SeaGreen)));
             DrawingMenu.AddItem(drawFill);
             DrawingMenu.AddItem(dmgAfterShave);
             DrawDamage.DamageToUnit = CalculateDamage;
@@ -210,6 +209,8 @@ namespace SurvivorRyze
             };
 
             #endregion
+
+            Menu.AddToMainMenu();
 
             #region Subscriptions
 
