@@ -22,7 +22,6 @@ namespace SurvivorMalzahar
     {
         public const string ChampionName = "Malzahar";
 
-        private static bool IsChanneling;
         private static Orbwalking.Orbwalker Orbwalker;
         //Menu
         public static Menu Menu;
