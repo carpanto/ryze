@@ -21,7 +21,6 @@ namespace SurvivorMalzahar
     internal class Program
     {
         public const string ChampionName = "Malzahar";
-        private const float SpellQWidth = 400f;
 
         private static bool IsChanneling;
         private static Orbwalking.Orbwalker Orbwalker;
@@ -120,6 +119,8 @@ namespace SurvivorMalzahar
             var miscMenu = new Menu("Misc", "Misc");
             Menu.AddSubMenu(miscMenu);
             // Todo: Add more KillSteal Variants/Spells
+            miscMenu.AddItem(
+                new MenuItem("HitChance", "HitChance?").SetValue(new StringList(new[] {"Medium", "High", "Very High"}, 1)));
             miscMenu.AddItem(new MenuItem("ksE", "Use E to KillSteal").SetValue(true));
             miscMenu.AddItem(new MenuItem("ksQ", "Use Q to KillSteal").SetValue(true));
             miscMenu.AddItem(new MenuItem("interruptQ", "Interrupt Spells Q", true).SetValue(true));
@@ -135,7 +136,6 @@ namespace SurvivorMalzahar
             miscMenu.AddItem(
                 new MenuItem("oneshot", "Burst Combo").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press))
                     .SetTooltip("It will cast Q+E+W+R on enemy when enemy is in E range."));
-            Menu.AddToMainMenu();
 
             #endregion
 
@@ -143,10 +143,10 @@ namespace SurvivorMalzahar
 
             #region DrawHPDamage
 
-            var dmgAfterShave = new MenuItem("SurvivorMalzahar.DrawComboDamage", "Draw Combo Damage").SetValue(true);
+            var dmgAfterShave = DrawingMenu.AddItem(new MenuItem("SurvivorMalzahar.DrawComboDamage", "Draw Combo Damage").SetValue(true));
             var drawFill =
-                new MenuItem("SurvivorMalzahar.DrawColour", "Fill Color", true).SetValue(
-                    new Circle(true, Color.FromArgb(204, 255, 0, 1)));
+                DrawingMenu.AddItem(new MenuItem("SurvivorMalzahar.DrawColour", "Fill Color", true).SetValue(
+                    new Circle(true, Color.FromArgb(204, 255, 0, 1))));
             DrawingMenu.AddItem(drawFill);
             DrawingMenu.AddItem(dmgAfterShave);
             DrawDamage.DamageToUnit = CalculateDamage;
@@ -167,6 +167,7 @@ namespace SurvivorMalzahar
 
             #endregion
 
+            Menu.AddToMainMenu();
             #region Subscriptions
 
             Game.OnUpdate += OnUpdate;
@@ -180,6 +181,9 @@ namespace SurvivorMalzahar
 
         private static void OnDraw(EventArgs args)
         {
+            if (Player.IsDead)
+                return;
+
             if (Menu.Item("drawQ").GetValue<bool>())
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.DarkRed, 3);
             if (Menu.Item("drawW").GetValue<bool>())
@@ -188,6 +192,57 @@ namespace SurvivorMalzahar
                 Render.Circle.DrawCircle(Player.Position, R.Range, Color.Purple, 3);
             if (Menu.Item("drawE").GetValue<bool>())
                 Render.Circle.DrawCircle(Player.Position, E.Range, Color.LightPink, 3);
+        }
+
+        private static void SebbySpell(Spell Q, Obj_AI_Base target)
+        {
+            var CoreType2 = SebbyLib.Prediction.SkillshotType.SkillshotLine;
+            var aoe2 = false;
+
+            if (Q.Type == SkillshotType.SkillshotCircle)
+            {
+                CoreType2 = SebbyLib.Prediction.SkillshotType.SkillshotCircle;
+                aoe2 = true;
+            }
+
+            if ((Q.Width > 80) && !Q.Collision)
+                aoe2 = true;
+
+            var predInput2 = new PredictionInput
+            {
+                Aoe = aoe2,
+                Collision = Q.Collision,
+                Speed = Q.Speed,
+                Delay = Q.Delay,
+                Range = Q.Range,
+                From = Player.ServerPosition,
+                Radius = Q.Width,
+                Unit = target,
+                Type = CoreType2
+            };
+            var poutput2 = Prediction.GetPrediction(predInput2);
+
+            if (OktwCommon.CollisionYasuo(Player.ServerPosition, poutput2.CastPosition))
+                return;
+
+            if ((Q.Speed != float.MaxValue) && OktwCommon.CollisionYasuo(Player.ServerPosition, poutput2.CastPosition))
+                return;
+
+            if (Menu.Item("HitChance").GetValue<StringList>().SelectedIndex == 0)
+            {
+                if (poutput2.Hitchance >= HitChance.Medium)
+                    Q.Cast(poutput2.CastPosition);
+            }
+            else if (Menu.Item("HitChance").GetValue<StringList>().SelectedIndex == 1)
+            {
+                if (poutput2.Hitchance >= HitChance.High)
+                    Q.Cast(poutput2.CastPosition);
+            }
+            else if (Menu.Item("HitChance").GetValue<StringList>().SelectedIndex == 2)
+            {
+                if (poutput2.Hitchance >= HitChance.VeryHigh)
+                    Q.Cast(poutput2.CastPosition);
+            }
         }
 
         private static void OnUpdate(EventArgs args)
@@ -219,32 +274,7 @@ namespace SurvivorMalzahar
                             h.IsValidTarget(Q.Range) &&
                             (h.Health < OktwCommon.GetKsDamage(h, Q) + OktwCommon.GetEchoLudenDamage(h))))
                 {
-                    #region SebbyPrediction
-
-                    //SebbyPrediction
-                    var PredSkillShotType = SebbyLib.Prediction.SkillshotType.SkillshotCircle;
-                    var Aoe10 = true;
-
-                    var predictioninput = new PredictionInput
-                    {
-                        Aoe = Aoe10,
-                        Collision = Q.Collision,
-                        Speed = Q.Speed,
-                        Delay = Q.Delay,
-                        Range = Q.Range,
-                        From = Player.ServerPosition,
-                        Radius = Q.Width,
-                        Unit = h,
-                        Type = PredSkillShotType
-                    };
-                    //SebbyPrediction END
-
-                    #endregion
-
-                    // Input = 'var predictioninput'
-                    var predpos = Prediction.GetPrediction(predictioninput);
-                    if (predpos.Hitchance >= HitChance.High)
-                        Q.Cast(predpos.CastPosition);
+                    SebbySpell(Q, h);
                 }
             //Combo
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
@@ -362,35 +392,11 @@ namespace SurvivorMalzahar
             if ((m == null) || !m.IsValidTarget())
                 return;
 
-            #region SebbyPrediction
-
-            //SebbyPrediction
-            var PredSkillShotType = SebbyLib.Prediction.SkillshotType.SkillshotCircle;
-            var Aoe10 = true;
-
-            var predictioninput = new PredictionInput
-            {
-                Aoe = Aoe10,
-                Collision = Q.Collision,
-                Speed = Q.Speed,
-                Delay = Q.Delay,
-                Range = Q.Range,
-                From = Player.ServerPosition,
-                Radius = Q.Width,
-                Unit = m,
-                Type = PredSkillShotType
-            };
-            //SebbyPrediction END
-
-            #endregion
-
             // Input = 'var predictioninput'
-            var predpos = Prediction.GetPrediction(predictioninput);
             if ((m != null) && Menu.Item("autoharass").GetValue<bool>())
                 E.CastOnUnit(m);
             if ((m != null) && Menu.Item("autoharassuseQ").GetValue<bool>())
-                if (predpos.Hitchance >= HitChance.High)
-                    Q.Cast(predpos.CastPosition);
+               SebbySpell(Q, m);
         }
 
         private static bool HasRBuff()
@@ -410,50 +416,20 @@ namespace SurvivorMalzahar
             if ((m == null) || !m.IsValidTarget())
                 return;
 
-            #region SebbyPrediction
-
-            //SebbyPrediction
-            var PredSkillShotType = SebbyLib.Prediction.SkillshotType.SkillshotCircle;
-            var Aoe10 = true;
-
-            var predictioninput = new PredictionInput
-            {
-                Aoe = Aoe10,
-                Collision = Q.Collision,
-                Speed = Q.Speed,
-                Delay = Q.Delay,
-                Range = Q.Range,
-                From = Player.ServerPosition,
-                Radius = Q.Width,
-                Unit = m,
-                Type = PredSkillShotType
-            };
-            //SebbyPrediction END
-
-            #endregion
-
-            // Input = 'var predictioninput'
-            var predpos = Prediction.GetPrediction(predictioninput);
             if (Player.Mana > E.ManaCost + W.ManaCost + R.ManaCost)
             {
                 if (useQ && Q.IsReady() && (Player.Mana > Q.ManaCost) && Q.IsInRange(m))
-                    if (m.CanMove && (predpos.Hitchance >= HitChance.High))
-                        Q.Cast(predpos.CastPosition);
-                    else if (!m.CanMove)
-                        Q.Cast(m.Position);
+                    SebbySpell(Q, m);
                 if (useW && W.IsReady()) W.Cast(m);
                 if (useE && E.IsReady() && E.IsInRange(m)) E.CastOnUnit(m);
-                if (useR && R.IsReady() && !W.IsReady() && !E.IsReady() && (m != null) && E.IsInRange(m))
+                if (useR && R.IsReady() && !W.IsReady() && !E.IsReady() && E.IsInRange(m))
                     R.CastOnUnit(m);
             }
             else
             {
                 if (useE && E.IsReady() && E.IsInRange(m)) E.CastOnUnit(m);
                 if (useQ && Q.IsReady() && (Player.Mana > Q.ManaCost) && Q.IsInRange(m))
-                    if (m.CanMove && (predpos.Hitchance >= HitChance.High))
-                        Q.Cast(predpos.CastPosition);
-                    else if (!m.CanMove)
-                        Q.Cast(m.Position);
+                    SebbySpell(Q, m);
                 if (useW && W.IsReady() && (Player.Mana > W.ManaCost) && W.IsInRange(m)) W.Cast(m);
             }
             if (Menu.Item("useIgniteInCombo").GetValue<bool>())
@@ -483,36 +459,8 @@ namespace SurvivorMalzahar
             if (!m.IsValidTarget())
                 return;
 
-            #region SebbyPrediction
-
-            //SebbyPrediction
-            var PredSkillShotType = SebbyLib.Prediction.SkillshotType.SkillshotCircle;
-            var Aoe10 = true;
-
-            var predictioninput = new PredictionInput
-            {
-                Aoe = Aoe10,
-                Collision = Q.Collision,
-                Speed = Q.Speed,
-                Delay = Q.Delay,
-                Range = Q.Range,
-                From = Player.ServerPosition,
-                Radius = Q.Width,
-                Unit = m,
-                Type = PredSkillShotType
-            };
-            //SebbyPrediction END
-
-            #endregion
-
-            // Input = 'var predictioninput'
-            var predpos = Prediction.GetPrediction(predictioninput);
-            // var pred = Q.GetSPrediction(m);
             if (Q.IsReady() && Q.IsInRange(m))
-                if (m.CanMove && (predpos.Hitchance >= HitChance.High))
-                    Q.Cast(predpos.CastPosition);
-                else if (!m.CanMove)
-                    Q.Cast(m.Position);
+                SebbySpell(Q, m);
             if (E.IsReady() && E.IsInRange(m)) E.CastOnUnit(m);
             if (W.IsReady()) W.Cast(m);
             Player.Spellbook.CastSpell(igniteSlot, m);
@@ -557,27 +505,5 @@ namespace SurvivorMalzahar
                     Q.Cast(farmPos.Position);
             }
         }
-
-        #region Q Range/Placement Calculations (BETA)
-
-        /*private void CastQ(Obj_AI_Base target, int minManaPercent = 0)
-        {
-            if (!Q.IsReady() || !(GetManaPercent() >= minManaPercent))
-                return;
-            if (target == null)
-                return;
-            Q.Width = GetDynamicQWidth(target);
-            Q.Cast(target);
-        }
-        public static float GetManaPercent()
-        {
-            return (ObjectManager.Player.Mana / ObjectManager.Player.MaxMana) * 100f;
-        }
-        private static float GetDynamicQWidth(Obj_AI_Base target)
-        {
-            return Math.Max(70, (1f - (ObjectManager.Player.Distance(target) / Q.Range)) * SpellQWidth);
-        }*/
-
-        #endregion
     }
 }
