@@ -307,10 +307,13 @@ namespace SVIrelia
         /// <summary>
         ///     Stunnable?
         /// </summary>
-        /// <param name="unit"></param>
+        /// <param></param>
         /// <returns></returns>
+#pragma warning disable 1573
         public static bool Stunnable(Obj_AI_Hero enemy)
+#pragma warning restore 1573
         {
+            if (enemy == null) throw new ArgumentNullException(nameof(enemy));
             return enemy.HealthPercent > Player.HealthPercent;
         }
 
