@@ -258,6 +258,8 @@ namespace SurvivorRyze
 
         private static void Drawing_OnDraw(EventArgs args)
         {
+            if (Player.IsDead)
+                return;
             switch (R.Level)
             {
                 case 1:

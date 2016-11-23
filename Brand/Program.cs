@@ -175,6 +175,8 @@ namespace SurvivorBrand
 
         private static void OnDraw(EventArgs args)
         {
+            if (Player.IsDead)
+                return;
             //var m = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (Menu.Item("DrawQ").GetValue<bool>())
                 Render.Circle.DrawCircle(Player.Position, Q.Range, Color.Aqua);

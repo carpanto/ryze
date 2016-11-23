@@ -177,6 +177,8 @@ namespace SurvivorAshe
 
         private static void Drawing_OnDraw(EventArgs args)
         {
+            if (Player.IsDead)
+                return;
             // Accurate Draw AutoAttack
             if (Menu.Item("DrawAA").GetValue<bool>())
                 Render.Circle.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(null), Color.Gold);

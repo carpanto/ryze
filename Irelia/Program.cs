@@ -268,6 +268,8 @@ namespace SVIrelia
         /// <param name="args"></param>
         private static void Drawing_OnDraw(EventArgs args)
         {
+            if (Player.IsDead)
+                return;
             if (Menu.Item("DrawAA").GetValue<bool>())
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, Orbwalking.GetRealAutoAttackRange(null),
                     Color.BlueViolet);
