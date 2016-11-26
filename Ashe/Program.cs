@@ -114,15 +114,20 @@ namespace SurvivorAshe
             AutoLevelerMenu.AddItem(
                 new MenuItem("AutoLvlStartFrom", "AutoLeveler Start from Level: ").SetValue(new Slider(2, 6, 1)));
 
-            var SkinMenu = Menu.AddSubMenu(new Menu("Skins Menu", "SkinMenu"));
-            SkinMenu.AddItem(new MenuItem("SkinID", "Skin ID")).SetValue(new Slider(8, 0, 8));
-            var UseSkin = SkinMenu.AddItem(new MenuItem("UseSkin", "Enabled")).SetValue(true);
-            UseSkin.ValueChanged += (sender, eventArgs) =>
+            #region Skin Changer
+
+            var SkinChangerMenu = Menu.AddSubMenu(new Menu(":: Skin Changer", "SkinChanger").SetFontStyle(FontStyle.Bold, SharpDX.Color.Chartreuse));
+            var SkinChanger = SkinChangerMenu.AddItem(new MenuItem("UseSkinChanger", ":: Use SkinChanger?").SetValue(true).SetFontStyle(FontStyle.Bold, SharpDX.Color.Crimson));
+            var SkinID = SkinChangerMenu.AddItem(new MenuItem("SkinID", ":: Skin").SetValue(new Slider(8, 0, 8)).SetFontStyle(FontStyle.Bold, SharpDX.Color.Crimson));
+            SkinID.ValueChanged += (sender, eventArgs) =>
             {
-                if (!eventArgs.GetNewValue<bool>())
-                    ObjectManager.Player.SetSkin(ObjectManager.Player.CharData.BaseSkinName,
-                        ObjectManager.Player.BaseSkinId);
+                if (!SkinChanger.GetValue<bool>())
+                    return;
+
+                Player.SetSkin(Player.CharData.BaseSkinName, eventArgs.GetNewValue<Slider>().Value);
             };
+
+            #endregion
 
             var DrawingMenu = Menu.AddSubMenu(new Menu("Drawing", "Drawing"));
             DrawingMenu.AddItem(new MenuItem("DrawAA", "Draw AA Range").SetValue(true));
@@ -331,9 +336,6 @@ namespace SurvivorAshe
         {
             if (Player.IsDead || Player.IsRecalling())
                 return;
-
-            if (Menu.Item("UseSkin").GetValue<bool>())
-                Player.SetSkin(Player.CharData.BaseSkinName, Menu.Item("SkinID").GetValue<Slider>().Value);
 
             switch (Orbwalker.ActiveMode)
             {

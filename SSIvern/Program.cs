@@ -179,6 +179,21 @@ namespace SSIvern
             DrawingMenu.AddItem(new MenuItem("DrawJungleMobPassive", "Draw Jungle Mob Ready!").SetValue(true));
             DrawingMenu.AddItem(new MenuItem("NotifyProtectedAlly", "Notify when Protected Ally?").SetValue(true));
 
+            #region Skin Changer
+
+            var SkinChangerMenu = Config.AddSubMenu(new Menu(":: Skin Changer", "SkinChanger").SetFontStyle(FontStyle.Bold, Color.Chartreuse));
+            var SkinChanger = SkinChangerMenu.AddItem(new MenuItem("UseSkinChanger", ":: Use SkinChanger?").SetValue(true).SetFontStyle(FontStyle.Bold, Color.Crimson));
+            var SkinID = SkinChangerMenu.AddItem(new MenuItem("SkinID", ":: Skin").SetValue(new StringList(new[] { "Classic", "Candy King Ivern" }, 0)).SetFontStyle(FontStyle.Bold, Color.Crimson));
+            SkinID.ValueChanged += (sender, eventArgs) =>
+            {
+                if (!SkinChanger.GetValue<bool>())
+                    return;
+
+                Player.SetSkin(Player.CharData.BaseSkinName, eventArgs.GetNewValue<StringList>().SelectedIndex);
+            };
+
+            #endregion
+
             var GapCloserInterrupter =
                 Config.AddSubMenu(
                     new Menu(":: Anti-GapCloser/Interrupter", "GapCloserInterrupter").SetFontStyle(FontStyle.Bold,

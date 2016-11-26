@@ -159,6 +159,21 @@ namespace SVIrelia
                     Menu.AddSubMenu(miscmenu);
                 }
 
+                #region Skin Changer
+
+                var SkinChangerMenu = Menu.AddSubMenu(new Menu(":: Skin Changer", "SkinChanger").SetFontStyle(FontStyle.Bold, SharpDX.Color.Chartreuse));
+                var SkinChanger = SkinChangerMenu.AddItem(new MenuItem("UseSkinChanger", ":: Use SkinChanger?").SetValue(true).SetFontStyle(FontStyle.Bold, SharpDX.Color.Crimson));
+                var SkinID = SkinChangerMenu.AddItem(new MenuItem("SkinID", ":: Skin").SetValue(new Slider(6, 0, 6)).SetFontStyle(FontStyle.Bold, SharpDX.Color.Crimson));
+                SkinID.ValueChanged += (sender, eventArgs) =>
+                {
+                    if (!SkinChanger.GetValue<bool>())
+                        return;
+
+                    Player.SetSkin(Player.CharData.BaseSkinName, eventArgs.GetNewValue<Slider>().Value);
+                };
+
+                #endregion
+
                 #region DrawHPDamage
 
                 var drawdamage = drawingmenu.AddSubMenu(new Menu(":: Draw Damage", "drawdamage"));

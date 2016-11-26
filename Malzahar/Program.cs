@@ -114,6 +114,23 @@ namespace SurvivorMalzahar
             DrawingMenu.AddItem(new MenuItem("drawW", "Draw W range").SetValue(false));
             DrawingMenu.AddItem(new MenuItem("drawE", "Draw E range").SetValue(false));
             DrawingMenu.AddItem(new MenuItem("drawR", "Draw R range").SetValue(true));
+
+            #region Skin Changer
+
+            var SkinChangerMenu = new Menu(":: Skin Changer", "SkinChanger").SetFontStyle(FontStyle.Bold, SharpDX.Color.Chartreuse);
+            Menu.AddSubMenu(SkinChangerMenu);
+            var SkinChanger = SkinChangerMenu.AddItem(new MenuItem("UseSkinChanger", ":: Use SkinChanger?").SetValue(true).SetFontStyle(FontStyle.Bold, SharpDX.Color.Crimson));
+            var SkinID = SkinChangerMenu.AddItem(new MenuItem("SkinID", ":: Skin").SetValue(new StringList(new[] { "Classic", "Shadow Prince Malzahar", "Djinn Malzahar", "Overlord Malzahar", "Vizier Malzahar", "Snow Day Malzahar" }, 3)).SetFontStyle(FontStyle.Bold, SharpDX.Color.Crimson));
+            SkinID.ValueChanged += (sender, eventArgs) =>
+            {
+                if (!SkinChanger.GetValue<bool>())
+                    return;
+
+                Player.SetSkin(Player.CharData.BaseSkinName, eventArgs.GetNewValue<StringList>().SelectedIndex);
+            };
+
+            #endregion
+
             // Misc Menu
             var miscMenu = new Menu("Misc", "Misc");
             Menu.AddSubMenu(miscMenu);

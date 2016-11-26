@@ -5,6 +5,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 using System;
+using System.Drawing;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
@@ -121,15 +122,20 @@ namespace SurvivorBrand
 
             #endregion
 
-            var SkinMenu = Menu.AddSubMenu(new Menu("Skins Menu", "SkinMenu"));
-            SkinMenu.AddItem(new MenuItem("SkinID", "Skin ID")).SetValue(new Slider(5, 0, 5));
-            var UseSkin = SkinMenu.AddItem(new MenuItem("UseSkin", "Enabled")).SetValue(true);
-            UseSkin.ValueChanged += (sender, eventArgs) =>
+            #region Skin Changer
+
+            var SkinChangerMenu = Menu.AddSubMenu(new Menu(":: Skin Changer", "SkinChanger").SetFontStyle(FontStyle.Bold, SharpDX.Color.Chartreuse));
+            var SkinChanger = SkinChangerMenu.AddItem(new MenuItem("UseSkinChanger", ":: Use SkinChanger?").SetValue(true).SetFontStyle(FontStyle.Bold, SharpDX.Color.Crimson));
+            var SkinID = SkinChangerMenu.AddItem(new MenuItem("SkinID", ":: Skin").SetValue(new Slider(5, 0, 5)).SetFontStyle(FontStyle.Bold, SharpDX.Color.Crimson));
+            SkinID.ValueChanged += (sender, eventArgs) =>
             {
-                if (!eventArgs.GetNewValue<bool>())
-                    ObjectManager.Player.SetSkin(ObjectManager.Player.CharData.BaseSkinName,
-                        ObjectManager.Player.BaseSkinId);
+                if (!SkinChanger.GetValue<bool>())
+                    return;
+
+                Player.SetSkin(Player.CharData.BaseSkinName, eventArgs.GetNewValue<Slider>().Value);
             };
+
+            #endregion
 
             #region DrawHPDamage
 
