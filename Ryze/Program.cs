@@ -129,9 +129,16 @@ namespace SurvivorRyze
 
             #region Skin Changer
 
-            var SkinChangerMenu = Menu.AddSubMenu(new Menu(":: Skin Changer", "SkinChanger").SetFontStyle(FontStyle.Bold, SharpDX.Color.Chartreuse));
-            var SkinChanger = SkinChangerMenu.AddItem(new MenuItem("UseSkinChanger", ":: Use SkinChanger?").SetValue(true).SetFontStyle(FontStyle.Bold, SharpDX.Color.Crimson));
-            var SkinID = SkinChangerMenu.AddItem(new MenuItem("SkinID", ":: Skin").SetValue(new Slider(10, 0, 10)).SetFontStyle(FontStyle.Bold, SharpDX.Color.Crimson));
+            var SkinChangerMenu =
+                Menu.AddSubMenu(new Menu(":: Skin Changer", "SkinChanger").SetFontStyle(FontStyle.Bold, Color.Chartreuse));
+            var SkinChanger =
+                SkinChangerMenu.AddItem(
+                    new MenuItem("UseSkinChanger", ":: Use SkinChanger?").SetValue(true)
+                        .SetFontStyle(FontStyle.Bold, Color.Crimson));
+            var SkinID =
+                SkinChangerMenu.AddItem(
+                    new MenuItem("SkinID", ":: Skin").SetValue(new Slider(10, 0, 10))
+                        .SetFontStyle(FontStyle.Bold, Color.Crimson));
             SkinID.ValueChanged += (sender, eventArgs) =>
             {
                 if (!SkinChanger.GetValue<bool>())
@@ -194,9 +201,7 @@ namespace SurvivorRyze
                 DrawingMenu.AddItem(new MenuItem("SurvivorRyze.DrawComboDamage", "Draw Combo Damage").SetValue(true));
             var drawFill =
                 DrawingMenu.AddItem(new MenuItem("SurvivorRyze.DrawColour", "Fill Color", true).SetValue(
-                    new Circle(true, System.Drawing.Color.SeaGreen)));
-            DrawingMenu.AddItem(drawFill);
-            DrawingMenu.AddItem(dmgAfterShave);
+                    new Circle(true, System.Drawing.Color.Chartreuse)));
             DrawDamage.DamageToUnit = CalculateDamage;
             DrawDamage.Enabled = dmgAfterShave.GetValue<bool>();
             DrawDamage.Fill = drawFill.GetValue<Circle>().Active;

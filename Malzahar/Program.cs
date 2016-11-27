@@ -11,6 +11,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SebbyLib;
+using Color = SharpDX.Color;
 using HitChance = SebbyLib.Prediction.HitChance;
 using Orbwalking = SebbyLib.Orbwalking;
 using Prediction = SebbyLib.Prediction.Prediction;
@@ -117,10 +118,22 @@ namespace SurvivorMalzahar
 
             #region Skin Changer
 
-            var SkinChangerMenu = new Menu(":: Skin Changer", "SkinChanger").SetFontStyle(FontStyle.Bold, SharpDX.Color.Chartreuse);
+            var SkinChangerMenu = new Menu(":: Skin Changer", "SkinChanger").SetFontStyle(FontStyle.Bold,
+                Color.Chartreuse);
             Menu.AddSubMenu(SkinChangerMenu);
-            var SkinChanger = SkinChangerMenu.AddItem(new MenuItem("UseSkinChanger", ":: Use SkinChanger?").SetValue(true).SetFontStyle(FontStyle.Bold, SharpDX.Color.Crimson));
-            var SkinID = SkinChangerMenu.AddItem(new MenuItem("SkinID", ":: Skin").SetValue(new StringList(new[] { "Classic", "Shadow Prince Malzahar", "Djinn Malzahar", "Overlord Malzahar", "Vizier Malzahar", "Snow Day Malzahar" }, 3)).SetFontStyle(FontStyle.Bold, SharpDX.Color.Crimson));
+            var SkinChanger =
+                SkinChangerMenu.AddItem(
+                    new MenuItem("UseSkinChanger", ":: Use SkinChanger?").SetValue(true)
+                        .SetFontStyle(FontStyle.Bold, Color.Crimson));
+            var SkinID =
+                SkinChangerMenu.AddItem(
+                    new MenuItem("SkinID", ":: Skin").SetValue(
+                        new StringList(
+                            new[]
+                            {
+                                "Classic", "Shadow Prince Malzahar", "Djinn Malzahar", "Overlord Malzahar",
+                                "Vizier Malzahar", "Snow Day Malzahar"
+                            }, 3)).SetFontStyle(FontStyle.Bold, Color.Crimson));
             SkinID.ValueChanged += (sender, eventArgs) =>
             {
                 if (!SkinChanger.GetValue<bool>())
@@ -163,9 +176,7 @@ namespace SurvivorMalzahar
                 DrawingMenu.AddItem(new MenuItem("SurvivorMalzahar.DrawComboDamage", "Draw Combo Damage").SetValue(true));
             var drawFill =
                 DrawingMenu.AddItem(new MenuItem("SurvivorMalzahar.DrawColour", "Fill Color", true).SetValue(
-                    new Circle(true, Color.FromArgb(204, 255, 0, 1))));
-            DrawingMenu.AddItem(drawFill);
-            DrawingMenu.AddItem(dmgAfterShave);
+                    new Circle(true, System.Drawing.Color.FromArgb(204, 255, 0, 1))));
             DrawDamage.DamageToUnit = CalculateDamage;
             DrawDamage.Enabled = dmgAfterShave.GetValue<bool>();
             DrawDamage.Fill = drawFill.GetValue<Circle>().Active;
@@ -203,13 +214,13 @@ namespace SurvivorMalzahar
                 return;
 
             if (Menu.Item("drawQ").GetValue<bool>())
-                Render.Circle.DrawCircle(Player.Position, Q.Range, Color.DarkRed, 3);
+                Render.Circle.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.DarkRed, 3);
             if (Menu.Item("drawW").GetValue<bool>())
-                Render.Circle.DrawCircle(Player.Position, 450f, Color.LightBlue, 3);
+                Render.Circle.DrawCircle(Player.Position, 450f, System.Drawing.Color.LightBlue, 3);
             if (Menu.Item("drawR").GetValue<bool>())
-                Render.Circle.DrawCircle(Player.Position, R.Range, Color.Purple, 3);
+                Render.Circle.DrawCircle(Player.Position, R.Range, System.Drawing.Color.Purple, 3);
             if (Menu.Item("drawE").GetValue<bool>())
-                Render.Circle.DrawCircle(Player.Position, E.Range, Color.LightPink, 3);
+                Render.Circle.DrawCircle(Player.Position, E.Range, System.Drawing.Color.LightPink, 3);
         }
 
         private static void SebbySpell(Spell Q, Obj_AI_Base target)

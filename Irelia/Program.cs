@@ -10,6 +10,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SebbyLib;
+using Color = SharpDX.Color;
 using Orbwalking = SebbyLib.Orbwalking;
 
 namespace SVIrelia
@@ -161,9 +162,17 @@ namespace SVIrelia
 
                 #region Skin Changer
 
-                var SkinChangerMenu = Menu.AddSubMenu(new Menu(":: Skin Changer", "SkinChanger").SetFontStyle(FontStyle.Bold, SharpDX.Color.Chartreuse));
-                var SkinChanger = SkinChangerMenu.AddItem(new MenuItem("UseSkinChanger", ":: Use SkinChanger?").SetValue(true).SetFontStyle(FontStyle.Bold, SharpDX.Color.Crimson));
-                var SkinID = SkinChangerMenu.AddItem(new MenuItem("SkinID", ":: Skin").SetValue(new Slider(6, 0, 6)).SetFontStyle(FontStyle.Bold, SharpDX.Color.Crimson));
+                var SkinChangerMenu =
+                    Menu.AddSubMenu(new Menu(":: Skin Changer", "SkinChanger").SetFontStyle(FontStyle.Bold,
+                        Color.Chartreuse));
+                var SkinChanger =
+                    SkinChangerMenu.AddItem(
+                        new MenuItem("UseSkinChanger", ":: Use SkinChanger?").SetValue(true)
+                            .SetFontStyle(FontStyle.Bold, Color.Crimson));
+                var SkinID =
+                    SkinChangerMenu.AddItem(
+                        new MenuItem("SkinID", ":: Skin").SetValue(new Slider(6, 0, 6))
+                            .SetFontStyle(FontStyle.Bold, Color.Crimson));
                 SkinID.ValueChanged += (sender, eventArgs) =>
                 {
                     if (!SkinChanger.GetValue<bool>())
@@ -184,9 +193,7 @@ namespace SVIrelia
                                 true));
                     var drawFill =
                         drawingmenu.AddItem(new MenuItem("SurvivorIrelia.DrawColour", "Fill Color", true).SetValue(
-                            new Circle(true, Color.Chartreuse)));
-                    drawdamage.AddItem(drawFill);
-                    drawdamage.AddItem(dmgAfterShave);
+                            new Circle(true, System.Drawing.Color.Chartreuse)));
                     DrawDamage.DamageToUnit = CalculateDamage;
                     DrawDamage.Enabled = dmgAfterShave.GetValue<bool>();
                     DrawDamage.Fill = drawFill.GetValue<Circle>().Active;
@@ -287,11 +294,11 @@ namespace SVIrelia
                 return;
             if (Menu.Item("DrawAA").GetValue<bool>())
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, Orbwalking.GetRealAutoAttackRange(null),
-                    Color.BlueViolet);
+                    System.Drawing.Color.BlueViolet);
             if (Menu.Item("DrawQ").GetValue<bool>())
-                Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, Color.Chartreuse);
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, Q.Range, System.Drawing.Color.Chartreuse);
             if (Menu.Item("DrawR").GetValue<bool>() && (R.Level > 0) && R.Instance.IsReady())
-                Render.Circle.DrawCircle(ObjectManager.Player.Position, R.Range, Color.DeepPink);
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, R.Range, System.Drawing.Color.DeepPink);
 
             if (Menu.Item("QMinionDrawHelper").GetValue<bool>())
                 foreach (
@@ -301,7 +308,7 @@ namespace SVIrelia
                             x =>
                                 x.Name.ToLower().Contains("minion") && x.IsHPBarRendered && x.IsValidTarget(1000) &&
                                 (x.Health < Q.GetDamage(x) + GetSheenDamage(x)) && x.IsEnemy))
-                    Render.Circle.DrawCircle(creature.Position, 35, Color.Chartreuse);
+                    Render.Circle.DrawCircle(creature.Position, 35, System.Drawing.Color.Chartreuse);
 
             if (!Menu.Item("DrawStunnable").GetValue<bool>())
                 return;
@@ -311,7 +318,7 @@ namespace SVIrelia
             {
                 var drawPos = Drawing.WorldToScreen(enemy.Position);
                 var textSize = Drawing.GetTextExtent("Stunnable");
-                Drawing.DrawText(drawPos.X - textSize.Width/2f, drawPos.Y, Color.DeepPink, "Stunnable");
+                Drawing.DrawText(drawPos.X - textSize.Width/2f, drawPos.Y, System.Drawing.Color.DeepPink, "Stunnable");
             }
         }
 

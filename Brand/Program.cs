@@ -11,7 +11,7 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using SebbyLib;
 using SharpDX;
-using Color = System.Drawing.Color;
+using Color = SharpDX.Color;
 using HitChance = SebbyLib.Prediction.HitChance;
 using Orbwalking = SebbyLib.Orbwalking;
 using Prediction = SebbyLib.Prediction.Prediction;
@@ -124,9 +124,16 @@ namespace SurvivorBrand
 
             #region Skin Changer
 
-            var SkinChangerMenu = Menu.AddSubMenu(new Menu(":: Skin Changer", "SkinChanger").SetFontStyle(FontStyle.Bold, SharpDX.Color.Chartreuse));
-            var SkinChanger = SkinChangerMenu.AddItem(new MenuItem("UseSkinChanger", ":: Use SkinChanger?").SetValue(true).SetFontStyle(FontStyle.Bold, SharpDX.Color.Crimson));
-            var SkinID = SkinChangerMenu.AddItem(new MenuItem("SkinID", ":: Skin").SetValue(new Slider(5, 0, 5)).SetFontStyle(FontStyle.Bold, SharpDX.Color.Crimson));
+            var SkinChangerMenu =
+                Menu.AddSubMenu(new Menu(":: Skin Changer", "SkinChanger").SetFontStyle(FontStyle.Bold, Color.Chartreuse));
+            var SkinChanger =
+                SkinChangerMenu.AddItem(
+                    new MenuItem("UseSkinChanger", ":: Use SkinChanger?").SetValue(true)
+                        .SetFontStyle(FontStyle.Bold, Color.Crimson));
+            var SkinID =
+                SkinChangerMenu.AddItem(
+                    new MenuItem("SkinID", ":: Skin").SetValue(new Slider(5, 0, 5))
+                        .SetFontStyle(FontStyle.Bold, Color.Crimson));
             SkinID.ValueChanged += (sender, eventArgs) =>
             {
                 if (!SkinChanger.GetValue<bool>())
@@ -143,9 +150,7 @@ namespace SurvivorBrand
                 DrawingMenu.AddItem(new MenuItem("SurvivorBrand.DrawComboDamage", "Draw Combo Damage").SetValue(true));
             var drawFill =
                 DrawingMenu.AddItem(new MenuItem("SurvivorBrand.DrawColour", "Fill Color", true).SetValue(
-                    new Circle(true, Color.FromArgb(204, 255, 0, 1))));
-            DrawingMenu.AddItem(drawFill);
-            DrawingMenu.AddItem(dmgAfterShave);
+                    new Circle(true, System.Drawing.Color.FromArgb(204, 255, 0, 1))));
             DrawDamage.DamageToUnit = CalculateDamage;
             DrawDamage.Enabled = dmgAfterShave.GetValue<bool>();
             DrawDamage.Fill = drawFill.GetValue<Circle>().Active;
@@ -185,15 +190,15 @@ namespace SurvivorBrand
                 return;
             //var m = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             if (Menu.Item("DrawQ").GetValue<bool>())
-                Render.Circle.DrawCircle(Player.Position, Q.Range, Color.Aqua);
+                Render.Circle.DrawCircle(Player.Position, Q.Range, System.Drawing.Color.Aqua);
             //if (Menu.Item("DrawPassiveBombOnEnemy").GetValue<bool>())
             //    Render.Circle.DrawCircle(m.Position, 420f, Color.Orange);
             if (Menu.Item("DrawW").GetValue<bool>())
-                Render.Circle.DrawCircle(Player.Position, W.Range, Color.MediumPurple);
+                Render.Circle.DrawCircle(Player.Position, W.Range, System.Drawing.Color.MediumPurple);
             if (Menu.Item("DrawE").GetValue<bool>())
-                Render.Circle.DrawCircle(Player.Position, E.Range, Color.LightPink);
+                Render.Circle.DrawCircle(Player.Position, E.Range, System.Drawing.Color.LightPink);
             if (Menu.Item("DrawR").GetValue<bool>())
-                Render.Circle.DrawCircle(Player.Position, R.Range, Color.MediumVioletRed);
+                Render.Circle.DrawCircle(Player.Position, R.Range, System.Drawing.Color.MediumVioletRed);
         }
 
         private static void AABlock()

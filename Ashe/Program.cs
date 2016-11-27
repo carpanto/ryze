@@ -10,6 +10,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SebbyLib;
+using Color = SharpDX.Color;
 using HitChance = SebbyLib.Prediction.HitChance;
 using Orbwalking = SebbyLib.Orbwalking;
 using Prediction = SebbyLib.Prediction.Prediction;
@@ -116,9 +117,16 @@ namespace SurvivorAshe
 
             #region Skin Changer
 
-            var SkinChangerMenu = Menu.AddSubMenu(new Menu(":: Skin Changer", "SkinChanger").SetFontStyle(FontStyle.Bold, SharpDX.Color.Chartreuse));
-            var SkinChanger = SkinChangerMenu.AddItem(new MenuItem("UseSkinChanger", ":: Use SkinChanger?").SetValue(true).SetFontStyle(FontStyle.Bold, SharpDX.Color.Crimson));
-            var SkinID = SkinChangerMenu.AddItem(new MenuItem("SkinID", ":: Skin").SetValue(new Slider(8, 0, 8)).SetFontStyle(FontStyle.Bold, SharpDX.Color.Crimson));
+            var SkinChangerMenu =
+                Menu.AddSubMenu(new Menu(":: Skin Changer", "SkinChanger").SetFontStyle(FontStyle.Bold, Color.Chartreuse));
+            var SkinChanger =
+                SkinChangerMenu.AddItem(
+                    new MenuItem("UseSkinChanger", ":: Use SkinChanger?").SetValue(true)
+                        .SetFontStyle(FontStyle.Bold, Color.Crimson));
+            var SkinID =
+                SkinChangerMenu.AddItem(
+                    new MenuItem("SkinID", ":: Skin").SetValue(new Slider(8, 0, 8))
+                        .SetFontStyle(FontStyle.Bold, Color.Crimson));
             SkinID.ValueChanged += (sender, eventArgs) =>
             {
                 if (!SkinChanger.GetValue<bool>())
@@ -142,9 +150,7 @@ namespace SurvivorAshe
                     new MenuItem("SurvivorAshe.DrawComboDamage", "Draw Damage on Enemy's HP Bar").SetValue(true));
             var drawFill =
                 DrawingMenu.AddItem(new MenuItem("SurvivorAshe.DrawColour", "Fill Color", true).SetValue(
-                    new Circle(true, Color.SeaGreen)));
-            DrawingMenu.AddItem(drawFill);
-            DrawingMenu.AddItem(dmgAfterShave);
+                    new Circle(true, System.Drawing.Color.SeaGreen)));
             DrawDamage.DamageToUnit = CalculateDamage;
             DrawDamage.Enabled = dmgAfterShave.GetValue<bool>();
             DrawDamage.Fill = drawFill.GetValue<Circle>().Active;
@@ -186,9 +192,10 @@ namespace SurvivorAshe
                 return;
             // Accurate Draw AutoAttack
             if (Menu.Item("DrawAA").GetValue<bool>())
-                Render.Circle.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(null), Color.Gold);
+                Render.Circle.DrawCircle(Player.Position, Orbwalking.GetRealAutoAttackRange(null),
+                    System.Drawing.Color.Gold);
             if (Menu.Item("DrawW").GetValue<bool>())
-                Render.Circle.DrawCircle(Player.Position, W.Range, Color.SkyBlue);
+                Render.Circle.DrawCircle(Player.Position, W.Range, System.Drawing.Color.SkyBlue);
         }
 
         private static void Obj_AI_Base_OnLevelUp(Obj_AI_Base sender, EventArgs args)
