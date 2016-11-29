@@ -34,25 +34,25 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="clipper_library">
-      <HintPath>F:\Program Files\SMMbu06D\References\clipper_library.dll</HintPath>
+      <HintPath>C:\Prioritized Programs\SMMbu06D\References\clipper_library.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp">
-      <HintPath>F:\Program Files\SMMbu06D\References\LeagueSharp.dll</HintPath>
+      <HintPath>C:\Prioritized Programs\SMMbu06D\References\LeagueSharp.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Common">
-      <HintPath>F:\Program Files\SMMbu06D\References\LeagueSharp.Common.dll</HintPath>
+      <HintPath>C:\Prioritized Programs\SMMbu06D\References\LeagueSharp.Common.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Data">
-      <HintPath>F:\Program Files\SMMbu06D\References\LeagueSharp.Data.dll</HintPath>
+      <HintPath>C:\Prioritized Programs\SMMbu06D\References\LeagueSharp.Data.dll</HintPath>
     </Reference>
     <Reference Include="SebbyLib">
-      <HintPath>F:\Program Files\SMMbu06D\References\SebbyLib.dll</HintPath>
+      <HintPath>C:\Prioritized Programs\SMMbu06D\References\SebbyLib.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>F:\Program Files\SMMbu06D\References\SharpDX.dll</HintPath>
+      <HintPath>C:\Prioritized Programs\SMMbu06D\References\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
-      <HintPath>F:\Program Files\SMMbu06D\References\SharpDX.Direct3D9.dll</HintPath>
+      <HintPath>C:\Prioritized Programs\SMMbu06D\References\SharpDX.Direct3D9.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

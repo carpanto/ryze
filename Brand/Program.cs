@@ -74,6 +74,12 @@ namespace SurvivorBrand
             HarassMenu.AddItem(new MenuItem("HarassBlockAA", "Block AA's in Harass Mode").SetValue(true));
             HarassMenu.AddItem(new MenuItem("HarassManaManager", "Mana Manager (%)").SetValue(new Slider(30, 1, 100)));
 
+            var JungleClearMenu = Menu.AddSubMenu(new Menu("JungleClear", "JungleClear"));
+            JungleClearMenu.AddItem(new MenuItem("UseQJC", "Use Q").SetValue(true));
+            JungleClearMenu.AddItem(new MenuItem("UseWJC", "Use W").SetValue(true));
+            JungleClearMenu.AddItem(new MenuItem("UseEJC", "Use E").SetValue(true));
+            JungleClearMenu.AddItem(new MenuItem("JungleClearManaManager", "JungleClear Mana Manager").SetValue(new Slider(50, 0, 100)));
+
             var LaneClearMenu = Menu.AddSubMenu(new Menu("Lane Clear", "LaneClear"));
             LaneClearMenu.AddItem(new MenuItem("laneclearW", "Use W").SetValue(true));
             LaneClearMenu.AddItem(new MenuItem("laneclearE", "Use E").SetValue(true));
@@ -218,7 +224,7 @@ namespace SurvivorBrand
             var mob =
                 MinionManager.GetMinions(Player.ServerPosition, W.Range, MinionTypes.All, MinionTeam.Neutral,
                     MinionOrderTypes.MaxHealth).FirstOrDefault();
-            if (mob == null)
+            if (mob == null || !mob.IsValidTarget())
                 return;
 
             if (jgcw && W.IsReady())
@@ -233,8 +239,6 @@ namespace SurvivorBrand
         {
             if (Player.IsDead || Player.IsRecalling())
                 return;
-            if (Menu.Item("UseSkin").GetValue<bool>())
-                Player.SetSkin(Player.CharData.BaseSkinName, Menu.Item("SkinID").GetValue<Slider>().Value);
             // Checks
             RManaCost();
             // Combo
