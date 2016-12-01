@@ -127,6 +127,7 @@ namespace SSIvern
 
             var DaisyMenu = Config.AddSubMenu(new Menu(":: Daisy", "Daisy"));
             DaisyMenu.AddItem(new MenuItem("AutoDaisy", "Auto-Play Daisy?").SetValue(false));
+            DaisyMenu.AddItem(new MenuItem("DaisyAttackUnderTurret", "Let Daisy dive under turret?").SetValue(true)); // Will make it a toggle-able keybind.
             DaisyMenu.AddItem(new MenuItem("DaisyFooter", ":: Soon More Options! <3"));
 
             var EWhitelistMenu =
@@ -695,11 +696,13 @@ namespace SSIvern
                 {
                     var enemy =
                         HeroManager.Enemies.Where(
-                                x => x.IsValidTarget() && (Daisy.Distance(x.Position) < 1000) && !x.UnderTurret(true))
+                                x => x.IsValidTarget() && (Daisy.Distance(x.Position) < 1000))
                             .OrderBy(x => x.Distance(Daisy))
                             .FirstOrDefault();
                     if (enemy != null)
                     {
+                        if (!Config.Item("DaisyAttackUnderTurret").GetValue<bool>() && enemy.UnderTurret(true))
+                            return;
                         if (Daisy.Distance(enemy.Position) > 200)
                         {
                             Player.IssueOrder(GameObjectOrder.MovePet, enemy);
@@ -716,6 +719,9 @@ namespace SSIvern
                     {
                         var iverntarget = Orbwalker.GetTarget() as Obj_AI_Base;
                         if (iverntarget != null)
+                        {
+                            if (!Config.Item("DaisyAttackUnderTurret").GetValue<bool>() && iverntarget.UnderTurret(true))
+                                return;
                             if (Daisy.Distance(iverntarget.Position) > 200)
                             {
                                 Player.IssueOrder(GameObjectOrder.MovePet, iverntarget);
@@ -727,6 +733,7 @@ namespace SSIvern
                                 DaisyStatus = true;
                                 E.CastOnUnit(Daisy);
                             }
+                        }
                         else if (Daisy.UnderTurret(true))
                         {
                             Player.IssueOrder(GameObjectOrder.MovePet, Player);
