@@ -890,14 +890,14 @@ namespace SurvivorRyze
             if (Player.ManaPercent > Menu.Item("LaneHitManaManager").GetValue<Slider>().Value)
             {
                 var specialQ =
-                    Cache.GetMinions(Player.Position, Q.Range, MinionTeam.Enemy)
+                    MinionManager.GetMinions(Q.Range)
                         .OrderBy(x => x.Distance(Player.Position));
                 if (Q.IsReady() && useQ)
                     foreach (var omfgabriel in specialQ)
                         if (omfgabriel.Health < QGetRealDamage(omfgabriel))
                             Q.Cast(omfgabriel);
-                var allMinionsQ = Cache.GetMinions(Player.ServerPosition, Q.Range, MinionTeam.Enemy);
-                var allMinionsE = Cache.GetMinions(Player.ServerPosition, E.Range, MinionTeam.Enemy);
+                var allMinionsQ = MinionManager.GetMinions(Q.Range);
+                var allMinionsE = MinionManager.GetMinions(E.Range);
                 if (Q.IsReady() && useQ)
                 {
                     if (allMinionsQ.Count > 0)
@@ -938,8 +938,8 @@ namespace SurvivorRyze
                     var ryzenotebuffed =
                         MinionManager.GetMinions(Player.Position, Q.Range)
                             .Find(x => !x.HasBuff("RyzeE") && x.IsValidTarget(Q.Range));
-                    var allMinionsQ = Cache.GetMinions(Player.ServerPosition, Q.Range, MinionTeam.Enemy);
-                    var allMinions = Cache.GetMinions(Player.ServerPosition, E.Range, MinionTeam.Enemy);
+                    var allMinionsQ = MinionManager.GetMinions(Q.Range);
+                    var allMinions = MinionManager.GetMinions(E.Range);
                     if (Q.IsReady() && !E.IsReady())
                         if (allMinionsQ.Count > 0)
                             foreach (var minion in allMinionsQ)
