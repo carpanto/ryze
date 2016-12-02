@@ -127,12 +127,17 @@ namespace SSIvern
 
             var DaisyMenu = Config.AddSubMenu(new Menu(":: Daisy", "Daisy"));
             DaisyMenu.AddItem(new MenuItem("AutoDaisy", "Auto-Play Daisy?").SetValue(false));
-            DaisyMenu.AddItem(new MenuItem("DaisyAttackUnderTurret", "Let Daisy dive under turret?").SetValue(true)); // Will make it a toggle-able keybind.
+            DaisyMenu.AddItem(new MenuItem("DaisyAttackUnderTurret", "Let Daisy dive under turret?").SetValue(true));
+                // Will make it a toggle-able keybind.
             DaisyMenu.AddItem(new MenuItem("DaisyFooter", ":: Soon More Options! <3"));
 
             var EWhitelistMenu =
                 Config.AddSubMenu(new Menu(":: (E) Protector", "Protector").SetFontStyle(FontStyle.Bold, Color.HotPink));
             {
+                EWhitelistMenu.AddItem(
+                    new MenuItem("ProtectionLogic", ":: Protector Logic").SetValue(
+                            new StringList(new[] {"Normal", "(New) Protection Logic"}, 0))
+                        .SetTooltip("Thanks to 'xcxooxl' for the contribution to this assembly :) (New Logic)"));
                 //EWhitelistMenu.AddItem(new MenuItem("EProtectionAlly", "Use (E) to Protect?").SetValue(true));
                 foreach (var ally in HeroManager.Allies.Where(x => x.IsValid))
                     EWhitelistMenu.AddItem(
@@ -347,30 +352,54 @@ namespace SSIvern
                 foreach (var hero in HeroManager.Allies)
                     if (Config.Item("EProtectionAlly." + hero.ChampionName).GetValue<bool>())
                         if (hero.Distance(Player.ServerPosition) <= E.Range)
-                            if (OktwCommon.GetIncomingDamage(hero, 2, true) > 0)
+                            switch (Config.Item("ProtectionLogic").GetValue<StringList>().SelectedIndex)
                             {
-                                E.CastOnUnit(hero);
-                                if (Config.Item("NotifyProtectedAlly").GetValue<bool>())
-                                    Notifications.AddNotification(
-                                        new Notification("Protected " + "Ally (" + hero.ChampionName + ")", 4000)
-                                            .SetTextColor(
-                                                System.Drawing.Color.Chartreuse));
+                                case 0:
+                                {
+                                    if (OktwCommon.GetIncomingDamage(hero, 2, true) > 0)
+                                    {
+                                        E.CastOnUnit(hero);
+                                        if (Config.Item("NotifyProtectedAlly").GetValue<bool>())
+                                            Notifications.AddNotification(
+                                                new Notification("Protected " + "Ally (" + hero.ChampionName + ")", 4000)
+                                                    .SetTextColor(
+                                                        System.Drawing.Color.Chartreuse));
+                                    }
+                                }
+                                    break;
+                                case 1:
+                                {
+                                    var damage = OktwCommon.GetIncomingDamage(hero, 2, true);
+                                    //if damage is atleast 5 percent health of ally OR damage is less than our sheild + ally health
+                                    if ((damage > hero.MaxHealth*0.05f) ||
+                                        ((damage > hero.Health) &&
+                                         (damage < 40 + 40*E.Level + 0.8*Player.TotalMagicalDamage + hero.Health)))
+                                    {
+                                        E.CastOnUnit(hero);
+                                        if (Config.Item("NotifyProtectedAlly").GetValue<bool>())
+                                            Notifications.AddNotification(
+                                                new Notification("Protected " + "Ally (" + hero.ChampionName + ")", 4000)
+                                                    .SetTextColor(
+                                                        System.Drawing.Color.Chartreuse));
+                                    }
+                                }
+                                    break;
                             }
 
                 #region Useless Stuff
 
 /*if (AllyTarget != null && AllyTarget is Obj_AI_Hero && sender.Target.HealthPercent <= 50 && SpellDamage + 1000 < sender.Target.Health && AllyTarget.IsValidTarget(E.Range))
-                                                                                                                                                                                                                                                                {
-                                                                                                                                                                                                                                                                    if (hero.IncomeDamage > 0 || hero.MinionDamage > hero.Player.Health)
-                                                                                                                                                                                                                                                                        E.CastOnUnit();
-                                                                                                                                                                                                                                                                    E.CastOnUnit((Obj_AI_Base)AllyTarget);
-                                                                                                                                                                                                                                                                    if (Config.Item("NotifyProtectedAlly").GetValue<bool>())
-                                                                                                                                                                                                                                                                    {
-                                                                                                                                                                                                                                                                        Notifications.AddNotification(
-                                                                                                                                                                                                                                                                            new Notification("Protected " + "(" + AllyTarget.Name + ")", 3000).SetTextColor(
-                                                                                                                                                                                                                                                                                System.Drawing.Color.Chartreuse));
-                                                                                                                                                                                                                                                                    }
-                                                                                                                                                                                                                                                                }*/
+                                                                                                                                                                                                                                                                                                                {
+                                                                                                                                                                                                                                                                                                                    if (hero.IncomeDamage > 0 || hero.MinionDamage > hero.Player.Health)
+                                                                                                                                                                                                                                                                                                                        E.CastOnUnit();
+                                                                                                                                                                                                                                                                                                                    E.CastOnUnit((Obj_AI_Base)AllyTarget);
+                                                                                                                                                                                                                                                                                                                    if (Config.Item("NotifyProtectedAlly").GetValue<bool>())
+                                                                                                                                                                                                                                                                                                                    {
+                                                                                                                                                                                                                                                                                                                        Notifications.AddNotification(
+                                                                                                                                                                                                                                                                                                                            new Notification("Protected " + "(" + AllyTarget.Name + ")", 3000).SetTextColor(
+                                                                                                                                                                                                                                                                                                                                System.Drawing.Color.Chartreuse));
+                                                                                                                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                                                                                                                }*/
 
                 #region Other Logic
 
@@ -387,15 +416,15 @@ namespace SSIvern
                 #endregion
 
 /*if (AllyProtect != null)
-                                                                                                                                                                                {
-                                                                                                                                                                                    E.CastOnUnit(AllyProtect);
-                                                                                                                                                                                    if (Config.Item("NotifyProtectedAlly").GetValue<bool>())
-                                                                                                                                                                                    {
-                                                                                                                                                                                        Notifications.AddNotification(
-                                                                                                                                                                                            new Notification("Protected " + "(" + AllyProtect.ChampionName + ")", 3000).SetTextColor(
-                                                                                                                                                                                                System.Drawing.Color.Chartreuse));
-                                                                                                                                                                                    }
-                                                                                                                                                                                }*/
+                                                                                                                                                                                                                {
+                                                                                                                                                                                                                    E.CastOnUnit(AllyProtect);
+                                                                                                                                                                                                                    if (Config.Item("NotifyProtectedAlly").GetValue<bool>())
+                                                                                                                                                                                                                    {
+                                                                                                                                                                                                                        Notifications.AddNotification(
+                                                                                                                                                                                                                            new Notification("Protected " + "(" + AllyProtect.ChampionName + ")", 3000).SetTextColor(
+                                                                                                                                                                                                                                System.Drawing.Color.Chartreuse));
+                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                }*/
 
                 #endregion
             }
