@@ -328,14 +328,13 @@ namespace SurvivorAshe
             var jgcw = Menu.Item("UseWJC").GetValue<bool>();
 
             var mob =
-                MinionManager.GetMinions(Player.ServerPosition, Q.Range, MinionTypes.All, MinionTeam.Neutral,
-                    MinionOrderTypes.MaxHealth).FirstOrDefault();
+                Cache.GetMinions(Player.ServerPosition, Q.Range, MinionTeam.Neutral).OrderBy(x => x.MaxHealth).FirstOrDefault();
             if (mob == null)
                 return;
 
-            if (jgcq && Q.IsReady())
+            if (jgcq && Q.IsReady() && mob.IsValidTarget())
                 Q.Cast();
-            if (jgcw && W.IsReady())
+            if (jgcw && W.IsReady() && mob.IsValidTarget())
                 W.CastOnUnit(mob);
         }
 
@@ -510,7 +509,7 @@ namespace SurvivorAshe
         {
             var SpellQ = Menu.Item("LaneClearUseQ").GetValue<bool>();
             var SpellW = Menu.Item("LaneClearUseW").GetValue<bool>();
-            var allMinionsW = MinionManager.GetMinions(W.Range, MinionTypes.All, MinionTeam.Enemy);
+            var allMinionsW = Cache.GetMinions(Player.Position, W.Range, MinionTeam.Enemy);
             if (allMinionsW.Count > 1)
                 foreach (var minion in allMinionsW)
                 {
