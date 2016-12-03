@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="AssemblyInfo.cs.cs" company="SSIvern">
+// <copyright file="AssemblyInfo.cs" company="SSIvern">
 //      Copyright (c) SSIvern. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
