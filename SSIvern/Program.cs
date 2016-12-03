@@ -136,13 +136,15 @@ namespace SSIvern
             {
                 EWhitelistMenu.AddItem(
                     new MenuItem("ProtectionLogic", ":: Protector Logic").SetValue(
-                            new StringList(new[] {"Normal", "(New) Protection Logic"}, 0))
-                        .SetTooltip("Thanks to 'xcxooxl' for the contribution to this assembly :) (New Logic)"));
+                            new StringList(new[] {"Normal", "(New) Protection Logic"}, 0)));
                 //EWhitelistMenu.AddItem(new MenuItem("EProtectionAlly", "Use (E) to Protect?").SetValue(true));
                 foreach (var ally in HeroManager.Allies.Where(x => x.IsValid))
                     EWhitelistMenu.AddItem(
                         new MenuItem("EProtectionAlly." + ally.ChampionName, "Protect with (E): " + ally.ChampionName)
                             .SetValue(HighChamps.Contains(ally.ChampionName)));
+                EWhitelistMenu.AddItem(
+                    new MenuItem("FooterProtector", "Thanks xcxooxl").SetTooltip(
+                        "Thanks to 'xcxooxl' for the contribution to this assembly :) (New Logic)"));
             }
 
             var LaneClearMenu = Config.AddSubMenu(new Menu(":: LaneClear", "LaneClear"));
@@ -725,23 +727,23 @@ namespace SSIvern
                 {
                     var enemy =
                         HeroManager.Enemies.Where(
-                                x => x.IsValidTarget() && (Daisy.Distance(x.Position) < 1000))
+                                x => x.IsValidTarget() && (Daisy.Distance(x.Position) < 750))
                             .OrderBy(x => x.Distance(Daisy))
                             .FirstOrDefault();
                     if (enemy != null)
                     {
                         if (!Config.Item("DaisyAttackUnderTurret").GetValue<bool>() && enemy.UnderTurret(true))
                             return;
-                        if (Daisy.Distance(enemy.Position) > 125)
+                        if (Daisy.Distance(enemy.Position) > 140)
                         {
-                            Player.IssueOrder(GameObjectOrder.MovePet, enemy);
+                            R.Cast(enemy);
                             DaisyStatus = true;
                         }
                         else
                         {
-                            Daisy.IssueOrder(GameObjectOrder.AttackUnit, enemy);
+                            R.CastOnUnit(enemy);
                             DaisyStatus = true;
-                            E.CastOnUnit(Player.CountEnemiesInRange(500) > 1 ? Player : Daisy);
+                            E.CastOnUnit(Player.CountEnemiesInRange(500) >= 1 ? Player : Daisy);
                         }
                     }
                     else
@@ -751,23 +753,29 @@ namespace SSIvern
                         {
                             if (!Config.Item("DaisyAttackUnderTurret").GetValue<bool>() && iverntarget.UnderTurret(true))
                                 return;
-                            if (Daisy.Distance(iverntarget.Position) > 125)
+                            if (Daisy.Distance(iverntarget.Position) > 140)
                             {
-                                Player.IssueOrder(GameObjectOrder.MovePet, iverntarget);
+                                R.Cast(iverntarget);
                                 DaisyStatus = true;
                             }
                             else
                             {
-                                Daisy.IssueOrder(GameObjectOrder.AttackUnit, iverntarget);
+                                R.CastOnUnit(iverntarget);
                                 DaisyStatus = true;
-                                E.CastOnUnit(Player.CountEnemiesInRange(500) > 1 ? Player : Daisy);
+                                E.CastOnUnit(Player.CountEnemiesInRange(500) >= 1 ? Player : Daisy);
                             }
+                        }
+                        else
+                        {
+                            R.Cast(Player);
+                            DaisyStatus = false;
                         }
                     }
                 }
                 else
                 {
                     Daisy = null;
+                    DaisyStatus = false;
                 }
         }
 
