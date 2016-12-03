@@ -1,4 +1,10 @@
-﻿using System;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="Program.cs" company="SSKhaZix">
+//      Copyright (c) SSKhaZix. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+using System;
 using System.Drawing;
 using System.Linq;
 using LeagueSharp;
@@ -21,6 +27,16 @@ namespace SSKhaZix
 
         //protected static int lvl1, lvl2, lvl3, lvl4;
         protected bool BoolEvolvedQ, BoolEvolvedW, BoolEvolvedE;
+
+        protected string[] HighChamps =
+        {
+            "Ahri", "Anivia", "Annie", "Ashe", "Azir", "Brand", "Caitlyn", "Cassiopeia", "Corki", "Draven",
+            "Ezreal", "Graves", "Jinx", "Kalista", "Karma", "Karthus", "Katarina", "Kennen", "KogMaw", "Leblanc",
+            "Lucian", "Lux", "Malzahar", "MasterYi", "MissFortune", "Orianna", "Quinn", "Sivir", "Syndra", "Talon",
+            "Teemo", "Tristana", "TwistedFate", "Twitch", "Varus", "Vayne", "Veigar", "VelKoz", "Viktor", "Xerath",
+            "Zed", "Ziggs", "Kindred", "Jhin"
+        };
+
         protected Obj_AI_Base KhaETrail, KhaELand;
 
         public SsKhaXiz()
@@ -91,6 +107,22 @@ namespace SSKhaZix
 
             #region Config Items
 
+            var AssassinManagerMenu = Config.AddSubMenu(new Menu(":: Assassin Manager", "AssassinManager"));
+            AssassinManagerMenu.AddItem(
+                new MenuItem("AssassinateTarget", "Assassinate Target").SetValue(new KeyBind("T".ToCharArray()[0],
+                    KeyBindType.Press))).Permashow(true, "Assassinating?");
+            foreach (var enemy in HeroManager.Enemies.Where(x => x.IsValid))
+                if (HighChamps.Contains(enemy.ChampionName))
+                    AssassinManagerMenu.AddItem(
+                        new MenuItem("AssassinManager." + enemy.ChampionName,
+                                "Assassination (Priority Main): " + enemy.ChampionName).SetValue(new Slider(5, 0, 5))
+                            .SetFontStyle(FontStyle.Bold, Color.Chartreuse));
+                else
+                    AssassinManagerMenu.AddItem(
+                        new MenuItem("AssassinManager." + enemy.ChampionName,
+                                "Assassination (Priority): " + enemy.ChampionName).SetValue(new Slider(3, 0, 5))
+                            .SetFontStyle(FontStyle.Bold, Color.Crimson));
+
             var comboMenu = Config.AddSubMenu(new Menu(":: Combo", "Combo"));
             comboMenu.AddItem(new MenuItem("ComboUseQ", "Use Q").SetValue(true));
             comboMenu.AddItem(new MenuItem("ComboUseW", "Use W").SetValue(true));
@@ -158,6 +190,31 @@ namespace SSKhaZix
             drawingMenu.AddItem(
                 new MenuItem("DrawIsolated", "Draw Isolated?").SetValue(true).SetTooltip("Preferably set to 'true'."));
             drawingMenu.AddItem(new MenuItem("DrawIsMidAirDebug", "Draw isMidAir (Debug)").SetValue(false));
+
+            #region Skin Changer
+
+            var SkinChangerMenu =
+                Config.AddSubMenu(new Menu(":: Skin Changer", "SkinChanger").SetFontStyle(FontStyle.Bold,
+                    Color.Chartreuse));
+            var SkinChanger =
+                SkinChangerMenu.AddItem(
+                    new MenuItem("UseSkinChanger", ":: Use SkinChanger?").SetValue(true)
+                        .SetFontStyle(FontStyle.Bold, Color.Crimson));
+            var SkinID =
+                SkinChangerMenu.AddItem(
+                    new MenuItem("SkinID", ":: Skin").SetValue(
+                        new StringList(
+                            new[] {"Classic", "Mecha Kha'Zix", "Guardian of the Sands Kha'Zix", "Death Blossom Kha'Zix"},
+                            1)).SetFontStyle(FontStyle.Bold, Color.Crimson));
+            SkinID.ValueChanged += (sender, eventArgs) =>
+            {
+                if (!SkinChanger.GetValue<bool>())
+                    return;
+
+                Player.SetSkin(Player.CharData.BaseSkinName, eventArgs.GetNewValue<StringList>().SelectedIndex);
+            };
+
+            #endregion
 
             var miscMenu = Config.AddSubMenu(new Menu(":: Misc", "Misc"));
             miscMenu.AddItem(
@@ -291,6 +348,62 @@ namespace SSKhaZix
             }
         }*/
 
+        private Obj_AI_Hero AssassinManager()
+        {
+            var _SelectedTarget = TargetSelector.GetSelectedTarget();
+            if (_SelectedTarget.IsValidTarget() || (_SelectedTarget != null))
+                return _SelectedTarget;
+            if (!_SelectedTarget.IsValidTarget())
+                foreach (var enemy in HeroManager.Enemies.Where(x => x.IsValidTarget(E.Range)))
+                {
+                    #region Target Acquire
+
+                    Obj_AI_Hero mostPriority = null;
+                    switch (Config.Item("AssassinManager." + enemy.ChampionName).GetValue<Slider>().Value)
+                    {
+                        case 5:
+                        {
+                            if (Config.Item("AssassinManager." + enemy.ChampionName).GetValue<Slider>().Value == 5)
+                                mostPriority = enemy;
+                            break;
+                        }
+                        case 4:
+                        {
+                            if (Config.Item("AssassinManager." + enemy.ChampionName).GetValue<Slider>().Value == 4)
+                                mostPriority = enemy;
+                            break;
+                        }
+                        case 3:
+                        {
+                            if (Config.Item("AssassinManager." + enemy.ChampionName).GetValue<Slider>().Value == 3)
+                                mostPriority = enemy;
+                            break;
+                        }
+                        case 2:
+                        {
+                            if (Config.Item("AssassinManager." + enemy.ChampionName).GetValue<Slider>().Value == 2)
+                                mostPriority = enemy;
+                            break;
+                        }
+                        case 1:
+                        {
+                            if (Config.Item("AssassinManager." + enemy.ChampionName).GetValue<Slider>().Value == 1)
+                                mostPriority = enemy;
+                            break;
+                        }
+                        default:
+                            mostPriority = null;
+                            break;
+                    }
+
+                    #endregion
+
+                    if ((mostPriority != null) || mostPriority.IsValidTarget())
+                        return mostPriority;
+                }
+            return null;
+        }
+
         private void SebbySpell(Spell w, Obj_AI_Base target)
         {
             var coreType2 = SebbyLib.Prediction.SkillshotType.SkillshotLine;
@@ -414,6 +527,39 @@ namespace SSKhaZix
             return Player.HasBuff("khazixrstealth");
         }
 
+        private void AssassinateProgram(Obj_AI_Hero target)
+        {
+            if ((target == null) || !target.IsValidTarget())
+                return;
+
+            if (E.Instance.IsReady() && !Q.IsInRange(target))
+                E.Cast(target.Position);
+            if (Q.Instance.IsReady())
+                Q.CastOnUnit(target);
+            if ((_isMidAir && target.IsValidTarget(Hydra.Range)) ||
+                target.IsValidTarget(Tiamat.Range) ||
+                target.IsValidTarget(TitanicHydra.Range))
+            {
+                if (Hydra.IsReady())
+                    Hydra.Cast();
+                if (TitanicHydra.IsReady())
+                    TitanicHydra.Cast();
+                if (Tiamat.IsReady())
+                    Tiamat.Cast();
+            }
+            if (W.Instance.IsReady())
+                SebbySpell(W, target);
+
+            if (Youmuu.IsReady() && target.IsValidTarget(Player.AttackRange + 400))
+                Youmuu.Cast();
+            if (Hydra.IsReady() && target.IsValidTarget(Hydra.Range))
+                Hydra.Cast();
+            if (TitanicHydra.IsReady() && target.IsValidTarget(TitanicHydra.Range))
+                TitanicHydra.Cast();
+            if (Tiamat.IsReady() && target.IsValidTarget(Tiamat.Range))
+                Tiamat.Cast();
+        }
+
         private void GameOnUpdate(EventArgs args)
         {
             EvolvedSpells();
@@ -422,6 +568,20 @@ namespace SSKhaZix
 
             Orbwalker.SetAttack(!IsInvisible());
             KillStealCheck();
+            if (Config.Item("AssassinateTarget").GetValue<KeyBind>().Active)
+            {
+                var target = AssassinManager();
+                if ((target == null) || !target.IsValidTarget())
+                {
+                    Orbwalking.MoveTo(Game.CursorPos);
+                    return;
+                }
+                if (target.IsValidTarget(E.Range))
+                {
+                    Orbwalking.Orbwalk(target, Game.CursorPos);
+                    AssassinateProgram(target);
+                }
+            }
             switch (Orbwalker.ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
@@ -656,22 +816,26 @@ namespace SSKhaZix
                 !ObjectManager.Get<Obj_AI_Base>()
                     .Any(
                         x =>
-                            (x.NetworkId != enemy.NetworkId) && (x.Team == enemy.Team) && (x.Distance(enemy) <= 500) &&
+                            (x.NetworkId != enemy.NetworkId) && (x.Team == enemy.Team) && (x.Distance(enemy) <= 450) &&
                             ((x.Type == GameObjectType.obj_AI_Hero) || (x.Type == GameObjectType.obj_AI_Minion) ||
                              (x.Type == GameObjectType.obj_AI_Turret)));
         }
 
         private double GetRealQDamage(Obj_AI_Base enemy)
         {
+            /*if (Q.Range < 326)
             if (Q.Range < 326)
                 return 0.984*Player.GetSpellDamage(enemy, SpellSlot.Q, IsIsolated(enemy) ? 1 : 0);
             if (Q.Range > 325)
             {
-                var isolated = IsIsolated(enemy);
                 if (isolated)
                     return 0.984*Player.GetSpellDamage(enemy, SpellSlot.Q, 3);
                 return Player.GetSpellDamage(enemy, SpellSlot.Q, 0);
-            }
+            }*/
+            if (Q.Range < 326)
+                return 0.984*Player.GetSpellDamage(enemy, SpellSlot.Q, 3);
+            if (Q.Range > 325)
+                return 0.984*Player.GetSpellDamage(enemy, SpellSlot.Q, 3);
             return 0;
         }
 

@@ -1,4 +1,10 @@
-﻿using System;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="DrawDamage.cs" company="SSKhaZix">
+//      Copyright (c) SSKhaZix. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+using System;
 using System.Drawing;
 using System.Linq;
 using LeagueSharp;
