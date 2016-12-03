@@ -732,7 +732,7 @@ namespace SSIvern
                     {
                         if (!Config.Item("DaisyAttackUnderTurret").GetValue<bool>() && enemy.UnderTurret(true))
                             return;
-                        if (Daisy.Distance(enemy.Position) > 75)
+                        if (Daisy.Distance(enemy.Position) > 125)
                         {
                             Player.IssueOrder(GameObjectOrder.MovePet, enemy);
                             DaisyStatus = true;
@@ -751,7 +751,7 @@ namespace SSIvern
                         {
                             if (!Config.Item("DaisyAttackUnderTurret").GetValue<bool>() && iverntarget.UnderTurret(true))
                                 return;
-                            if (Daisy.Distance(iverntarget.Position) > 75)
+                            if (Daisy.Distance(iverntarget.Position) > 125)
                             {
                                 Player.IssueOrder(GameObjectOrder.MovePet, iverntarget);
                                 DaisyStatus = true;
@@ -762,11 +762,6 @@ namespace SSIvern
                                 DaisyStatus = true;
                                 E.CastOnUnit(Player.CountEnemiesInRange(500) > 1 ? Player : Daisy);
                             }
-                        }
-                        else if (Daisy.UnderTurret(true))
-                        {
-                            Player.IssueOrder(GameObjectOrder.MovePet, Player);
-                            DaisyStatus = false;
                         }
                     }
                 }
