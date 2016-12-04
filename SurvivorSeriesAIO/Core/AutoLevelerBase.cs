@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="AutoLevelerBase.cs.cs" company="SurvivorSeriesAIO">
+// <copyright file="AutoLevelerBase.cs" company="SurvivorSeriesAIO">
 //      Copyright (c) SurvivorSeriesAIO. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------

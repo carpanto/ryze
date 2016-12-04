@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="AssemblyInfo.cs.cs" company="SVIrelia">
+// <copyright file="AssemblyInfo.cs" company="SVIrelia">
 //      Copyright (c) SVIrelia. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------

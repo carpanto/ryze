@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="CameraMovement.cs.cs" company="hsCamera">
+// <copyright file="CameraMovement.cs" company="hsCamera">
 //      Copyright (c) hsCamera. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------

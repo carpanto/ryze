@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Program.cs.cs" company="SurvivorAshe">
+// <copyright file="Program.cs" company="SurvivorAshe">
 //      Copyright (c) SurvivorAshe. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -328,7 +328,9 @@ namespace SurvivorAshe
             var jgcw = Menu.Item("UseWJC").GetValue<bool>();
 
             var mob =
-                Cache.GetMinions(Player.ServerPosition, Q.Range, MinionTeam.Neutral).OrderBy(x => x.MaxHealth).FirstOrDefault();
+                Cache.GetMinions(Player.ServerPosition, Q.Range, MinionTeam.Neutral)
+                    .OrderBy(x => x.MaxHealth)
+                    .FirstOrDefault();
             if (mob == null)
                 return;
 

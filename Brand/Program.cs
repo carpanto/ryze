@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Program.cs.cs" company="SurvivorSeriesBrand">
+// <copyright file="Program.cs" company="SurvivorSeriesBrand">
 //      Copyright (c) SurvivorSeriesBrand. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -78,7 +78,8 @@ namespace SurvivorBrand
             JungleClearMenu.AddItem(new MenuItem("UseQJC", "Use Q").SetValue(true));
             JungleClearMenu.AddItem(new MenuItem("UseWJC", "Use W").SetValue(true));
             JungleClearMenu.AddItem(new MenuItem("UseEJC", "Use E").SetValue(true));
-            JungleClearMenu.AddItem(new MenuItem("JungleClearManaManager", "JungleClear Mana Manager").SetValue(new Slider(50, 0, 100)));
+            JungleClearMenu.AddItem(
+                new MenuItem("JungleClearManaManager", "JungleClear Mana Manager").SetValue(new Slider(50, 0, 100)));
 
             var LaneClearMenu = Menu.AddSubMenu(new Menu("Lane Clear", "LaneClear"));
             LaneClearMenu.AddItem(new MenuItem("laneclearW", "Use W").SetValue(true));
@@ -224,7 +225,7 @@ namespace SurvivorBrand
             var mob =
                 MinionManager.GetMinions(Player.ServerPosition, W.Range, MinionTypes.All, MinionTeam.Neutral,
                     MinionOrderTypes.MaxHealth).FirstOrDefault();
-            if (mob == null || !mob.IsValidTarget())
+            if ((mob == null) || !mob.IsValidTarget())
                 return;
 
             if (jgcw && W.IsReady())

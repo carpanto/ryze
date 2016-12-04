@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="AssemblyInfo.cs.cs" company="hsCamera">
+// <copyright file="AssemblyInfo.cs" company="hsCamera">
 //      Copyright (c) hsCamera. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------

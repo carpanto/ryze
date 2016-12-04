@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="MenuFactory.cs.cs" company="SurvivorSeriesAIO">
+// <copyright file="MenuFactory.cs" company="SurvivorSeriesAIO">
 //      Copyright (c) SurvivorSeriesAIO. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------

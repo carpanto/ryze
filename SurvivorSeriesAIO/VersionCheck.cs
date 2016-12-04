@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="VersionCheck.cs.cs" company="SurvivorSeriesAIO">
+// <copyright file="VersionCheck.cs" company="SurvivorSeriesAIO">
 //      Copyright (c) SurvivorSeriesAIO. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------

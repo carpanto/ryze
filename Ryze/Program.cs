@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Program.cs.cs" company="SurvivorRyze">
+// <copyright file="Program.cs" company="SurvivorRyze">
 //      Copyright (c) SurvivorRyze. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------

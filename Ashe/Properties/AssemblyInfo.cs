@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="AssemblyInfo.cs.cs" company="SurvivorAshe">
+// <copyright file="AssemblyInfo.cs" company="SurvivorAshe">
 //      Copyright (c) SurvivorAshe. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------

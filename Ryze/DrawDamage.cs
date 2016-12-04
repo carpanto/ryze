@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DrawDamage.cs.cs" company="SurvivorRyze">
+// <copyright file="DrawDamage.cs" company="SurvivorRyze">
 //      Copyright (c) SurvivorRyze. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------

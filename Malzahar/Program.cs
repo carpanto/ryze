@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Program.cs.cs" company="SurvivorMalzahar">
+// <copyright file="Program.cs" company="SurvivorMalzahar">
 //      Copyright (c) SurvivorMalzahar. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
