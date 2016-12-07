@@ -890,14 +890,14 @@ namespace SurvivorRyze
             if (Player.ManaPercent > Menu.Item("LaneHitManaManager").GetValue<Slider>().Value)
             {
                 var specialQ =
-                    MinionManager.GetMinions(Q.Range)
+                    Cache.GetMinions(Player.Position, Q.Range)
                         .OrderBy(x => x.Distance(Player.Position));
                 if (Q.IsReady() && useQ)
                     foreach (var omfgabriel in specialQ)
                         if (omfgabriel.Health < QGetRealDamage(omfgabriel))
                             Q.Cast(omfgabriel);
-                var allMinionsQ = MinionManager.GetMinions(Q.Range);
-                var allMinionsE = MinionManager.GetMinions(E.Range);
+                var allMinionsQ = Cache.GetMinions(Player.Position, Q.Range);
+                var allMinionsE = Cache.GetMinions(Player.Position, E.Range);
                 if (Q.IsReady() && useQ)
                 {
                     if (allMinionsQ.Count > 0)
@@ -933,13 +933,13 @@ namespace SurvivorRyze
                 if (Player.ManaPercent > Menu.Item("LaneClearManaManager").GetValue<Slider>().Value)
                 {
                     var ryzeebuffed =
-                        MinionManager.GetMinions(Player.Position, Q.Range)
+                        Cache.GetMinions(Player.Position, Q.Range)
                             .Find(x => x.HasBuff("RyzeE") && x.IsValidTarget(Q.Range));
                     var ryzenotebuffed =
-                        MinionManager.GetMinions(Player.Position, Q.Range)
+                        Cache.GetMinions(Player.Position, Q.Range)
                             .Find(x => !x.HasBuff("RyzeE") && x.IsValidTarget(Q.Range));
-                    var allMinionsQ = MinionManager.GetMinions(Q.Range);
-                    var allMinions = MinionManager.GetMinions(E.Range);
+                    var allMinionsQ = Cache.GetMinions(Player.Position, Q.Range);
+                    var allMinions = Cache.GetMinions(Player.Position, E.Range);
                     if (Q.IsReady() && !E.IsReady())
                         if (allMinionsQ.Count > 0)
                             foreach (var minion in allMinionsQ)
