@@ -613,7 +613,7 @@ namespace SurvivorRyze
             };
             var poutput2 = SebbyLib.Prediction.Prediction.GetPrediction(predInput2);
 
-            if ((QR.Speed != float.MaxValue) && OktwCommon.CollisionYasuo(Player.ServerPosition, poutput2.CastPosition))
+            if (OktwCommon.CollisionYasuo(Player.ServerPosition, poutput2.CastPosition))
                 return;
 
             if (Menu.Item("HitChance").GetValue<StringList>().SelectedIndex == 0)

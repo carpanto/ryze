@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F77DB0F6-3651-426A-9556-D266DCE3C49E}</ProjectGuid>
+    <ProjectGuid>{CF5566C0-CDB3-409D-9463-FBEE1CF55E49}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LuxBlockimateSharp</RootNamespace>
-    <AssemblyName>LuxBlockimateSharp</AssemblyName>
+    <RootNamespace>SurvivorAurelionSol</RootNamespace>
+    <AssemblyName>SurvivorAurelionSol</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -32,47 +32,30 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\x86\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="clipper_library">
-      <HintPath>..\..\..\..\..\..\..\Prioritized Programs\SMMbu06D\References\clipper_library.dll</HintPath>
+      <HintPath>C:\Prioritized Programs\SMMbu06D\References\clipper_library.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp">
-      <HintPath>..\..\..\..\..\..\..\Prioritized Programs\SMMbu06D\References\LeagueSharp.dll</HintPath>
+      <HintPath>C:\Prioritized Programs\SMMbu06D\References\LeagueSharp.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Common">
-      <HintPath>..\..\..\..\..\..\..\Prioritized Programs\SMMbu06D\References\LeagueSharp.Common.dll</HintPath>
+      <HintPath>C:\Prioritized Programs\SMMbu06D\References\LeagueSharp.Common.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Data">
-      <HintPath>..\..\..\..\..\..\..\Prioritized Programs\SMMbu06D\References\LeagueSharp.Data.dll</HintPath>
+      <HintPath>C:\Prioritized Programs\SMMbu06D\References\LeagueSharp.Data.dll</HintPath>
     </Reference>
     <Reference Include="SebbyLib">
-      <HintPath>..\..\..\..\..\..\..\Prioritized Programs\SMMbu06D\References\SebbyLib.dll</HintPath>
+      <HintPath>C:\Prioritized Programs\SMMbu06D\References\SebbyLib.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>..\..\..\..\..\..\..\Prioritized Programs\SMMbu06D\References\SharpDX.dll</HintPath>
+      <HintPath>C:\Prioritized Programs\SMMbu06D\References\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
-      <HintPath>..\..\..\..\..\..\..\Prioritized Programs\SMMbu06D\References\SharpDX.Direct3D9.dll</HintPath>
+      <HintPath>C:\Prioritized Programs\SMMbu06D\References\SharpDX.Direct3D9.dll</HintPath>
+    </Reference>
+    <Reference Include="SPrediction">
+      <HintPath>C:\Prioritized Programs\SMMbu06D\References\SPrediction.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -81,9 +64,11 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DrawDamage.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

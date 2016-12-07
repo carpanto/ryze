@@ -190,21 +190,20 @@ namespace Sense_Elise
                     }
                 }
             }
-            if (Minions == null) return;
         }
 
         private static void JungleClear()
         {
             var JungleMinions = MinionManager.GetMinions(Player.ServerPosition, W.Range, MinionTypes.All,
                 MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
-            if (JungleMinions.Count >= 1)
+            if (JungleMinions?.Count >= 1)
                 foreach (var Mob in JungleMinions)
                 {
                     if (Human())
                     {
                         if (Option_Item("Jungle R") && R.IsReady())
                             if (!Q.IsReady() && !W.IsReady())
-                                if (((_spideQcd == 0) && (_spideWcd <= 1.8f)) || (_humaQcd >= 1.2f))
+                                if (((_spideQcd <= 0) && (_spideWcd <= 1.8f)) || (_humaQcd >= 1.2f))
                                     R.Cast(true);
 
                         if (Player.ManaPercent >= Option.Item("JMana").GetValue<Slider>().Value)
@@ -254,8 +253,6 @@ namespace Sense_Elise
                         }
                     }
                 }
-
-            if (JungleMinions == null) return;
         }
 
         private static void Combo()
