@@ -65,7 +65,12 @@ namespace SurvivorRyze
             ComboMenu.AddItem(new MenuItem("CUseQ", "Cast Q").SetValue(true));
             ComboMenu.AddItem(new MenuItem("CUseW", "Cast W").SetValue(true));
             ComboMenu.AddItem(new MenuItem("CUseE", "Cast E").SetValue(true));
-            ComboMenu.AddItem(new MenuItem("CBlockAA", "Block AA in Combo Mode").SetValue(true));
+            ComboMenu.AddItem(
+                new MenuItem("SmartAABlock", "Smart AA Blocking").SetValue(true)
+                    .SetTooltip("Turn this on and it'll AA in Combo only until you get level 6 after that it'll stop."));
+            ComboMenu.AddItem(
+                new MenuItem("CBlockAA", "Block AA in Combo Mode").SetValue(true)
+                    .SetTooltip("Turn this on, if Smart AA Blocking is OFF"));
             ComboMenu.AddItem(
                 new MenuItem("Combo2TimesMana", "Champion needs to have mana for atleast 2 times (Q/W/E)?").SetValue(
                         false)
@@ -307,7 +312,15 @@ namespace SurvivorRyze
 
         private static void AABlock()
         {
-            Orbwalker.SetAttack(!Menu.Item("CBlockAA").GetValue<bool>());
+            if (Menu.Item("SmartAABlock").GetValue<bool>())
+            {
+                if (Player.Level >= 6)
+                    Orbwalker.SetAttack(false);
+            }
+            else
+            {
+                Orbwalker.SetAttack(!Menu.Item("CBlockAA").GetValue<bool>());
+            }
             //SebbyLib.OktwCommon.blockAttack = Menu.Item("CBlockAA").GetValue<bool>();
         }
 
@@ -613,7 +626,7 @@ namespace SurvivorRyze
             };
             var poutput2 = SebbyLib.Prediction.Prediction.GetPrediction(predInput2);
 
-            if ((QR.Speed != float.MaxValue) && OktwCommon.CollisionYasuo(Player.ServerPosition, poutput2.CastPosition))
+            if (OktwCommon.CollisionYasuo(Player.ServerPosition, poutput2.CastPosition))
                 return;
 
             if (Menu.Item("HitChance").GetValue<StringList>().SelectedIndex == 0)
