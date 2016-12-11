@@ -108,21 +108,21 @@ namespace SSRumble
             LaneClearMenu.AddItem(new MenuItem("LaneClearQ", "Use Q").SetValue(true));
             LaneClearMenu.AddItem(new MenuItem("LaneClearE", "Use E").SetValue(false));
             LaneClearMenu.AddItem(
-                new MenuItem("LaneClearManaManager", "LaneClear Mana Manager").SetValue(new Slider(50, 0, 100)));
+                new MenuItem("LaneClearManaManager", "LaneClear Mana Manager").SetValue(new Slider(0, 0, 100)));
             LaneClearMenu.AddItem(
                 new MenuItem("MinimumQMinions", "Minimum Minions Near You To Use Q?").SetValue(new Slider(2, 1, 10)));
 
             var LastHitMenu = Config.AddSubMenu(new Menu(":: LastHit", "LastHit"));
             LastHitMenu.AddItem(new MenuItem("LastHitE", "Use E").SetValue(true));
             LastHitMenu.AddItem(
-                new MenuItem("LastHitManaManager", "LastHit Mana Manager").SetValue(new Slider(50, 0, 100)));
+                new MenuItem("LastHitManaManager", "LastHit Mana Manager").SetValue(new Slider(0, 0, 100)));
 
             var HarassMenu = Config.AddSubMenu(new Menu(":: Harass", "Harass"));
             HarassMenu.AddItem(new MenuItem("HarassQ", "Use Q").SetValue(true));
             HarassMenu.AddItem(new MenuItem("HarassE", "Use E").SetValue(true));
             HarassMenu.AddItem(new MenuItem("HarassItems", "Use Items (GLP/Protobelt)").SetValue(true));
             HarassMenu.AddItem(
-                new MenuItem("HarassManaManager", "Harass Mana Manager").SetValue(new Slider(50, 0, 100)));
+                new MenuItem("HarassManaManager", "Harass Mana Manager").SetValue(new Slider(0, 0, 100)));
 
             var KillStealMenu = Config.AddSubMenu(new Menu(":: Killsteal", "Killsteal"));
             KillStealMenu.AddItem(new MenuItem("EnableKS", "Enable Killsteal?").SetValue(true));
