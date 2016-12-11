@@ -197,7 +197,7 @@ namespace SSRumble
             MiscMenu.AddItem(new MenuItem("UseWNearbyEnemy", "[Auto] Use (W) Nearby Enemies").SetValue(false));
             MiscMenu.AddItem(new MenuItem("EnableMouseScroll", "Enable Mouse Scroll to Store Heat?").SetValue(true));
             MiscMenu.AddItem(
-                    new MenuItem("EnableStoreHeat", "Enable Storing Heat?").SetValue(true)
+                    new MenuItem("EnableStoreHeat", "Enable Storing Heat?").SetValue(false)
                         .SetTooltip("You either change the value here by clicking or by Scrolling Down using the mouse"))
                 .Permashow(true, "Storing Heat?");
 
