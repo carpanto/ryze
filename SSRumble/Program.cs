@@ -537,7 +537,6 @@ namespace SSRumble
             var UseW = Config.Item("ComboUseW").GetValue<bool>();
             var UseE = Config.Item("ComboUseE").GetValue<bool>();
             var UseItems = Config.Item("ComboUseItems").GetValue<bool>();
-            var ComboMinimumREnemies = Config.Item("ComboMinimumREnemies").GetValue<Slider>().Value;
 
             var target = TargetSelector.GetTarget(E.Range, TargetSelector.DamageType.Magical);
             if ((target == null) || !target.IsValidTarget())
