@@ -145,7 +145,7 @@ namespace SSRumble
 
             #region Skin Changer
 
-            var SkinChangerMenu =
+            /*var SkinChangerMenu =
                 Config.AddSubMenu(new Menu(":: Skin Changer", "SkinChanger").SetFontStyle(FontStyle.Bold,
                     Color.Chartreuse));
             var SkinChanger =
@@ -162,7 +162,7 @@ namespace SSRumble
                     return;
 
                 Player.SetSkin(Player.CharData.BaseSkinName, eventArgs.GetNewValue<StringList>().SelectedIndex);
-            };
+            };*/
 
             #endregion
 
