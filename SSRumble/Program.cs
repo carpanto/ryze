@@ -561,7 +561,7 @@ namespace SSRumble
 
         private void StoreHeat()
         {
-            if (Config.Item("EnableStoreHeat").GetValue<bool>())
+            if (Config.Item("EnableStoreHeat").GetValue<bool>() && Player.Mana < 80)
             {
                 if (Q.Instance.IsReady())
                     Q.Cast();
