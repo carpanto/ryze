@@ -128,7 +128,7 @@ namespace SSRumble
             KillStealMenu.AddItem(new MenuItem("EnableKS", "Enable Killsteal?").SetValue(true));
             KillStealMenu.AddItem(new MenuItem("KSQ", "KS with Q?").SetValue(true));
             KillStealMenu.AddItem(new MenuItem("KSE", "KS with E?").SetValue(true));
-            KillStealMenu.AddItem(new MenuItem("KSR", "KS with R?").SetValue(true)); // Later
+            //KillStealMenu.AddItem(new MenuItem("KSR", "KS with R?").SetValue(true)); // Later
             KillStealMenu.AddItem(new MenuItem("KSItems", "KS with Items?").SetValue(true));
 
             var DrawingMenu = Config.AddSubMenu(new Menu(":: Drawings", "Drawings"));
