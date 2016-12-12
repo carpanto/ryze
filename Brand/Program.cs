@@ -130,7 +130,7 @@ namespace SurvivorBrand
                         var SPreditctionLoaded =
                             PredictionMenu.AddItem(new MenuItem("SPredictionLoaded", "SPrediction Loaded!"));
                         Game.PrintChat(
-                            "<font color='#0993F9'>[SS Ivern Warning]</font> <font color='#FF8800'>Please exit the menu and click back on it again, to see the settings or Reload (F5)</font>");
+                            "<font color='#0993F9'>[SS Brand Warning]</font> <font color='#FF8800'>Please exit the menu and click back on it again, to see the settings or Reload (F5)</font>");
 
                         SPredictionLoaded = true;
                     }
