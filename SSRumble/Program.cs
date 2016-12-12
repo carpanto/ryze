@@ -424,7 +424,7 @@ namespace SSRumble
                             var mProj = mPos.ProjectOn(startPos, endPos);
                             //if (NavMesh.GetCollisionFlags(endPos.To3D()) != CollisionFlags.Wall)
                             if (startPos.IsWall())
-                                return;
+                                continue;
                             if (mProj.IsOnSegment &&
                                 (mProj.SegmentPoint.Distance(hero.Position) <= hero.BoundingRadius + 100))
                                 if (bubba.HeroesOnSegment.Contains(hero) == false)
