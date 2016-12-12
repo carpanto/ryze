@@ -15,7 +15,7 @@ using SharpDX;
 using SPrediction;
 using Color = SharpDX.Color;
 using HitChance = SebbyLib.Prediction.HitChance;
-using Orbwalking = SebbyLib.Orbwalking;
+using Orbwalking = LeagueSharp.Common.Orbwalking;
 using Prediction = SPrediction.Prediction;
 using PredictionInput = SebbyLib.Prediction.PredictionInput;
 
@@ -95,7 +95,7 @@ namespace SSRumble
             ComboMenu.AddItem(
                 new MenuItem("UseSmartCastingADC", "Use R Only if it'll land first on ADC?").SetValue(false));
             ComboMenu.AddItem(new MenuItem("ComboCastUltimate", "[Insta] Cast Ultimate Key"))
-                .SetValue(new KeyBind('T', KeyBindType.Press));
+                .SetValue(new KeyBind('T', KeyBindType.Press)).Permashow(true, "[Insta Ult Active?]");
             ComboMenu.AddItem(
                 new MenuItem("SemiManualR", "Semi-Manual R Casting?").SetValue(true)
                     .SetTooltip("True - Script will Auto R | False - You will R when you decide - preferably",
