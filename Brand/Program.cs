@@ -11,6 +11,7 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using SebbyLib;
 using SharpDX;
+using SPrediction;
 using Color = SharpDX.Color;
 using HitChance = SebbyLib.Prediction.HitChance;
 using Orbwalking = SebbyLib.Orbwalking;
@@ -38,7 +39,7 @@ namespace SurvivorBrand
             E = new Spell(SpellSlot.E, 625f);
             R = new Spell(SpellSlot.R, 750f);
             Q.SetSkillshot(0.25f, 60f, 1600f, true, SkillshotType.SkillshotLine);
-            W.SetSkillshot(1.15f, 230f, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            W.SetSkillshot(0.823f, 230f, float.MaxValue, false, SkillshotType.SkillshotCircle);
             R.SetTargetted(0.25f, 2000f);
 
             #endregion
@@ -105,6 +106,35 @@ namespace SurvivorBrand
             MiscMenu.AddItem(
                 new MenuItem("NearbyREnemies", "Use R in Combo if X Enemies are nearby 'X' ->").SetValue(new Slider(1, 0,
                     5)));
+
+            var PredictionMenu = Menu.AddSubMenu(new Menu(":: Prediction", "PredictionSettings"));
+            PredictionMenu.AddItem(
+                new MenuItem("HitChance", "Hit Chance").SetValue(new StringList(new[] { "Medium", "High", "Very High" }, 1)));
+            var PredictionVar = PredictionMenu.AddItem(
+                new MenuItem("Prediction", "Prediction:").SetValue(new StringList(
+                    new[] { "Common", "OKTW", "SPrediction" }, 1)));
+            if (PredictionVar.GetValue<StringList>().SelectedIndex == 2)
+                if (!SPredictionLoaded)
+                {
+                    SPrediction.Prediction.Initialize(PredictionMenu, "SPrediction Settings");
+                    var SPreditctionLoaded =
+                        PredictionMenu.AddItem(new MenuItem("SPredictionLoaded", "SPrediction Loaded!"));
+                    SPredictionLoaded = true;
+                }
+            PredictionVar.ValueChanged += (sender, eventArgs) =>
+            {
+                if (eventArgs.GetNewValue<StringList>().SelectedIndex == 2)
+                    if (!SPredictionLoaded)
+                    {
+                        SPrediction.Prediction.Initialize(PredictionMenu, "SPrediction Settings");
+                        var SPreditctionLoaded =
+                            PredictionMenu.AddItem(new MenuItem("SPredictionLoaded", "SPrediction Loaded!"));
+                        Game.PrintChat(
+                            "<font color='#0993F9'>[SS Ivern Warning]</font> <font color='#FF8800'>Please exit the menu and click back on it again, to see the settings or Reload (F5)</font>");
+
+                        SPredictionLoaded = true;
+                    }
+            };
 
             var AutoLevelerMenu = Menu.AddSubMenu(new Menu("AutoLeveler Menu", "AutoLevelerMenu"));
             AutoLevelerMenu.AddItem(new MenuItem("AutoLevelUp", "AutoLevel Up Spells?").SetValue(true));
@@ -453,40 +483,85 @@ namespace SurvivorBrand
 
         private static void SebbySpell(Spell QW, Obj_AI_Base target)
         {
-            var CoreType2 = SebbyLib.Prediction.SkillshotType.SkillshotLine;
-            var aoe2 = false;
-
-            if (QW.Type == SkillshotType.SkillshotCircle)
+            if (Menu.Item("Prediction").GetValue<StringList>().SelectedIndex == 1)
             {
-                CoreType2 = SebbyLib.Prediction.SkillshotType.SkillshotCircle;
-                aoe2 = true;
+                var CoreType2 = SebbyLib.Prediction.SkillshotType.SkillshotLine;
+                var aoe2 = false;
+
+                if (QW.Type == SkillshotType.SkillshotCircle)
+                {
+                    CoreType2 = SebbyLib.Prediction.SkillshotType.SkillshotLine;
+                    aoe2 = true;
+                }
+
+                if ((QW.Width > 80) && !QW.Collision)
+                    aoe2 = true;
+
+                var predInput2 = new PredictionInput
+                {
+                    Aoe = aoe2,
+                    Collision = QW.Collision,
+                    Speed = QW.Speed,
+                    Delay = QW.Delay,
+                    Range = QW.Range,
+                    From = Player.ServerPosition,
+                    Radius = QW.Width,
+                    Unit = target,
+                    Type = CoreType2
+                };
+                var poutput2 = SebbyLib.Prediction.Prediction.GetPrediction(predInput2);
+
+                if (OktwCommon.CollisionYasuo(Player.ServerPosition, poutput2.CastPosition))
+                    return;
+
+                if ((QW.Speed != float.MaxValue) &&
+                    OktwCommon.CollisionYasuo(Player.ServerPosition, poutput2.CastPosition))
+                    return;
+
+                if (Menu.Item("HitChance").GetValue<StringList>().SelectedIndex == 0)
+                {
+                    if (poutput2.Hitchance >= HitChance.Medium)
+                        QW.Cast(poutput2.CastPosition);
+                    else if (predInput2.Aoe && (poutput2.AoeTargetsHitCount > 1) && (poutput2.Hitchance >= HitChance.Medium))
+                        QW.Cast(poutput2.CastPosition);
+                }
+                else if (Menu.Item("HitChance").GetValue<StringList>().SelectedIndex == 1)
+                {
+                    if (poutput2.Hitchance >= HitChance.High)
+                        QW.Cast(poutput2.CastPosition);
+                }
+                else if (Menu.Item("HitChance").GetValue<StringList>().SelectedIndex == 2)
+                {
+                    if (poutput2.Hitchance >= HitChance.VeryHigh)
+                        QW.Cast(poutput2.CastPosition);
+                }
             }
-
-            if ((QW.Width > 80) && !QW.Collision)
-                aoe2 = true;
-
-            var predInput2 = new PredictionInput
+            else if (Menu.Item("Prediction").GetValue<StringList>().SelectedIndex == 0)
             {
-                Aoe = aoe2,
-                Collision = QW.Collision,
-                Speed = QW.Speed,
-                Delay = QW.Delay,
-                Range = QW.Range,
-                From = Player.ServerPosition,
-                Radius = QW.Width,
-                Unit = target,
-                Type = CoreType2
-            };
-            var poutput2 = Prediction.GetPrediction(predInput2);
-
-            //var poutput2 = QW.GetPrediction(target);
-
-            if ((QW.Speed != float.MaxValue) &&
-                OktwCommon.CollisionYasuo(Player.ServerPosition, poutput2.CastPosition))
-                return;
-
-            if (poutput2.Hitchance >= HitChance.High)
-                QW.Cast(poutput2.CastPosition);
+                if (Menu.Item("HitChance").GetValue<StringList>().SelectedIndex == 0)
+                    QW.CastIfHitchanceEquals(target, LeagueSharp.Common.HitChance.Medium);
+                else if (Menu.Item("HitChance").GetValue<StringList>().SelectedIndex == 1)
+                    QW.CastIfHitchanceEquals(target, LeagueSharp.Common.HitChance.High);
+                else if (Menu.Item("HitChance").GetValue<StringList>().SelectedIndex == 2)
+                    QW.CastIfHitchanceEquals(target, LeagueSharp.Common.HitChance.VeryHigh);
+            }
+            else if (Menu.Item("Prediction").GetValue<StringList>().SelectedIndex == 2)
+            {
+                if (target is Obj_AI_Hero && target.IsValid)
+                {
+                    var t = target as Obj_AI_Hero;
+                    if (Menu.Item("HitChance").GetValue<StringList>().SelectedIndex == 0)
+                        QW.SPredictionCast(t, LeagueSharp.Common.HitChance.Medium);
+                    else if (Menu.Item("HitChance").GetValue<StringList>().SelectedIndex == 1)
+                        QW.SPredictionCast(t, LeagueSharp.Common.HitChance.High);
+                    else if (Menu.Item("HitChance").GetValue<StringList>().SelectedIndex == 2)
+                        QW.SPredictionCast(t, LeagueSharp.Common.HitChance.VeryHigh);
+                }
+                else
+                {
+                    QW.CastIfHitchanceEquals(target, LeagueSharp.Common.HitChance.High);
+                }
+            }
         }
 
         private static void RManaCost()
@@ -772,7 +847,7 @@ namespace SurvivorBrand
         private static SpellSlot IgniteSlot;
         private static Orbwalking.Orbwalker Orbwalker;
         private static Menu Menu;
-
+        private static bool SPredictionLoaded;
         private static Obj_AI_Hero Player
         {
             get { return ObjectManager.Player; }
