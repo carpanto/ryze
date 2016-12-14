@@ -707,14 +707,14 @@ namespace SSRumble
             {
                 var damage = Player.CalcDamage(target, Damage.DamageType.Magical,
                     (float) new[] {6.25, 11.25, 16.25, 21.25, 26.25}[Player.GetSpell(SpellSlot.Q).Level - 1] +
-                    Player.TotalMagicalDamage*8.33/100);
+                    Player.TotalMagicalDamage/8.33*100);
                 return damage*time/0.25;
             }
             else
             {
                 var damage = Player.CalcDamage(target, Damage.DamageType.Magical,
                     (float) new[] {9.4, 16.9, 24.4, 31.9, 39.4}[Player.GetSpell(SpellSlot.Q).Level - 1] +
-                    Player.TotalMagicalDamage*12.5/100);
+                    Player.TotalMagicalDamage/12.5*100);
                 return damage*time/0.25;
             }
         }
