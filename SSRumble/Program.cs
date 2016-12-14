@@ -91,6 +91,7 @@ namespace SSRumble
             ComboMenu.AddItem(new MenuItem("ComboUseQ", "Use Q").SetValue(true));
             ComboMenu.AddItem(new MenuItem("ComboUseW", "Use W").SetValue(true));
             ComboMenu.AddItem(new MenuItem("ComboUseE", "Use E").SetValue(true));
+            ComboMenu.AddItem(new MenuItem("ComboUseRSolo", "Use R on 1vs1").SetValue(true));
             ComboMenu.AddItem(new MenuItem("ComboUseItems", "Use Items?").SetValue(true));
             ComboMenu.AddItem(
                 new MenuItem("UseSmartCastingADC", "Use R Only if it'll land first on ADC?").SetValue(false));
@@ -111,6 +112,10 @@ namespace SSRumble
                 new MenuItem("LaneClearManaManager", "LaneClear Mana Manager").SetValue(new Slider(0, 0, 100)));
             LaneClearMenu.AddItem(
                 new MenuItem("MinimumQMinions", "Minimum Minions Near You To Use Q?").SetValue(new Slider(2, 1, 10)));
+
+            var JungleClearMenu = Config.AddSubMenu(new Menu(":: JungleClear", "JungleClear"));
+            JungleClearMenu.AddItem(new MenuItem("JungleClearQ", "Use Q").SetValue(true));
+            JungleClearMenu.AddItem(new MenuItem("JungleClearE", "Use E").SetValue(true));
 
             var LastHitMenu = Config.AddSubMenu(new Menu(":: LastHit", "LastHit"));
             LastHitMenu.AddItem(new MenuItem("LastHitE", "Use E").SetValue(true));
@@ -457,9 +462,7 @@ namespace SSRumble
                                     Config.Item("SemiManualR").GetValue<bool>())
                                     R.Cast(importantTarget.Position, BubbaFat.HeroToKick.Position);
                         }
-                        if (R.Instance.IsReady() && Config.Item("SemiManualR").GetValue<bool>() &&
-                            (BubbaFat.HeroesOnSegment.Count >=
-                             Config.Item("ComboMinimumRTargets").GetValue<Slider>().Value))
+                        if (R.Instance.IsReady() && Config.Item("SemiManualR").GetValue<bool>())
                             R.Cast(BubbaFat.TargetHero.Position, BubbaFat.HeroToKick.Position);
                     }
                 }
@@ -480,7 +483,7 @@ namespace SSRumble
                     break;
 
                 case Orbwalking.OrbwalkingMode.LaneClear:
-                    //JungleClear();
+                    JungleClear();
                     LaneClear();
                     break;
 
@@ -502,6 +505,20 @@ namespace SSRumble
                 if (t != null)
                     BubbKushGo(t);
             }
+        }
+
+        private void JungleClear()
+        {
+            var junglemobs = Cache.GetMinions(Player.ServerPosition, E.Range, MinionTeam.Neutral).OrderByDescending(x => x.MaxHealth).FirstOrDefault();
+            if (junglemobs == null)
+                return;
+
+            if (junglemobs.IsValidTarget(Q.Range) && Q.IsReady() && Config.Item("JungleClearQ").GetValue<bool>() &&
+                Player.IsFacing(junglemobs))
+                Q.Cast();
+
+            if (junglemobs.IsValidTarget(E.Range) && E.IsReady() && Config.Item("JungleClearE").GetValue<bool>())
+                E.Cast(junglemobs.ServerPosition);
         }
 
         private void KillStealCheck()
@@ -547,7 +564,18 @@ namespace SSRumble
                 SebbySpell(E, target);
             if (UseW && (Player.CountEnemiesInRange(E.Range) > 0) && (Player.HealthPercent < 80))
                 W.Cast();
-            // R Casting here
+            if (target.CountEnemiesInRange(1000) <= 0 && target.IsValidTarget(700) && Config.Item("ComboUseRSolo").GetValue<bool>())
+            {
+                switch (target.IsFacing(Player))
+                {
+                    case true:
+                        R.Cast(target.ServerPosition, Player.ServerPosition);
+                        break;
+                    case false:
+                        R.Cast(Player.ServerPosition, target.ServerPosition);
+                        break;
+                }
+            }
 
             if (UseItems)
             {
