@@ -339,9 +339,10 @@ namespace SSRumble
             }
             else if (Config.Item("Prediction").GetValue<StringList>().SelectedIndex == 2)
             {
-                if (target is Obj_AI_Hero && target.IsValid)
+                var hero = target as Obj_AI_Hero;
+                if ((hero != null) && hero.IsValid)
                 {
-                    var t = target as Obj_AI_Hero;
+                    var t = hero;
                     if (Config.Item("HitChance").GetValue<StringList>().SelectedIndex == 0)
                         ER.SPredictionCast(t, LeagueSharp.Common.HitChance.Medium);
                     else if (Config.Item("HitChance").GetValue<StringList>().SelectedIndex == 1)
@@ -509,7 +510,10 @@ namespace SSRumble
 
         private void JungleClear()
         {
-            var junglemobs = Cache.GetMinions(Player.ServerPosition, E.Range, MinionTeam.Neutral).OrderByDescending(x => x.MaxHealth).FirstOrDefault();
+            var junglemobs =
+                Cache.GetMinions(Player.ServerPosition, E.Range, MinionTeam.Neutral)
+                    .OrderByDescending(x => x.MaxHealth)
+                    .FirstOrDefault();
             if (junglemobs == null)
                 return;
 
@@ -564,8 +568,8 @@ namespace SSRumble
                 SebbySpell(E, target);
             if (UseW && (Player.CountEnemiesInRange(E.Range) > 0) && (Player.HealthPercent < 80))
                 W.Cast();
-            if (target.CountEnemiesInRange(1000) <= 0 && target.IsValidTarget(700) && Config.Item("ComboUseRSolo").GetValue<bool>())
-            {
+            if ((target.CountEnemiesInRange(1000) <= 0) && target.IsValidTarget(700) &&
+                Config.Item("ComboUseRSolo").GetValue<bool>())
                 switch (target.IsFacing(Player))
                 {
                     case true:
@@ -575,7 +579,6 @@ namespace SSRumble
                         R.Cast(Player.ServerPosition, target.ServerPosition);
                         break;
                 }
-            }
 
             if (UseItems)
             {
@@ -588,7 +591,7 @@ namespace SSRumble
 
         private void StoreHeat()
         {
-            if (Config.Item("EnableStoreHeat").GetValue<bool>() && Player.Mana < 50)
+            if (Config.Item("EnableStoreHeat").GetValue<bool>() && (Player.Mana < 50))
             {
                 if (Q.Instance.IsReady())
                     Q.Cast();
@@ -687,7 +690,7 @@ namespace SSRumble
             double damage = 0;
 
             if (Q.Instance.IsReady())
-                damage += Q.GetDamage(enemy);
+                damage += QDamage(enemy, 2);
             if (E.Instance.IsReady())
                 damage += E.GetDamage(enemy);
             if (R.Instance.IsReady())
@@ -696,6 +699,24 @@ namespace SSRumble
             damage += Player.GetAutoAttackDamage(enemy);
 
             return (float) damage;
+        }
+
+        private double QDamage(Obj_AI_Base target, float time)
+        {
+            if (Player.Mana < 50)
+            {
+                var damage = Player.CalcDamage(target, Damage.DamageType.Magical,
+                    (float) new[] {6.25, 11.25, 16.25, 21.25, 26.25}[Player.GetSpell(SpellSlot.Q).Level - 1] +
+                    Player.TotalMagicalDamage*8.33/100);
+                return damage*time/0.25;
+            }
+            else
+            {
+                var damage = Player.CalcDamage(target, Damage.DamageType.Magical,
+                    (float) new[] {9.4, 16.9, 24.4, 31.9, 39.4}[Player.GetSpell(SpellSlot.Q).Level - 1] +
+                    Player.TotalMagicalDamage*12.5/100);
+                return damage*time/0.25;
+            }
         }
 
         protected class Bubba
