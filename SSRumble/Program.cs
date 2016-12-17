@@ -93,17 +93,17 @@ namespace SSRumble
             ComboMenu.AddItem(new MenuItem("ComboUseE", "Use E").SetValue(true));
             ComboMenu.AddItem(new MenuItem("ComboUseRSolo", "Use R on 1vs1").SetValue(true));
             ComboMenu.AddItem(new MenuItem("ComboUseItems", "Use Items?").SetValue(true));
-            ComboMenu.AddItem(
-                new MenuItem("UseSmartCastingADC", "Use R Only if it'll land first on ADC?").SetValue(false));
+            //ComboMenu.AddItem(
+            //    new MenuItem("UseSmartCastingADC", "Use R Only if it'll land first on ADC?").SetValue(false));
             ComboMenu.AddItem(new MenuItem("ComboCastUltimate", "[Insta] Cast Ultimate Key"))
                 .SetValue(new KeyBind('T', KeyBindType.Press)).Permashow(true, "[Insta Ult Active?]");
             ComboMenu.AddItem(
                 new MenuItem("SemiManualR", "Semi-Manual R Casting?").SetValue(true)
                     .SetTooltip("True - Script will Auto R | False - You will R when you decide - preferably",
                         Color.Chartreuse));
-            ComboMenu.AddItem(
-                new MenuItem("ComboMinimumRTargets", "Minimum Enemies to hit before casting Ultimate?").SetValue(
-                    new Slider(2, 1, HeroManager.Enemies.Count)));
+            //ComboMenu.AddItem(
+            //    new MenuItem("ComboMinimumRTargets", "Minimum Enemies to hit before casting Ultimate?").SetValue(
+            //        new Slider(2, 1, HeroManager.Enemies.Count)));
 
             var LaneClearMenu = Config.AddSubMenu(new Menu(":: LaneClear", "LaneClear"));
             LaneClearMenu.AddItem(new MenuItem("LaneClearQ", "Use Q").SetValue(true));
@@ -451,7 +451,7 @@ namespace SSRumble
 
                     if (BubbaFat != null)
                     {
-                        if (Config.Item("UseSmartCastingADC").GetValue<bool>())
+                        /*if (Config.Item("UseSmartCastingADC").GetValue<bool>())
                         {
                             var importantTarget =
                                 HeroManager.Enemies.FirstOrDefault(
@@ -462,7 +462,7 @@ namespace SSRumble
                                 if (R.Instance.IsReady() &&
                                     Config.Item("SemiManualR").GetValue<bool>())
                                     R.Cast(importantTarget.Position, BubbaFat.HeroToKick.Position);
-                        }
+                        }*/
                         if (R.Instance.IsReady() && Config.Item("SemiManualR").GetValue<bool>())
                             R.Cast(BubbaFat.TargetHero.Position, BubbaFat.HeroToKick.Position);
                     }
